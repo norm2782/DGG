@@ -1,0 +1,17 @@
+Name:		DGG
+Maintainer: Jurriën Stutterheim
+Version:	0.1
+Cabal-Version:  >= 0.8
+License:	BSD3
+License-File:	LICENSE
+Author:		Jurriën Stutterheim
+Homepage:	http://github.com/norm2782/DGG
+Category:	Generics
+Synopsis:   Generator for GP libraries
+Description: Generator for GP libraries. Developed as part of the Advanced Functional Programming course at Utrecht University.
+Build-Type: Simple
+Tested-With: GHC
+
+Library
+  Build-Depends:	base >= 4.0 && <= 5.0
+
