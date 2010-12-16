@@ -36,13 +36,21 @@ data Associativity = Left | Right
 data ConType = PrefixType | RecordType | InfixType
              deriving (Show)
 
-data Record = Record Deconstructor TypeName
+data Record = Record { recDec    :: Deconstructor
+                     , recTyname :: TypeName
+                     }
             deriving (Show)
 
 data TCInfo = TCInfo TypeName TypeType [VCInfo]
             deriving (Show)
 
-data VCInfo = VCInfo ConName Arity ConIndex ConFixity Associativity [Record]
+data VCInfo = VCInfo { conName    :: ConName
+                     , conArity   :: Arity
+                     , conIndex   :: ConIndex
+                     , conFixity  :: ConFixity
+                     , conAssoc   :: Associativity
+                     , conRecords :: [Record]
+                     }
             deriving (Show)
 
 
