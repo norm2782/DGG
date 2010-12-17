@@ -36,12 +36,13 @@ rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
                              (mkIdent toFunName))
 
 bdecls :: [VCInfo] -> Binds
-bdecls vcis = BDecls $ (P.map (bdeclFrom $ length vcis) vcis) ++ (P.map (bdeclTo $ length vcis) vcis)
+bdecls vcis = BDecls $ (P.map (bdeclFrom ln) vcis) ++ (P.map (bdeclTo ln) vcis)
+    where ln = length vcis
 
 bdeclFrom :: Int -> VCInfo -> Decl
-bdeclFrom cnt vci@(VCInfo n ar i f as rs) =
+bdeclFrom cnt vci@(VCInfo n _ _ _ _ rs) =
     FunBind [Match srcLoc (Ident fromFunName) 
-        [PParen (PApp (unQualIdent n) (P.map (pVarIdent . recTyname) rs))]
+        [PApp (unQualIdent n) (P.map (pVarIdent . recTyname) rs)]
         Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
 bdeclTo :: Int -> VCInfo -> Decl
@@ -87,8 +88,8 @@ fromEP cnt nc vci@(VCInfo _ _ i _ _ rs)
     | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
 
 mkFromRs :: [Record] -> Exp
-mkFromRs rs | length rs == 0 = mkIdent unitType
-        | otherwise      = buildProd rs
+mkFromRs [] = mkIdent unitType
+mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
 ppPAppConUnQualIdent s e = PParen (PApp (unQualIdent s) [e])
@@ -121,7 +122,7 @@ toEP cnt nc vci@(VCInfo _ _ i _ _ rs)
 -- Test code:
 --
 data Tree a = Leaf a | Branch (Tree a) (Tree a) | LBranch (Tree a) (Tree a) (Tree a)
-
+data List a = Nil | List a (List a)
 data Foo = Bar | Baz | Bat
 
 data Foo' = Bar'
@@ -171,3 +172,8 @@ aTC = TCInfo "A" TyDataType [
     VCInfo "C" 0 1 Nonfix M.LeftAssoc [],
     VCInfo "D" 0 2 Nonfix M.LeftAssoc [],
     VCInfo "E" 0 3 Nonfix M.LeftAssoc []]
+
+aList = TCInfo "List" TyDataType [
+    VCInfo "Nil"  0 0 Nonfix M.LeftAssoc [],
+    VCInfo "List" 2 1 Nonfix M.LeftAssoc [Record Nothing "a", Record Nothing "b"]]
+

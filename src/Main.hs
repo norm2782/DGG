@@ -42,7 +42,9 @@ data ConType = PrefixType
              | InfixType
              deriving (Show)
 
-data Record = Record { recDec    :: Deconstructor
+-- TODO: Typename should either be something like "a", or it should be a
+-- reference to some primitive or another datatype. Just a string won't do.
+data Record = Record { recDec    :: Maybe Deconstructor
                      , recTyname :: TypeName
                      }
             deriving (Show)
