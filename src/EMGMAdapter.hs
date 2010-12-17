@@ -6,7 +6,7 @@ module EMGMAdapter where
 import Language.Haskell.Exts.Syntax
 import Generics.EMGM as E
 import Prelude as P
-import Main
+import Main as M
 
 --tyRep = TypeDecl (SourceLoc "" 0 0) (Name "" "mytypename")
 data Tree a = Leaf a | Branch (Tree a) (Tree a) | LBranch (Tree a) (Tree a) (Tree a)
@@ -14,8 +14,6 @@ data Tree a = Leaf a | Branch (Tree a) (Tree a) | LBranch (Tree a) (Tree a) (Tre
 data Foo = Bar | Baz | Bat
 
 data Foo' = Bar'
-
-data A = B | C | D | E
 
 ggEPA = EP from to
     where
@@ -91,7 +89,7 @@ bdeclFrom cnt vci@(VCInfo n ar i f as rs) =
         [PParen (PApp (unQualIdent n) (P.map (pVarIdent . recTyname) rs))]
         Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
-buildProd :: [Record] -> Exp            
+buildProd :: [Record] -> Exp       
 buildProd rs = buildInApp $ reverse (P.map recTyname rs)
 
 buildInApp :: [String] -> Exp
@@ -117,11 +115,25 @@ pAppConUnQualIdent :: String -> Exp -> Exp
 pAppConUnQualIdent s e = Paren (App (conUnQualIdent s) e)
 
 fromEP :: Int -> Int -> VCInfo -> Exp
-fromEP _   1  (VCInfo _ _ _ _ _ rs) = buildProd rs
+fromEP _   1  vci = mkRs $ conRecords vci
 fromEP cnt nc vci@(VCInfo _ _ i _ _ rs)
-    | cnt == nc - 1 && i == nc      = pAppConUnQualIdent "R" $ buildProd rs
-    | cnt == nc - 1 && i == nc - 1  = pAppConUnQualIdent "L" $ buildProd rs
+    | i == nc - 1 && i == cnt + 1 = pAppConUnQualIdent "R" $ mkRs rs
+    | i == cnt  = pAppConUnQualIdent "L" $ mkRs rs
     | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
+
+mkRs :: [Record] -> Exp
+mkRs rs | length rs == 0 = mkIdent unitType
+        | otherwise      = buildProd rs
+
+data A = B | C | D | E
+
+aTC = TCInfo "A" TyDataType [
+    VCInfo "B" 0 0 Nonfix M.LeftAssoc [],
+    VCInfo "C" 0 1 Nonfix M.LeftAssoc [],
+    VCInfo "D" 0 2 Nonfix M.LeftAssoc [],
+    VCInfo "E" 0 3 Nonfix M.LeftAssoc []]
+
+
 
 {-
 (UnGuardedRhs (App (Con (UnQual (Ident "R"))) (Paren (
