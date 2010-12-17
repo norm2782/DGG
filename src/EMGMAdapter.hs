@@ -15,33 +15,43 @@ data Foo = Bar | Baz | Bat
 
 data Foo' = Bar'
 
+data A = B | C | D | E
+
+ggEPA = EP from to
+    where
+        from B = L       Unit
+        from C = R (L    Unit)
+        from D = R (R (L Unit))
+        from E = R (R (R Unit))
+        to (L       Unit)   = B
+        to (R (L    Unit))  = C
+        to (R (R (L Unit))) = D
+        to (R (R (R Unit))) = E
+
+
 ggFoo' :: EP Foo' Unit
 ggFoo' = EP from' to'
     where
         from' Bar' = Unit
         to' Unit = Bar'
 
--- For your datatypes, you have to define your own instances as below:
---    Embedding projection pair (conversion between the datatype and a
---    structural generic representation):
-ggEPTree :: EP (Tree t) (t :+: (Tree t :*: Tree t)
-                           :+: (Tree t :*: Tree t :*: Tree t))
+ggEPTree :: EP (Tree t) (t :+: Tree t :*: Tree t
+                           :+: Tree t :*: Tree t :*: Tree t)
 ggEPTree = EP from' to' where
-  from' (Leaf a)        = L a
-  from' (Branch a b)    = R (L (a :*: b))
+  from' (Leaf    a)     = L     a
+  from' (Branch  a b)   = R (L (a :*: b))
   from' (LBranch a b c) = R (R (a :*: b :*: c))
-  to' (L (a))                 = Leaf a
+  to' (L a)                   = Leaf a
   to' (R (L (a :*: b)))       = Branch a b
   to' (R (R (a :*: b :*: c))) = LBranch a b c
 
-
---ggFoo :: EP Foo (Unit :+: (Unit :+: Unit))
+ggFoo :: EP Foo (Unit :+: (Unit :+: Unit))
 ggFoo = EP from' to'
     where
-        from' Bar = L Unit
+        from' Bar = L    Unit
         from' Baz = R (L Unit)
         from' Bat = R (R Unit)
-        to' (L Unit) = Bar
+        to' (L    Unit)  = Bar
         to' (R (L Unit)) = Baz
         to' (R (R Unit)) = Bat
 
@@ -56,39 +66,69 @@ newPat tc@(TCInfo _ TyGADT     _) = createGADTEP tc
 srcLoc = SrcLoc "" 0 0
 
 createDTEP (TCInfo tn TyDataType vcis) =
-  PatBind srcLoc (PVar (Ident $ "dgg_" ++ tn)) Nothing rhs (bdecls vcis)
+  PatBind srcLoc (pVarIdent $ "dgg_" ++ tn) Nothing rhs (bdecls vcis)
 
 
 
-createNTEP   (TCInfo tn TyNewType  vcis) = undefined
-createSynEP  (TCInfo tn TySynonym  vcis) = undefined
-createGADTEP (TCInfo tn TyGADT     vcis) = undefined
+createNTEP   (TCInfo tn TyNewType vcis) = undefined
+createSynEP  (TCInfo tn TySynonym vcis) = undefined
+createGADTEP (TCInfo tn TyGADT    vcis) = undefined
 
 fromFunName = "from'"
 toFunName   = "to'"
 unitType    = "Unit"
 
-rhs = UnGuardedRhs (App (App (Con (UnQual (Ident "EP")))
-                             (Var (UnQual (Ident fromFunName))))
-                             (Var (UnQual (Ident toFunName))))
+rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
+                             (mkIdent fromFunName))
+                             (mkIdent toFunName))
 
 bdecls :: [VCInfo] -> Binds
-bdecls vcis = BDecls $ (P.map bdeclFrom vcis) ++ (P.map bdeclTo vcis)
+bdecls vcis = BDecls $ (P.map (bdeclFrom $ length vcis) vcis) ++ (P.map bdeclTo vcis)
 
-bdeclFrom :: VCInfo -> Decl
-bdeclFrom (VCInfo n ar i f as rs) =
+bdeclFrom :: Int -> VCInfo -> Decl
+bdeclFrom cnt vci@(VCInfo n ar i f as rs) =
     FunBind [Match srcLoc (Ident fromFunName) 
-        [PParen (PApp (UnQual (Ident n)) (P.map (PVar . Ident . recTyname) rs))]
-        Nothing 
-        (UnGuardedRhs (App (Con (UnQual (Ident "L"))) -- TODO: Dynamic L R etc
-            (Paren (buildProd rs)))) (BDecls [])]
+        [PParen (PApp (unQualIdent n) (P.map (pVarIdent . recTyname) rs))]
+        Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
 buildProd :: [Record] -> Exp            
-buildProd rs = buildInApp $ reverse $ P.map recTyname rs
+buildProd rs = buildInApp $ reverse (P.map recTyname rs)
 
 buildInApp :: [String] -> Exp
-buildInApp (x:xs) = InfixApp (buildInApp xs) (QConOp (UnQual (Symbol ":*:"))) 
-                                             (Var (UnQual (Ident x)))
+buildInApp [x]    = mkIdent x
+buildInApp (x:xs) = InfixApp (buildInApp xs) expProd (mkIdent x)
+
+expProd :: QOp
+expProd = (QConOp . UnQual . Symbol) ":*:"
+
+mkIdent :: String -> Exp
+mkIdent = Var . unQualIdent 
+
+unQualIdent :: String -> QName
+unQualIdent = UnQual . Ident
+
+conUnQualIdent :: String -> Exp
+conUnQualIdent = Con . unQualIdent
+
+pVarIdent :: String -> Pat
+pVarIdent = PVar . Ident
+
+pAppConUnQualIdent :: String -> Exp -> Exp
+pAppConUnQualIdent s e = Paren (App (conUnQualIdent s) e)
+
+fromEP :: Int -> Int -> VCInfo -> Exp
+fromEP _   1  (VCInfo _ _ _ _ _ rs) = buildProd rs
+fromEP cnt nc vci@(VCInfo _ _ i _ _ rs)
+    | cnt == nc - 1 && i == nc      = pAppConUnQualIdent "R" $ buildProd rs
+    | cnt == nc - 1 && i == nc - 1  = pAppConUnQualIdent "L" $ buildProd rs
+    | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
+
+{-
+(UnGuardedRhs (App (Con (UnQual (Ident "R"))) (Paren (
+App (Con (UnQual (Ident "R"))) (Paren (InfixApp (InfixApp (Var (UnQual (Ident 
+"a"))) (QConOp (UnQual (Symbol ":*:"))) (Var (UnQual (Ident "b")))) (QConOp (
+UnQual (Symbol ":*:"))) (Var (UnQual (Ident "c")))))))))
+-}
 
 {-
 (UnGuardedRhs (App (Con (UnQual (Ident "R"))) (Paren (App (Con (UnQual (Ident

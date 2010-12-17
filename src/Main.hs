@@ -21,7 +21,10 @@ type ConName  = String
 type ConIndex = Int
 type Deconstructor = String
 
-data TypeType = TyDataType | TyNewType | TySynonym | TyGADT
+data TypeType = TyDataType
+              | TyNewType
+              | TySynonym
+              | TyGADT
               deriving (Show)  
 
 data ConFixity = Nonfix
@@ -30,10 +33,13 @@ data ConFixity = Nonfix
                | Infixr
                deriving (Eq, Show)
 
-data Associativity = Left | Right
+data Associativity = LeftAssoc
+                   | RightAssoc
                    deriving (Show)
 
-data ConType = PrefixType | RecordType | InfixType
+data ConType = PrefixType
+             | RecordType
+             | InfixType
              deriving (Show)
 
 data Record = Record { recDec    :: Deconstructor
@@ -41,6 +47,7 @@ data Record = Record { recDec    :: Deconstructor
                      }
             deriving (Show)
 
+-- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo TypeName TypeType [VCInfo]
             deriving (Show)
 
