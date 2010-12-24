@@ -65,7 +65,8 @@ aTC = TCInfo "A" TyDataType [
 
 aList = TCInfo "List" TyDataType [
     VCInfo "Nil"  0 0 Nonfix M.LeftAssoc [],
-    VCInfo "List" 2 1 Nonfix M.LeftAssoc [Record Nothing "a", Record Nothing "b"]]
+    VCInfo "List" 2 1 Nonfix M.LeftAssoc [ Record Nothing "a" undefined
+                                         , Record Nothing "b" undefined]]
 
 
 data Comp f g a = C (f (g a))
