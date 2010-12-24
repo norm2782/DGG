@@ -19,14 +19,14 @@ data Foo' = Bar'
 
 ggEPA = EP from to
     where
-        from B = L       Unit
-        from C = R (L    Unit)
-        from D = R (R (L Unit))
-        from E = R (R (R Unit))
-        to (L       Unit)   = B
-        to (R (L    Unit))  = C
-        to (R (R (L Unit))) = D
-        to (R (R (R Unit))) = E
+        from Ba = L       Unit
+        from Ca = R (L    Unit)
+        from Da = R (R (L Unit))
+        from Ea = R (R (R Unit))
+        to (L       Unit)   = Ba
+        to (R (L    Unit))  = Ca
+        to (R (R (L Unit))) = Da
+        to (R (R (R Unit))) = Ea
 
 
 ggFoo' :: EP Foo' Unit
@@ -41,8 +41,8 @@ ggEPTree = EP from' to' where
   from' (Leaf    a)     = L     a
   from' (Branch  a b)   = R (L (a :*: b))
   from' (LBranch a b c) = R (R (a :*: b :*: c))
-  to' (L a)                   = Leaf a
-  to' (R (L (a :*: b)))       = Branch a b
+  to' (L a)                   = Leaf    a
+  to' (R (L (a :*: b)))       = Branch  a b
   to' (R (R (a :*: b :*: c))) = LBranch a b c
 
 ggFoo :: EP Foo (Unit :+: (Unit :+: Unit))
@@ -55,15 +55,37 @@ ggFoo = EP from' to'
         to' (R (L Unit)) = Baz
         to' (R (R Unit)) = Bat
 
-data A = B | C | D | E
+data A = Ba | Ca | Da | Ea
 
 aTC = TCInfo "A" TyDataType [
-    VCInfo "B" 0 0 Nonfix M.LeftAssoc [],
-    VCInfo "C" 0 1 Nonfix M.LeftAssoc [],
-    VCInfo "D" 0 2 Nonfix M.LeftAssoc [],
-    VCInfo "E" 0 3 Nonfix M.LeftAssoc []]
+    VCInfo "Ba" 0 0 Nonfix M.LeftAssoc [],
+    VCInfo "Ca" 0 1 Nonfix M.LeftAssoc [],
+    VCInfo "Da" 0 2 Nonfix M.LeftAssoc [],
+    VCInfo "Ea" 0 3 Nonfix M.LeftAssoc []]
 
 aList = TCInfo "List" TyDataType [
     VCInfo "Nil"  0 0 Nonfix M.LeftAssoc [],
     VCInfo "List" 2 1 Nonfix M.LeftAssoc [Record Nothing "a", Record Nothing "b"]]
 
+
+data Comp f g a = C (f (g a))
+
+
+ggComp = EP from' to' where
+    from' (C fga) = fga
+    to' fga = C fga
+
+data HFix f a   = Hln (f (HFix f) a)
+
+-- To describe any value constructor in an EP, all that is required are the
+-- value constructor name and the number of records to the value constructor.
+-- These do need to be given unique names, but their type is not explicitly 
+-- refered to in the EP.
+--
+-- The types are required in order to generate a type signature though.
+-- The question is if we want to generate a type signature for the EP. In
+-- general, the compiler can infer that by itself. TODO: Ask Sean about cases
+-- where the compiler would fail to infer the types.
+ggHFix = EP from' to' where
+    from' (Hln ffa) = ffa
+    to' ffa = Hln ffa

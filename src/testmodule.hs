@@ -40,3 +40,11 @@ data Expr a where
 
 -- Newtype
 newtype Foo = Foo Int
+
+
+data Tree       = Empty | Leaf Int | Node Tree Tree Tree
+data TTree a    = Tip Int | Branch (TTree a) a (TTree a)
+data Toeplitz a = Toeplitz a [(a,a)]
+data Comp f g a = C (f (g a))
+data HFix f a   = Hln (f (HFix f) a)
+
