@@ -46,7 +46,7 @@ data ConType = PrefixType
 -- reference to some primitive or another datatype. Just a string won't do.
 data Record = Record { recDec    :: Maybe Deconstructor
                      , recTyname :: TypeName
---                     , recBType  :: BangType
+                     , recBType  :: BangType
                      }
             deriving (Show)
 
