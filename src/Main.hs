@@ -2,6 +2,8 @@
 
 module Main where
 
+import DGG.Parser
+import DGG.Data
 import Data.Typeable
 import Language.Haskell.Exts
 import System.Console.CmdArgs
@@ -61,3 +63,6 @@ isSuppDecl (DataDecl _ _ _ _ _ _ _)     = True
 isSuppDecl (GDataDecl _ _ _ _ _ _ _ _)  = False
 isSuppDecl (DataFamDecl _ _ _ _ _)      = False
 isSuppDecl _                            = False
+
+adapters :: [(String, LibParser)]
+adapters = [("emgm", makeEMGM)]

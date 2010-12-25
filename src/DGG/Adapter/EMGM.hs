@@ -6,6 +6,9 @@ import Generics.EMGM as E
 import Language.Haskell.Exts.Syntax
 import Language.Haskell.Exts.Pretty
 
+makeEMGM :: LibParser
+makeEMGM = undefined
+
 newPat :: TCInfo -> Decl
 newPat tc@(TCInfo _ TyDataType _) = createDTEP   tc
 newPat tc@(TCInfo _ TyNewType  _) = createNTEP   tc

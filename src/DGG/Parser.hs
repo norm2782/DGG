@@ -1,13 +1,12 @@
-module DGG.Parser where
+module DGG.Parser (
+      module DGG.Adapter.EMGM
+    , parseDTs
+    ) where
 
 import DGG.Data
+import DGG.Adapter.EMGM
 import Language.Haskell.Exts
 
-parse :: String -> [Decl] -> [TCInfo]
-parse a xs = foldr mkTCI [] xs
+parseDTs :: LibParser -> [Decl] -> [TCInfo]
+parseDTs f = foldr (\x xs -> f x : xs) []
 
-mkTCI :: Decl -> [TCInfo] -> [TCInfo]
-mkTCI d tcis = d2tci d : tcis
-
-d2tci :: Decl -> TCInfo
-d2tci d = undefined

@@ -14,6 +14,9 @@ import Language.Haskell.Exts.Syntax
 -- Type aliases: TypeDecl nothing (just TypeDecl)
 -- Newtypes: DataDecl NewType
 --
+
+type LibParser = Decl -> TCInfo
+
 type Arity    = Int
 type TypeName = String
 type ConName  = String
