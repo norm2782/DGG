@@ -50,9 +50,8 @@ genCode :: ParseResult Module -> LibParser -> String
 genCode (ParseFailed l m) _ = error $ "Failed to parse module. Error on line " ++ show l ++ ": " ++ m 
 genCode (ParseOk m)       p = prettyPrint (mkSrc p $ listify isSuppDecl m)
 
-mkSrc :: LibParser -> [Decl] -> Decl
-mkSrc a []     = undefined
-mkSrc a (x:xs) = undefined
+mkSrc :: LibParser -> [Decl] -> Module
+mkSrc p xs = Module (SrcLoc "" 0 0) (ModuleName "") [] Nothing Nothing [] $ map p xs
 
 -- Returns True when the Decl is of the right type and False otherwise. Several
 -- types return False at the moment, because they are not supported yet by this

@@ -2,7 +2,7 @@ module DGG.Parser (
       module DGG.Adapter.EMGM
     , module DGG.Adapter.MultiRec
     , module DGG.Adapter.SYB
-    , parseDTs
+    , makeDecls
     ) where
 
 import DGG.Data
@@ -11,6 +11,6 @@ import DGG.Adapter.MultiRec
 import DGG.Adapter.SYB
 import Language.Haskell.Exts
 
-parseDTs :: LibParser -> [Decl] -> [TCInfo]
-parseDTs f = foldr (\x xs -> f x : xs) []
+makeDecls :: LibParser -> [Decl] -> [Decl]
+makeDecls f = foldr (\x xs -> f x : xs) []
 
