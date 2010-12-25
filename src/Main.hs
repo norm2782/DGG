@@ -64,5 +64,9 @@ isSuppDecl (GDataDecl _ _ _ _ _ _ _ _)  = False
 isSuppDecl (DataFamDecl _ _ _ _ _)      = False
 isSuppDecl _                            = False
 
+-- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
 adapters :: [(String, LibParser)]
-adapters = [("emgm", makeEMGM)]
+adapters = [ ("emgm",     makeEMGM)
+           , ("syb",      makeSYB)
+           , ("multirec", makeMultiRec) ]
+
