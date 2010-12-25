@@ -1,4 +1,4 @@
-module Data where
+module DGG.Data where
 
 import Language.Haskell.Exts.Syntax
 

@@ -1,8 +1,7 @@
-module EMGMAdapter where
+module DGG.Adapter.EMGM where
 
-
+import DGG.Data as M
 import Prelude as P
-import Main as M
 import Generics.EMGM as E
 import Language.Haskell.Exts.Syntax
 import Language.Haskell.Exts.Pretty

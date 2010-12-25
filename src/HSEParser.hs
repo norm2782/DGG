@@ -1,7 +1,7 @@
 module Main where
 
 import Language.Haskell.Exts
-import Data
+import DGG.Data
 
 testFile = "testmodule.hs"
 --testFile = "EMGMAdapter.hs"

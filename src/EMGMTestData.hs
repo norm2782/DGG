@@ -2,11 +2,11 @@
 
 module EMGMTestData where
 
-import EMGMAdapter
+import DGG.Adapter.EMGM
 import Language.Haskell.Exts.Syntax
 import Generics.EMGM as E
 import Prelude as P
-import Main as M
+import DGG.Data as M
 import Language.Haskell.Exts.Pretty
 
 -- Test code:
