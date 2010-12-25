@@ -3,7 +3,6 @@
 module Main where
 
 import Data.Char (toLower)
-import Data.Generics
 import Data.Map (fromList, (!), Map)
 import Data.Typeable
 import DGG.Data
@@ -45,24 +44,6 @@ main = do
     
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput dgg = not $ null $ foutput dgg
-
-genCode :: ParseResult Module -> LibParser -> String
-genCode (ParseFailed l m) _ = error $ "Failed to parse module. Error on line " ++ show l ++ ": " ++ m 
-genCode (ParseOk m)       p = prettyPrint (mkSrc p $ listify isSuppDecl m)
-
-mkSrc :: LibParser -> [Decl] -> Module
-mkSrc p xs = Module (SrcLoc "" 0 0) (ModuleName "") [] Nothing Nothing [] $ map p xs
-
--- Returns True when the Decl is of the right type and False otherwise. Several
--- types return False at the moment, because they are not supported yet by this
--- library. Support for these types is planned for future increments.
-isSuppDecl :: Decl -> Bool
-isSuppDecl (TypeDecl _ _ _ _)           = False
-isSuppDecl (TypeFamDecl _ _ _ _)        = False
-isSuppDecl (DataDecl _ _ _ _ _ _ _)     = True
-isSuppDecl (GDataDecl _ _ _ _ _ _ _ _)  = False
-isSuppDecl (DataFamDecl _ _ _ _ _)      = False
-isSuppDecl _                            = False
 
 -- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
 adapters :: Map String LibParser
