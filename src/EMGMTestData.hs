@@ -90,3 +90,9 @@ data HFix f a   = Hln (f (HFix f) a)
 ggHFix = EP from' to' where
     from' (Hln ffa) = ffa
     to' ffa = Hln ffa
+
+{-
+[UnBangedTy (TyParen (TyApp (TyApp (TyVar (Ident "f"))
+            (TyParen (TyApp (TyCon (UnQual (Ident "HFix")))
+            (TyVar (Ident "f"))))) (TyVar (Ident "a"))))]
+-}

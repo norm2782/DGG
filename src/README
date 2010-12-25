@@ -1,0 +1,10 @@
+CLI tool usage:
+
+Usage: dgg [OPTION...] file
+  -v  --version   Version information
+  -h  --help      Help contents
+  -a  --adapter   (required) Adapter name. E.g.: EMGM
+  -d  --datatype  (optional) Specify datatype for which to derive. Generates
+                             for all datatypes if left blank.
+  -o  --output    (optional) Output file. E.g.: Instances.hs
+
