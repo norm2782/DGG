@@ -2,13 +2,14 @@
 
 module Main where
 
-import DGG.Parser
-import DGG.Data
+import Data.Char (toLower)
+import Data.Generics
+import Data.Map (fromList, (!), Map)
 import Data.Typeable
-import Data.Map hiding (null)
+import DGG.Data
+import DGG.Parser
 import Language.Haskell.Exts
 import System.Console.CmdArgs
-import Data.Generics
 
 -- TODO: This probably shouldn't be a string, but some datatype representing
 -- the adapter. The adapter needs to be called in mkSrc.
@@ -37,7 +38,7 @@ main :: IO ()
 main = do
     args <- cmdArgs dgg
     pr   <- parseFile (finput args) 
-    code <- return $ genCode pr (adapters ! (adapter args))
+    code <- return $ genCode pr (adapters ! (map toLower $ adapter args))
     if hasFileOutput args
         then writeFile (foutput args) code
         else putStrLn code
