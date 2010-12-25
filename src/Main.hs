@@ -5,6 +5,7 @@ module Main where
 import DGG.Parser
 import DGG.Data
 import Data.Typeable
+import Data.Map hiding (null)
 import Language.Haskell.Exts
 import System.Console.CmdArgs
 import Data.Generics
@@ -16,9 +17,8 @@ import Data.Generics
 -- easiest approach would be to just hardcode all supported adapters. Later,
 -- dynamic adapter support could be investigated, possibly using variability
 -- mechanisms.
-type Adapter = String
 
-data DGGArgs = DGGArgs { adapter  :: Adapter
+data DGGArgs = DGGArgs { adapter  :: String
                        , finput   :: String
                        , datatype :: String
                        , foutput  :: String
@@ -37,7 +37,7 @@ main :: IO ()
 main = do
     args <- cmdArgs dgg
     pr   <- parseFile (finput args) 
-    code <- return $ genCode pr (adapter args)
+    code <- return $ genCode pr (adapters ! (adapter args))
     if hasFileOutput args
         then writeFile (foutput args) code
         else putStrLn code
@@ -45,11 +45,11 @@ main = do
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput dgg = not $ null $ foutput dgg
 
-genCode :: ParseResult Module -> Adapter -> String
+genCode :: ParseResult Module -> LibParser -> String
 genCode (ParseFailed l m) _ = error $ "Failed to parse module. Error on line " ++ show l ++ ": " ++ m 
-genCode (ParseOk m)       a = prettyPrint (mkSrc a $ listify isSuppDecl m)
+genCode (ParseOk m)       p = prettyPrint (mkSrc p $ listify isSuppDecl m)
 
-mkSrc :: Adapter -> [Decl] -> Decl
+mkSrc :: LibParser -> [Decl] -> Decl
 mkSrc a []     = undefined
 mkSrc a (x:xs) = undefined
 
@@ -65,8 +65,8 @@ isSuppDecl (DataFamDecl _ _ _ _ _)      = False
 isSuppDecl _                            = False
 
 -- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
-adapters :: [(String, LibParser)]
-adapters = [ ("emgm",     makeEMGM)
-           , ("syb",      makeSYB)
-           , ("multirec", makeMultiRec) ]
+adapters :: Map String LibParser
+adapters = fromList [ ("emgm",     makeEMGM)
+                    , ("syb",      makeSYB)
+                    , ("multirec", makeMultiRec) ]
 
