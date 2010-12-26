@@ -6,10 +6,11 @@ module DGG.Parser (
     ) where
 
 import Data.Generics
-import DGG.Data
+import DGG.Adapter
 import DGG.Adapter.EMGM
 import DGG.Adapter.MultiRec
 import DGG.Adapter.SYB
+import DGG.Data
 import Language.Haskell.Exts
 
 genCode :: ParseResult Module -> LibParser -> LibSupport -> String
@@ -19,7 +20,7 @@ genCode (ParseOk m)       p s = prettyPrint (mkModule p $ listify s m)
 
 mkModule :: LibParser -> [Decl] -> Module
 mkModule _ [] = error "No compatible datatypes found."
-mkModule p xs = Module (SrcLoc "" 0 0) (ModuleName "") [] Nothing Nothing []
+mkModule p xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing []
                        $ map (p . mkTCI) xs
 
 mkTCI :: Decl -> TCInfo
