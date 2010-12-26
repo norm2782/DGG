@@ -1,5 +1,5 @@
 default:
-	ghc --Make -O src/Main.hs
+	cd src && ghc --make -O Main.hs
 
 dist:
 	cabal check
