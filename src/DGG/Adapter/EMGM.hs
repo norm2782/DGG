@@ -1,11 +1,18 @@
 module DGG.Adapter.EMGM (
       makeEMGM
+    , deriveEMGM
     , isSuppEMGM
     ) where
 
+import Data.DeriveTH
+import Data.Derive.Internal.Derivation
 import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts.Syntax
+
+-- TODO: Implement
+deriveEMGM :: Derivation
+deriveEMGM = Derivation "myEMGMType" undefined
 
 makeEMGM :: LibParser
 makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc
