@@ -3,6 +3,7 @@ module DGG.Adapter.EMGM (
     , isSuppEMGM
     ) where
 
+import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts.Syntax
 
@@ -22,9 +23,6 @@ isSuppEMGM (DataDecl _ _ _ _ _ _ _)    = True
 isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _) = False
 isSuppEMGM (DataFamDecl _ _ _ _ _)     = False
 isSuppEMGM _                           = False
-
-srcLoc :: SrcLoc
-srcLoc = SrcLoc "" 0 0
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType vcis) =
@@ -78,21 +76,6 @@ buildInApp (x:xs) = InfixApp (buildInApp xs) expProd (mkIdent x)
 expProd :: QOp
 expProd = (QConOp . UnQual . Symbol) ":*:"
 
-mkIdent :: String -> Exp
-mkIdent = Var . unQualIdent 
-
-unQualIdent :: String -> QName
-unQualIdent = UnQual . Ident
-
-conUnQualIdent :: String -> Exp
-conUnQualIdent = Con . unQualIdent
-
-pVarIdent :: String -> Pat
-pVarIdent = PVar . Ident
-
-pAppConUnQualIdent :: String -> Exp -> Exp
-pAppConUnQualIdent s e = Paren (App (conUnQualIdent s) e)
-
 fromEP :: Int -> Int -> VCInfo -> Exp
 fromEP _   1  vci = mkFromRs $ conArity vci
 fromEP cnt nc vci@(VCInfo _ a i _ _ _)
@@ -106,9 +89,6 @@ mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
 ppPAppConUnQualIdent s e = PParen (PApp (unQualIdent s) [e])
-
-mkPIdent :: String -> Pat
-mkPIdent = PVar . Ident 
 
 mkPRs :: Int -> Pat
 mkPRs 0  = mkPIdent unitType
@@ -130,10 +110,3 @@ toEP cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = ppPAppConUnQualIdent "R" $ mkPRs a
     | i == cnt  = ppPAppConUnQualIdent "L" $ mkPRs a
     | otherwise = PParen (PApp (unQualIdent "R") [(toEP (cnt + 1) nc vci)])
-
-genNames :: Int -> [String]
-genNames n = take n genNames'
-
-genNames' :: [String]
-genNames' = map (\x -> 'a' : show x) [1..]
-

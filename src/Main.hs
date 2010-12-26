@@ -5,6 +5,7 @@ module Main where
 import Data.Char (toLower)
 import Data.Map (fromList, (!), Map)
 import Data.Typeable
+import DGG.Adapter
 import DGG.Data
 import DGG.Parser
 import Language.Haskell.Exts
