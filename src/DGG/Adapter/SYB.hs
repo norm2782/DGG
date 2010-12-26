@@ -1,7 +1,6 @@
 module DGG.Adapter.SYB where
 
 import DGG.Data
-import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
 makeSYB :: LibParser

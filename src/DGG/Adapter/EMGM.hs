@@ -1,7 +1,6 @@
 module DGG.Adapter.EMGM where
 
 import DGG.Data
-import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
 makeEMGM :: LibParser

@@ -1,7 +1,6 @@
 module DGG.Adapter.MultiRec where
 
 import DGG.Data
-import Language.Haskell.Exts.Pretty
 import Language.Haskell.Exts.Syntax
 
 makeMultiRec :: LibParser
