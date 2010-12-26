@@ -37,7 +37,7 @@ main = do
         else putStrLn code
     
 hasFileOutput :: DGGArgs -> Bool
-hasFileOutput dgg = not $ null $ foutput dgg
+hasFileOutput = not . null . foutput
 
 -- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
 -- Do these two maps need to be combined using a tuple ?

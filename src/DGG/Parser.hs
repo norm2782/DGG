@@ -14,7 +14,7 @@ import DGG.Data
 import Language.Haskell.Exts
 
 genCode :: ParseResult Module -> LibParser -> LibSupport -> String
-genCode (ParseFailed l m) _ s = error $ "Failed to parse module."
+genCode (ParseFailed l m) _ _ = error $ "Failed to parse module."
                                      ++ "Error on line " ++ show l ++ ": " ++ m
 genCode (ParseOk m)       p s = prettyPrint (mkModule p $ listify s m)
 
