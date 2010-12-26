@@ -24,7 +24,7 @@ dgg = DGGArgs { adapter  = def &= help "Adapter name. E.g.: EMGM"
               , datatype = def &= help "Specify datatype for which to derive. Generates for all datatypes if left blank."
               , output   = def &= help "Output file. E.g.: Instances.hs"
               }
-              &= summary "DGG: Datatype Generic Generator v0.1"
+              &= summary "DGG: Datatype Generic Generator v0.1-dev"
 
 main :: IO ()
 main = do
