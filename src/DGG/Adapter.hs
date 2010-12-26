@@ -30,3 +30,6 @@ genNames n = take n genNames'
 genNames' :: [String]
 genNames' = map (\x -> 'a' : show x) [1..]
 
+unQualSym :: String -> QName
+unQualSym = UnQual . Symbol
+

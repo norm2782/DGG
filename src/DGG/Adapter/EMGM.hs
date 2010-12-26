@@ -32,13 +32,9 @@ createNTEP   (TCInfo tn TyNewType vcis) = undefined
 createSynEP  (TCInfo tn TySynonym vcis) = undefined
 createGADTEP (TCInfo tn TyGADT    vcis) = undefined
 
-fromFunName :: String
+fromFunName, toFunName, unitType :: String
 fromFunName = "from'"
-
-toFunName :: String
 toFunName   = "to'"
-
-unitType :: String
 unitType    = "Unit"
 
 rhs :: Rhs
@@ -74,7 +70,7 @@ buildInApp [x]    = mkIdent x
 buildInApp (x:xs) = InfixApp (buildInApp xs) expProd (mkIdent x)
 
 expProd :: QOp
-expProd = (QConOp . UnQual . Symbol) ":*:"
+expProd = (QConOp . unQualSym) ":*:"
 
 fromEP :: Int -> Int -> VCInfo -> Exp
 fromEP _   1  vci = mkFromRs $ conArity vci
@@ -102,7 +98,7 @@ buildInPApp [x]    = mkPIdent x
 buildInPApp (x:xs) = PInfixApp (buildInPApp xs) expPProd (mkPIdent x)
 
 expPProd :: QName
-expPProd = (UnQual . Symbol) ":*:"
+expPProd = unQualSym ":*:"
 
 toEP :: Int -> Int -> VCInfo -> Pat
 toEP _   1  vci = mkPRs $ conArity vci
