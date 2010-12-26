@@ -9,6 +9,17 @@ import Language.Haskell.Exts.Pretty
 makeEMGM :: LibParser
 makeEMGM = undefined
 
+-- Returns True when the Decl is of the right type and False otherwise. Several
+-- types return False at the moment, because they are not supported yet by this
+-- library. Support for these types is planned for future increments.
+isSuppEMGM :: Decl -> Bool
+isSuppEMGM (TypeDecl _ _ _ _)           = False
+isSuppEMGM (TypeFamDecl _ _ _ _)        = False
+isSuppEMGM (DataDecl _ _ _ _ _ _ _)     = True
+isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _)  = False
+isSuppEMGM (DataFamDecl _ _ _ _ _)      = False
+isSuppEMGM _                            = False
+
 newPat :: TCInfo -> Decl
 newPat tc@(TCInfo _ TyDataType _) = createDTEP   tc
 newPat tc@(TCInfo _ TyNewType  _) = createNTEP   tc
