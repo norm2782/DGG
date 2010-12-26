@@ -1,4 +1,7 @@
-module DGG.Adapter.MultiRec where
+module DGG.Adapter.MultiRec (
+      makeMultiRec
+    , isSuppMultiRec
+    ) where
 
 import DGG.Data
 import Language.Haskell.Exts.Syntax

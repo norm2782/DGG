@@ -1,4 +1,7 @@
-module DGG.Adapter.EMGM where
+module DGG.Adapter.EMGM (
+      makeEMGM
+    , isSuppEMGM
+    ) where
 
 import DGG.Data
 import Language.Haskell.Exts.Syntax

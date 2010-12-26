@@ -1,4 +1,7 @@
-module DGG.Adapter.SYB where
+module DGG.Adapter.SYB (
+      makeSYB
+    , isSuppSYB
+    ) where
 
 import DGG.Data
 import Language.Haskell.Exts.Syntax
