@@ -16,6 +16,8 @@ makeEMGM tc@(TCInfo _ TyGADT     _) = createGADTEP tc
 -- Returns True when the Decl is of the right type and False otherwise. Several
 -- types return False at the moment, because they are not supported yet by this
 -- library. Support for these types is planned for future increments.
+-- TODO: Perhaps this check should be performed on the DGG custom datatypes
+-- instead? They can tell if a datatype is mutually recursive, etc.
 isSuppEMGM :: Decl -> Bool
 isSuppEMGM (TypeDecl _ _ _ _)          = False
 isSuppEMGM (TypeFamDecl _ _ _ _)       = False
@@ -26,7 +28,7 @@ isSuppEMGM _                           = False
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType vcis) =
-  PatBind srcLoc (pVarIdent $ "dgg_" ++ tn) Nothing rhs (bdecls vcis)
+  PatBind srcLoc (pVarIdent $ "dggEP_" ++ tn) Nothing rhs (bdecls vcis)
 
 createNTEP   (TCInfo tn TyNewType vcis) = undefined
 createSynEP  (TCInfo tn TySynonym vcis) = undefined

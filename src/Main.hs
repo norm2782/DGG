@@ -12,32 +12,32 @@ import Language.Haskell.Exts
 import System.Console.CmdArgs
 
 data DGGArgs = DGGArgs { adapter  :: String
-                       , finput   :: String
+                       , input    :: String
                        , datatype :: String
-                       , foutput  :: String
+                       , output   :: String
                        }
                        deriving (Show, Data, Typeable)
 
 dgg :: DGGArgs
 dgg = DGGArgs { adapter  = def &= help "Adapter name. E.g.: EMGM"
-              , finput   = def &= help "Input file"
+              , input    = def &= help "Input file"
               , datatype = def &= help "Specify datatype for which to derive. Generates for all datatypes if left blank."
-              , foutput  = def &= help "Output file. E.g.: Instances.hs"
+              , output   = def &= help "Output file. E.g.: Instances.hs"
               }
               &= summary "DGG: Datatype Generic Generator v0.1"
 
 main :: IO ()
 main = do
     args <- cmdArgs dgg
-    pr   <- parseFile (finput args)
+    pr   <- parseFile (input args)
     adap <- return (map toLower $ adapter args)
     code <- return $ genCode pr (adapters ! adap) (supports ! adap)
     if hasFileOutput args
-        then writeFile (foutput args) code
+        then writeFile (output args) code
         else putStrLn code
     
 hasFileOutput :: DGGArgs -> Bool
-hasFileOutput = not . null . foutput
+hasFileOutput = not . null . output
 
 -- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
 -- Do these two maps need to be combined using a tuple ?
