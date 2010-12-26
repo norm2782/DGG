@@ -29,6 +29,10 @@ dgg = DGGArgs { adapter  = def &= help "Adapter name. E.g.: EMGM"
 main :: IO ()
 main = do
     args <- cmdArgs dgg
+    -- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?
+    if (null $ adapter dgg) || (null $ input dgg)
+        then error "Specify at least an adapter and input file."
+        else return ()
     pr   <- parseFile (input args)
     adap <- return (map toLower $ adapter args)
     code <- return $ genCode pr (adapters ! adap) (supports ! adap)
