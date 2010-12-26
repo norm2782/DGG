@@ -13,6 +13,7 @@ import DGG.Adapter.SYB
 import Language.Haskell.Exts
 
 mkModule :: LibParser -> [Decl] -> Module
+mkModule _ [] = error "No compatible datatypes found."
 mkModule p xs = Module (SrcLoc "" 0 0) (ModuleName "") [] Nothing Nothing []
                        $ map (p . mkTCI) xs
 

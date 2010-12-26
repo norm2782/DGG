@@ -1,8 +1,7 @@
 module DGG.Adapter.EMGM where
 
-import DGG.Data as M
-import Prelude as P
-import Generics.EMGM as E
+import DGG.Data
+import Generics.EMGM hiding (map, show, conArity)
 import Language.Haskell.Exts.Syntax
 import Language.Haskell.Exts.Pretty
 
@@ -49,13 +48,13 @@ rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
                              (mkIdent toFunName))
 
 bdecls :: [VCInfo] -> Binds
-bdecls vcis = BDecls $ (P.map (bdeclFrom ln) vcis) ++ (P.map (bdeclTo ln) vcis)
+bdecls vcis = BDecls $ (map (bdeclFrom ln) vcis) ++ (map (bdeclTo ln) vcis)
     where ln = length vcis
 
 bdeclFrom :: Int -> VCInfo -> Decl
 bdeclFrom cnt vci@(VCInfo n a _ _ _ _) =
     FunBind [Match srcLoc (Ident fromFunName) 
-        [PApp (unQualIdent n) (P.map pVarIdent (genNames a))]
+        [PApp (unQualIdent n) (map pVarIdent (genNames a))]
         Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
 bdeclTo :: Int -> VCInfo -> Decl
@@ -94,7 +93,7 @@ pAppConUnQualIdent :: String -> Exp -> Exp
 pAppConUnQualIdent s e = Paren (App (conUnQualIdent s) e)
 
 fromEP :: Int -> Int -> VCInfo -> Exp
-fromEP _   1  vci = mkFromRs $ M.conArity vci
+fromEP _   1  vci = mkFromRs $ conArity vci
 fromEP cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = pAppConUnQualIdent "R" $ mkFromRs a
     | i == cnt  = pAppConUnQualIdent "L" $ mkFromRs a
@@ -125,7 +124,7 @@ expPProd :: QName
 expPProd = (UnQual . Symbol) ":*:"
 
 toEP :: Int -> Int -> VCInfo -> Pat
-toEP _   1  vci = mkPRs $ M.conArity vci
+toEP _   1  vci = mkPRs $ conArity vci
 toEP cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = ppPAppConUnQualIdent "R" $ mkPRs a
     | i == cnt  = ppPAppConUnQualIdent "L" $ mkPRs a
@@ -135,5 +134,5 @@ genNames :: Int -> [String]
 genNames n = take n genNames'
 
 genNames' :: [String]
-genNames' = P.map (\x -> 'a' : P.show x) [1..]
+genNames' = map (\x -> 'a' : show x) [1..]
 

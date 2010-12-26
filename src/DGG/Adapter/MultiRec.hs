@@ -1,8 +1,8 @@
 module DGG.Adapter.MultiRec where
 
-import DGG.Data as M
-import Language.Haskell.Exts.Syntax
+import DGG.Data
 import Language.Haskell.Exts.Pretty
+import Language.Haskell.Exts.Syntax
 
 makeMultiRec :: LibParser
 makeMultiRec = undefined

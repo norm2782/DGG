@@ -10,14 +10,6 @@ import DGG.Parser
 import Language.Haskell.Exts
 import System.Console.CmdArgs
 
--- TODO: This probably shouldn't be a string, but some datatype representing
--- the adapter. The adapter needs to be called in mkSrc.
--- Each of the adapters needs to have its own "main" function with a unique
--- name. A naming convention needs to be created for this. Initially, the 
--- easiest approach would be to just hardcode all supported adapters. Later,
--- dynamic adapter support could be investigated, possibly using variability
--- mechanisms.
-
 data DGGArgs = DGGArgs { adapter  :: String
                        , finput   :: String
                        , datatype :: String
