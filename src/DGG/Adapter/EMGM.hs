@@ -7,27 +7,26 @@ import Language.Haskell.Exts.Syntax
 import Language.Haskell.Exts.Pretty
 
 makeEMGM :: LibParser
-makeEMGM = undefined
+makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc
+makeEMGM tc@(TCInfo _ TyNewType  _) = createNTEP   tc
+makeEMGM tc@(TCInfo _ TySynonym  _) = createSynEP  tc
+makeEMGM tc@(TCInfo _ TyGADT     _) = createGADTEP tc
 
 -- Returns True when the Decl is of the right type and False otherwise. Several
 -- types return False at the moment, because they are not supported yet by this
 -- library. Support for these types is planned for future increments.
 isSuppEMGM :: Decl -> Bool
-isSuppEMGM (TypeDecl _ _ _ _)           = False
-isSuppEMGM (TypeFamDecl _ _ _ _)        = False
-isSuppEMGM (DataDecl _ _ _ _ _ _ _)     = True
-isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _)  = False
-isSuppEMGM (DataFamDecl _ _ _ _ _)      = False
-isSuppEMGM _                            = False
+isSuppEMGM (TypeDecl _ _ _ _)          = False
+isSuppEMGM (TypeFamDecl _ _ _ _)       = False
+isSuppEMGM (DataDecl _ _ _ _ _ _ _)    = True
+isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _) = False
+isSuppEMGM (DataFamDecl _ _ _ _ _)     = False
+isSuppEMGM _                           = False
 
-newPat :: TCInfo -> Decl
-newPat tc@(TCInfo _ TyDataType _) = createDTEP   tc
-newPat tc@(TCInfo _ TyNewType  _) = createNTEP   tc
-newPat tc@(TCInfo _ TySynonym  _) = createSynEP  tc
-newPat tc@(TCInfo _ TyGADT     _) = createGADTEP tc
-
+srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0
 
+createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType vcis) =
   PatBind srcLoc (pVarIdent $ "dgg_" ++ tn) Nothing rhs (bdecls vcis)
 
@@ -35,10 +34,16 @@ createNTEP   (TCInfo tn TyNewType vcis) = undefined
 createSynEP  (TCInfo tn TySynonym vcis) = undefined
 createGADTEP (TCInfo tn TyGADT    vcis) = undefined
 
+fromFunName :: String
 fromFunName = "from'"
+
+toFunName :: String
 toFunName   = "to'"
+
+unitType :: String
 unitType    = "Unit"
 
+rhs :: Rhs
 rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
                              (mkIdent fromFunName))
                              (mkIdent toFunName))
@@ -106,7 +111,7 @@ mkPIdent :: String -> Pat
 mkPIdent = PVar . Ident 
 
 mkPRs :: Int -> Pat
-mkPRs 0 = mkPIdent unitType
+mkPRs 0  = mkPIdent unitType
 mkPRs rs = buildPProd rs
 
 buildPProd :: Int -> Pat
