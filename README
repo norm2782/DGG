@@ -1,12 +1,13 @@
-Datatype Generic Generator
+DGG: Datatype Generic Generator v0.1-dev
 
-CLI tool usage:
+./Main [OPTIONS]
 
-Usage: dgg [OPTION...] file
-  -v  --version   Version information
-  -h  --help      Help contents
-  -a  --adapter   (required) Adapter name. E.g.: EMGM
-  -d  --datatype  (optional) Specify datatype for which to derive. Generates
-                             for all datatypes if left blank.
-  -o  --output    (optional) Output file. E.g.: Instances.hs
+Common flags:
+  -a --adapter=ITEM   Adapter name. E.g.: EMGM
+  -i --input=ITEM     Input file
+  -d --datatype=ITEM  Specify datatype for which to derive. Generates for all
+                      datatypes if left blank.
+  -o --output=ITEM    Output file. E.g.: Instances.hs
+  -? --help           Display help message
+  -V --version        Print version information
 
