@@ -1,9 +1,8 @@
 module DGG.Adapter.EMGM where
 
 import DGG.Data
-import Generics.EMGM hiding (map, show, conArity)
-import Language.Haskell.Exts.Syntax
 import Language.Haskell.Exts.Pretty
+import Language.Haskell.Exts.Syntax
 
 makeEMGM :: LibParser
 makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc
