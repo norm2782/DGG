@@ -6,6 +6,9 @@ import Language.Haskell.Exts.Syntax
 srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0
 
+mkCon :: String -> Exp
+mkCon = Con . unQualIdent
+
 mkIdent :: String -> Exp
 mkIdent = Var . unQualIdent 
 

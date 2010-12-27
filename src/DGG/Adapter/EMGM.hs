@@ -72,7 +72,7 @@ bdeclTo cnt vci =
         Nothing (UnGuardedRhs $ mkToRhs vci) (BDecls [])]
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n _ _ _ _ []) = (Con . unQualIdent) n
+mkToRhs (VCInfo n _ _ _ _ []) = mkCon n
 mkToRhs (VCInfo _ a _ _ _ rs) = buildProd a
 
 buildProd :: Int -> Exp
@@ -93,7 +93,7 @@ fromEP cnt nc vci@(VCInfo _ a i _ _ _)
     | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
 
 mkFromRs :: Int -> Exp
-mkFromRs 0  = (Con . unQualIdent) unitType
+mkFromRs 0  = mkCon unitType
 mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
