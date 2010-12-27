@@ -72,7 +72,7 @@ bdeclTo cnt vci =
         Nothing (UnGuardedRhs $ mkToRhs vci) (BDecls [])]
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n _ _ _ _ []) = (Con . UnQual . Ident) n
+mkToRhs (VCInfo n _ _ _ _ []) = (Con . unQualIdent) n
 mkToRhs (VCInfo _ a _ _ _ rs) = buildProd a
 
 buildProd :: Int -> Exp
