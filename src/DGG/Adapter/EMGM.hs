@@ -73,7 +73,7 @@ bdeclTo cnt vci =
 
 mkToRhs :: VCInfo -> Exp
 mkToRhs (VCInfo n _ _ _ _ []) = Con (UnQual (Ident n))
-mkToRhs (VCInfo n a _ _ _ rs) = buildProd a
+mkToRhs (VCInfo _ a _ _ _ rs) = buildProd a
 
 buildProd :: Int -> Exp
 buildProd rs = buildInApp $ reverse (D.genNames rs)
@@ -93,14 +93,14 @@ fromEP cnt nc vci@(VCInfo _ a i _ _ _)
     | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
 
 mkFromRs :: Int -> Exp
-mkFromRs 0  = mkIdent unitType
+mkFromRs 0  = (Con . unQualIdent) unitType
 mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
 ppPAppConUnQualIdent s e = PApp (unQualIdent s) [e]
 
 mkPRs :: Int -> Pat
-mkPRs 0  = mkPIdent unitType
+mkPRs 0  = (PApp . unQualIdent) unitType []
 mkPRs rs = buildPProd rs
 
 buildPProd :: Int -> Pat
