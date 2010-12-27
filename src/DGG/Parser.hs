@@ -13,6 +13,10 @@ genCode (ParseFailed l m) _ _ = error $ "Failed to parse module."
                                      ++ "Error on line " ++ show l ++ ": " ++ m
 genCode (ParseOk m)       p s = prettyPrint (mkModule p $ listify s m)
 
+-- TODO: This alone probably won't do. The GP libraries in question need to be 
+-- imported in the generated module as well. This is adapter-specific and needs
+-- to be added on the module level.
+-- Also, this is called a parser, but it also generates code. Naming conflict!
 mkModule :: LibParser -> [Decl] -> Module
 mkModule _ [] = error "No compatible datatypes found."
 mkModule p xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing []
