@@ -19,7 +19,7 @@ pVarIdent :: String -> Pat
 pVarIdent = PVar . Ident
 
 pAppConUnQualIdent :: String -> Exp -> Exp
-pAppConUnQualIdent s e = Paren (App (conUnQualIdent s) e)
+pAppConUnQualIdent = App . conUnQualIdent
 
 mkPIdent :: String -> Pat
 mkPIdent = PVar . Ident 

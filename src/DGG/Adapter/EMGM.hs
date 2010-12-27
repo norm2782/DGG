@@ -4,15 +4,19 @@ module DGG.Adapter.EMGM (
     , isSuppEMGM
     ) where
 
-import Data.DeriveTH
 import Data.Derive.Internal.Derivation
-import DGG.Adapter
-import DGG.Data
-import Language.Haskell.Exts.Syntax
+import DGG.Adapter as D
+import DGG.Data as D
+import DGG.Parser as D
+import Language.Haskell
 
--- TODO: Implement
+-- TODO: The definitions of deriveEMGM and fddE are quick and dirty
+-- implementations to make the types work. They need a lot of work still.
 deriveEMGM :: Derivation
-deriveEMGM = Derivation "myEMGMType" undefined
+deriveEMGM = derivationCustom "myEMGMType" fddE
+
+fddE :: FullDataDecl -> Either String [Decl]
+fddE ((ModuleName n), decl) = Right [(makeEMGM . mkTCI) decl]
 
 makeEMGM :: LibParser
 makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc
@@ -58,7 +62,7 @@ bdecls vcis = BDecls $ (map (bdeclFrom ln) vcis) ++ (map (bdeclTo ln) vcis)
 bdeclFrom :: Int -> VCInfo -> Decl
 bdeclFrom cnt vci@(VCInfo n a _ _ _ _) =
     FunBind [Match srcLoc (Ident fromFunName) 
-        [PApp (unQualIdent n) (map pVarIdent (genNames a))]
+        [PApp (unQualIdent n) (map pVarIdent (D.genNames a))]
         Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
 bdeclTo :: Int -> VCInfo -> Decl
@@ -72,7 +76,7 @@ mkToRhs (VCInfo n _ _ _ _ []) = Con (UnQual (Ident n))
 mkToRhs (VCInfo n a _ _ _ rs) = buildProd a
 
 buildProd :: Int -> Exp
-buildProd rs = buildInApp $ reverse (genNames rs)
+buildProd rs = buildInApp $ reverse (D.genNames rs)
 
 buildInApp :: [String] -> Exp
 buildInApp [x]    = mkIdent x
@@ -93,14 +97,14 @@ mkFromRs 0  = mkIdent unitType
 mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
-ppPAppConUnQualIdent s e = PParen (PApp (unQualIdent s) [e])
+ppPAppConUnQualIdent s e = PApp (unQualIdent s) [e]
 
 mkPRs :: Int -> Pat
 mkPRs 0  = mkPIdent unitType
 mkPRs rs = buildPProd rs
 
 buildPProd :: Int -> Pat
-buildPProd rs = buildInPApp $ reverse (genNames rs)
+buildPProd rs = buildInPApp $ reverse (D.genNames rs)
 
 buildInPApp :: [String] -> Pat
 buildInPApp [x]    = mkPIdent x
@@ -114,4 +118,4 @@ toEP _   1  vci = mkPRs $ conArity vci
 toEP cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = ppPAppConUnQualIdent "R" $ mkPRs a
     | i == cnt  = ppPAppConUnQualIdent "L" $ mkPRs a
-    | otherwise = PParen (PApp (unQualIdent "R") [(toEP (cnt + 1) nc vci)])
+    | otherwise = PApp (unQualIdent "R") [(toEP (cnt + 1) nc vci)]
