@@ -3,7 +3,8 @@ module Main where
 import Language.Haskell.Exts
 import DGG.Data
 
-testFile = "testmodule.hs"
+--testFile = "testmodule.hs"
+testFile = "EMGMTestData.hs"
 --testFile = "EMGMAdapter.hs"
 
 main =

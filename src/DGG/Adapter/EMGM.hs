@@ -2,7 +2,7 @@ module DGG.Adapter.EMGM (
       makeEMGM
     , deriveEMGM
     , isSuppEMGM
-    , importsEMGM,mkBDecl
+    , importsEMGM
     ) where
 
 import Data.Derive.Internal.Derivation
@@ -60,23 +60,25 @@ rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
                              (mkIdent toFunName))
 
 bdecls :: [VCInfo] -> Binds
-bdecls vcis = BDecls $ (map (bdeclFrom ln) vcis) ++ (map (bdeclTo ln) vcis)
+bdecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
+                     , FunBind $ map (bdeclTo ln) vcis ]
     where ln = length vcis
 
-bdeclFrom :: Int -> VCInfo -> Decl
-bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkBDecl fromFunName [pApp (name n)
+bdeclFrom :: Int -> VCInfo -> Match
+bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkMatch fromFunName [pApp (name n)
                                                  (map mkPIdent (genNames a))]
                                                  (fromEP 0 cnt vci)
 
-bdeclTo :: Int -> VCInfo -> Decl
-bdeclTo cnt vci = mkBDecl toFunName [toEP 0 cnt vci] (mkToRhs vci)
+bdeclTo :: Int -> VCInfo -> Match
+bdeclTo cnt vci = mkMatch toFunName [toEP 0 cnt vci] (mkToRhs vci)
 
-mkBDecl :: String -> [Pat] -> Exp -> Decl
-mkBDecl n xs rhs = FunBind [Match srcLoc (Ident n) xs Nothing (UnGuardedRhs rhs) (BDecls [])]
+mkMatch :: String -> [Pat] -> Exp -> Match
+mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing
+                         (UnGuardedRhs rhs) (BDecls [])
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n _ _ _ _ []) = mkCon n
-mkToRhs (VCInfo n a _ _ _ _)  = appFun (mkCon n) (map mkIdent $ genNames a)
+mkToRhs (VCInfo n 0 _ _ _ _) = mkCon n
+mkToRhs (VCInfo n a _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
 
 buildProd :: Int -> Exp
 buildProd n = buildInApp $ reverse (genNames n)
