@@ -2,7 +2,7 @@ module DGG.Adapter.EMGM (
       makeEMGM
     , deriveEMGM
     , isSuppEMGM
-    , importsEMGM
+    , importsEMGM,mkBDecl
     ) where
 
 import Data.Derive.Internal.Derivation
@@ -64,16 +64,15 @@ bdecls vcis = BDecls $ (map (bdeclFrom ln) vcis) ++ (map (bdeclTo ln) vcis)
     where ln = length vcis
 
 bdeclFrom :: Int -> VCInfo -> Decl
-bdeclFrom cnt vci@(VCInfo n a _ _ _ _) =
-    FunBind [Match srcLoc (Ident fromFunName) 
-        [pApp (name n) (map mkPIdent (genNames a))]
-        Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
+bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkBDecl fromFunName [pApp (name n)
+                                                 (map mkPIdent (genNames a))]
+                                                 (fromEP 0 cnt vci)
 
 bdeclTo :: Int -> VCInfo -> Decl
-bdeclTo cnt vci =
-    FunBind [Match srcLoc (Ident toFunName)
-        [toEP 0 cnt vci]
-        Nothing (UnGuardedRhs $ mkToRhs vci) (BDecls [])]
+bdeclTo cnt vci = mkBDecl toFunName [toEP 0 cnt vci] (mkToRhs vci)
+
+mkBDecl :: String -> [Pat] -> Exp -> Decl
+mkBDecl n xs rhs = FunBind [Match srcLoc (Ident n) xs Nothing (UnGuardedRhs rhs) (BDecls [])]
 
 mkToRhs :: VCInfo -> Exp
 mkToRhs (VCInfo n _ _ _ _ []) = mkCon n

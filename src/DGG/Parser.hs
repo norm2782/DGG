@@ -1,8 +1,10 @@
+module DGG.Parser where
+{-
 module DGG.Parser (
       genCode
     , mkTCI
     ) where
-
+-}
 import Data.Generics
 import DGG.Adapter
 import DGG.Data
@@ -28,12 +30,13 @@ mkTCI (DataDecl _ _ _ n _ ds _) = TCInfo (fromName n) TyDataType $ map mkVCI
 mkTCI _ = error "Only regular datatypes are supported at this moment."
 
 mkVCI :: (Int, QualConDecl) -> VCInfo
-mkVCI (i, (QualConDecl _ ts _ c)) = VCInfo (getConName c) (length ts) i Nonfix
-                                           LeftAssoc $ map mkRec ts 
+mkVCI (i, (QualConDecl _ _ _ (ConDecl n bts))) = VCInfo (fromName n) (length bts) i Nonfix
+                                           LeftAssoc $ map mkRec bts 
 
-mkRec :: TyVarBind -> Record
-mkRec (KindedVar n _) = Record Nothing (fromName n) (UnBangedTy (TyVar (Ident "a")))
-mkRec (UnkindedVar n) = Record Nothing (fromName n) (UnBangedTy (TyVar (Ident "a")))
+mkRec :: BangType -> Record
+mkRec (BangedTy t)   = error "Not supported yet"
+mkRec r@(UnBangedTy t) = Record Nothing "someNam" r
+mkRec (UnpackedTy t) = error "Not supported yet"
 
 getConName :: ConDecl -> String
 getConName (ConDecl n _)        = fromName n
@@ -43,3 +46,6 @@ getConName (RecDecl n _ )       = fromName n
 fromName :: Name -> String
 fromName (Ident n)  = n
 fromName (Symbol n) = n
+
+
+testMkTCI = mkTCI $ DataDecl (SrcLoc {srcFilename = "TestTH.hs", srcLine = 10, srcColumn = 1}) DataType [] (Ident "List") [UnkindedVar (Ident "a")] [QualConDecl (SrcLoc {srcFilename = "TestTH.hs", srcLine = 10, srcColumn = 15}) [] [] (ConDecl (Ident "Nil") []),QualConDecl (SrcLoc {srcFilename = "TestTH.hs", srcLine = 10, srcColumn = 21}) [] [] (ConDecl (Ident "Cons") [UnBangedTy (TyVar (Ident "a")),UnBangedTy (TyParen (TyApp (TyCon (UnQual (Ident "List"))) (TyVar (Ident "a"))))])] []
