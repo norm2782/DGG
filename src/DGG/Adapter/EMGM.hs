@@ -76,7 +76,7 @@ mkBDecl n xs rhs = FunBind [Match srcLoc (Ident n) xs Nothing (UnGuardedRhs rhs)
 
 mkToRhs :: VCInfo -> Exp
 mkToRhs (VCInfo n _ _ _ _ []) = mkCon n
-mkToRhs (VCInfo _ a _ _ _ rs) = buildProd a
+mkToRhs (VCInfo n a _ _ _ rs) = appFun (mkCon n) (map (Var . unQualSym) $ genNames a)
 
 buildProd :: Int -> Exp
 buildProd n = buildInApp $ reverse (genNames n)
@@ -104,7 +104,7 @@ ppPAppConUnQualIdent s e = pApp (name s) [e]
 
 mkPRs :: Int -> Pat
 mkPRs 0  = pApp (name unitType) []
-mkPRs rs = buildPProd rs
+mkPRs i = buildPProd i
 
 buildPProd :: Int -> Pat
 buildPProd rs = buildInPApp $ reverse (genNames rs)
