@@ -18,9 +18,6 @@ unQualIdent = UnQual . Ident
 conUnQualIdent :: String -> Exp
 conUnQualIdent = Con . unQualIdent
 
-pVarIdent :: String -> Pat
-pVarIdent = PVar . Ident
-
 pAppConUnQualIdent :: String -> Exp -> Exp
 pAppConUnQualIdent = App . conUnQualIdent
 

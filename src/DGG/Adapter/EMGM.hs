@@ -6,10 +6,10 @@ module DGG.Adapter.EMGM (
     ) where
 
 import Data.Derive.Internal.Derivation
-import DGG.Adapter as D
-import DGG.Data as D
-import DGG.Parser as D
-import Language.Haskell
+import DGG.Adapter
+import DGG.Data
+import DGG.Parser
+import Language.Haskell hiding (genNames)
 
 importsEMGM :: [ImportDecl]
 importsEMGM = [mkImport "Generics.EMGM"]
@@ -43,7 +43,7 @@ isSuppEMGM _                           = False
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType vcis) =
-  PatBind srcLoc (pVarIdent $ "dggEP_" ++ tn) Nothing rhs (bdecls vcis)
+  PatBind srcLoc (mkPIdent $ "dggEP_" ++ tn) Nothing rhs (bdecls vcis)
 
 createNTEP   (TCInfo tn TyNewType vcis) = undefined
 createSynEP  (TCInfo tn TySynonym vcis) = undefined
@@ -66,7 +66,7 @@ bdecls vcis = BDecls $ (map (bdeclFrom ln) vcis) ++ (map (bdeclTo ln) vcis)
 bdeclFrom :: Int -> VCInfo -> Decl
 bdeclFrom cnt vci@(VCInfo n a _ _ _ _) =
     FunBind [Match srcLoc (Ident fromFunName) 
-        [PApp (unQualIdent n) (map pVarIdent (D.genNames a))]
+        [pApp (name n) (map mkPIdent (genNames a))]
         Nothing (UnGuardedRhs (fromEP 0 cnt vci)) (BDecls [])]
 
 bdeclTo :: Int -> VCInfo -> Decl
@@ -80,7 +80,7 @@ mkToRhs (VCInfo n _ _ _ _ []) = mkCon n
 mkToRhs (VCInfo _ a _ _ _ rs) = buildProd a
 
 buildProd :: Int -> Exp
-buildProd rs = buildInApp $ reverse (D.genNames rs)
+buildProd n = buildInApp $ reverse (genNames n)
 
 buildInApp :: [String] -> Exp
 buildInApp [x]    = mkIdent x
@@ -101,14 +101,14 @@ mkFromRs 0  = mkCon unitType
 mkFromRs rs = buildProd rs
 
 ppPAppConUnQualIdent :: String -> Pat -> Pat
-ppPAppConUnQualIdent s e = PApp (unQualIdent s) [e]
+ppPAppConUnQualIdent s e = pApp (name s) [e]
 
 mkPRs :: Int -> Pat
-mkPRs 0  = (PApp . unQualIdent) unitType []
+mkPRs 0  = pApp (name unitType) []
 mkPRs rs = buildPProd rs
 
 buildPProd :: Int -> Pat
-buildPProd rs = buildInPApp $ reverse (D.genNames rs)
+buildPProd rs = buildInPApp $ reverse (genNames rs)
 
 buildInPApp :: [String] -> Pat
 buildInPApp [x]    = mkPIdent x

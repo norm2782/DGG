@@ -47,7 +47,7 @@ hasFileOutput :: DGGArgs -> Bool
 hasFileOutput = not . null . output
 
 -- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
--- Do these two maps need to be combined using a tuple ?
+-- Do these three maps need to be combined using a tuple ?
 adapters :: Map String LibParser
 adapters = fromList [ ("emgm",     makeEMGM)
                     , ("syb",      makeSYB)
