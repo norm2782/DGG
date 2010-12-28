@@ -9,6 +9,6 @@ import DGG.Adapter.EMGM
 data Foo = Bar
 data List a = Nil | Cons a (List a)
 
--- $(derive deriveEMGM ''Foo)
+$(derive deriveEMGM ''Foo)
 
 $(derive deriveEMGM ''List)
