@@ -38,7 +38,7 @@ main = do
 --        else return ()
     pr   <- parseFile (input args)
     adap <- return (map toLower $ adapter args)
-    code <- return $ genCode pr (adapters ! adap) (supports ! adap)
+    code <- return $ genCode pr (adapters ! adap) (supports ! adap) (imports ! adap)
     if hasFileOutput args
         then writeFile (output args) code
         else putStrLn code
@@ -57,3 +57,9 @@ supports :: Map String (Decl -> Bool)
 supports = fromList [ ("emgm",     isSuppEMGM)
                     , ("syb",      isSuppSYB)
                     , ("multirec", isSuppMultiRec) ]
+
+imports :: Map String [ImportDecl]
+imports = fromList [ ("emgm",     importsEMGM)
+                   , ("syb",      importsSYB)
+                   , ("multirec", importsMultiRec) ]
+

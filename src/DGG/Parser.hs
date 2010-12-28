@@ -8,18 +8,18 @@ import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts
 
-genCode :: ParseResult Module -> LibParser -> LibSupport -> String
-genCode (ParseFailed l m) _ _ = error $ "Failed to parse module."
-                                     ++ "Error on line " ++ show l ++ ": " ++ m
-genCode (ParseOk m)       p s = prettyPrint (mkModule p $ listify s m)
+genCode :: ParseResult Module -> LibParser -> LibSupport -> [ImportDecl] -> String
+genCode (ParseFailed l m) _ _ _  = error $ "Failed to parse module."
+                                        ++ "Error on line " ++ show l ++ ": " ++ m
+genCode (ParseOk m)       p s is = prettyPrint (mkModule p is $ listify s m)
 
 -- TODO: This alone probably won't do. The GP libraries in question need to be 
 -- imported in the generated module as well. This is adapter-specific and needs
 -- to be added on the module level.
 -- Also, this is called a parser, but it also generates code. Naming conflict!
-mkModule :: LibParser -> [Decl] -> Module
-mkModule _ [] = error "No compatible datatypes found."
-mkModule p xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing []
+mkModule :: LibParser -> [ImportDecl] -> [Decl] -> Module
+mkModule _ _  [] = error "No compatible datatypes found."
+mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing is
                        $ map (p . mkTCI) xs
 
 mkTCI :: Decl -> TCInfo

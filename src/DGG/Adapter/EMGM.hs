@@ -2,6 +2,7 @@ module DGG.Adapter.EMGM (
       makeEMGM
     , deriveEMGM
     , isSuppEMGM
+    , importsEMGM
     ) where
 
 import Data.Derive.Internal.Derivation
@@ -9,6 +10,9 @@ import DGG.Adapter as D
 import DGG.Data as D
 import DGG.Parser as D
 import Language.Haskell
+
+importsEMGM :: [ImportDecl]
+importsEMGM = [mkImport "Generics.EMGM"]
 
 -- TODO: The definitions of deriveEMGM and fddE are quick and dirty
 -- implementations to make the types work. They need a lot of work still.

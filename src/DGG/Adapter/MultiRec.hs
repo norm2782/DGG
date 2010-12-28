@@ -1,10 +1,15 @@
 module DGG.Adapter.MultiRec (
       makeMultiRec
     , isSuppMultiRec
+    , importsMultiRec
     ) where
 
+import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts.Syntax
+
+importsMultiRec :: [ImportDecl]
+importsMultiRec = [mkImport "Generics.MultiRec"]
 
 makeMultiRec :: LibParser
 makeMultiRec = undefined

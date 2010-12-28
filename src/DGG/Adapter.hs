@@ -36,3 +36,6 @@ genNames' = map (\x -> 'a' : show x) [1..]
 unQualSym :: String -> QName
 unQualSym = UnQual . Symbol
 
+mkImport :: String -> ImportDecl
+mkImport n = ImportDecl srcLoc (ModuleName n) False
+                        False Nothing Nothing Nothing

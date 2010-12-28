@@ -1,10 +1,15 @@
 module DGG.Adapter.SYB (
       makeSYB
     , isSuppSYB
+    , importsSYB
     ) where
 
 import DGG.Data
+import DGG.Adapter
 import Language.Haskell.Exts.Syntax
+
+importsSYB :: [ImportDecl]
+importsSYB = [mkImport "Data.Data", mkImport "Data.Generics"]
 
 makeSYB :: LibParser
 makeSYB = undefined
