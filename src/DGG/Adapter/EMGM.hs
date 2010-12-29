@@ -157,6 +157,9 @@ appInt  = mkIdent "rint"
 appCon  = mkIdent "rcon"
 appFrep = mkIdent "frep"
 
+-- TODO: A lot of the code below is copy/pasted to make things compile.
+-- Obviously the code is incomplete and commonalities need to be extracted and
+-- the code refactored.
 mkRepFn :: TCInfo -> Decl
 mkRepFn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkRepName tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
