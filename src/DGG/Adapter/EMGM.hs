@@ -14,13 +14,11 @@ import Language.Haskell hiding (genNames)
 importsEMGM :: [ImportDecl]
 importsEMGM = [mkImport "Generics.EMGM"]
 
--- TODO: The definitions of deriveEMGM and fddE are quick and dirty
--- implementations to make the types work. They need a lot of work still.
 deriveEMGM :: Derivation
-deriveEMGM = derivationCustom "myEMGMType" fddE
+deriveEMGM = derivationCustom "DGG.Adapter.EMGM.Derivation" mkFullDecl
 
-fddE :: FullDataDecl -> Either String [Decl]
-fddE ((ModuleName n), decl) = Right [(makeEMGM . mkTCI) decl]
+mkFullDecl :: FullDataDecl -> Either String [Decl]
+mkFullDecl (_, decl) = Right [(makeEMGM . mkTCI) decl]
 
 makeEMGM :: LibParser
 makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc

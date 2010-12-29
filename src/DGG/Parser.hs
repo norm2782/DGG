@@ -29,9 +29,9 @@ mkVCI (i, (QualConDecl _ _ _ (ConDecl n bts))) = VCInfo (fromName n) (length bts
                                            LeftAssoc $ map mkRec bts 
 
 mkRec :: BangType -> Record
-mkRec (BangedTy t)   = error "Not supported yet"
-mkRec r@(UnBangedTy t) = Record Nothing "someNam" r
-mkRec (UnpackedTy t) = error "Not supported yet"
+mkRec (BangedTy _)     = error "Not supported yet"
+mkRec r@(UnBangedTy _) = Record Nothing "someNam" r
+mkRec (UnpackedTy _)   = error "Not supported yet"
 
 fromName :: Name -> String
 fromName (Ident n)  = n
