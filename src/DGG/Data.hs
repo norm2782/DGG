@@ -15,7 +15,7 @@ import Language.Haskell.Exts.Syntax
 -- Newtypes: DataDecl NewType
 --
 
-type LibParser  = TCInfo -> Decl
+type LibParser  = TCInfo -> [Decl]
 type LibSupport = Decl -> Bool
 
 type Arity    = Int

@@ -36,3 +36,6 @@ unQualSym = UnQual . Symbol
 mkImport :: String -> ImportDecl
 mkImport n = ImportDecl srcLoc (ModuleName n) False
                         False Nothing Nothing Nothing
+
+appInfix :: String -> QOp
+appInfix n = QVarOp (unQualIdent n)

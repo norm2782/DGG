@@ -18,10 +18,10 @@ deriveEMGM :: Derivation
 deriveEMGM = derivationCustom "DGG.Adapter.EMGM.Derivation" mkFullDecl
 
 mkFullDecl :: FullDataDecl -> Either String [Decl]
-mkFullDecl (_, decl) = Right [(makeEMGM . mkTCI) decl]
+mkFullDecl (_, decl) = Right $ (makeEMGM . mkTCI) decl
 
 makeEMGM :: LibParser
-makeEMGM tc@(TCInfo _ TyDataType _) = createDTEP   tc
+makeEMGM tc@(TCInfo _ TyDataType _) = (createDTEP tc) : (mkDTReps tc)
 makeEMGM tc@(TCInfo _ TyNewType  _) = createNTEP   tc
 makeEMGM tc@(TCInfo _ TySynonym  _) = createSynEP  tc
 makeEMGM tc@(TCInfo _ TyGADT     _) = createGADTEP tc
@@ -39,9 +39,14 @@ isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _) = False
 isSuppEMGM (DataFamDecl _ _ _ _ _)     = False
 isSuppEMGM _                           = False
 
+mkDTReps :: TCInfo -> [Decl]
+mkDTReps tci = map ($tci) [mkRepFn, mkRepInst]
+
+mkEPName n = "dggEP_" ++ n
+
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType vcis) =
-  PatBind srcLoc (mkPIdent $ "dggEP_" ++ tn) Nothing rhs (bdecls vcis)
+  PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing rhs (bdecls vcis)
 
 createNTEP   (TCInfo tn TyNewType vcis) = undefined
 createSynEP  (TCInfo tn TySynonym vcis) = undefined
@@ -79,11 +84,7 @@ mkToRhs (VCInfo n 0 _ _ _ _) = mkCon n
 mkToRhs (VCInfo n a _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
 
 buildProd :: Int -> Exp
-buildProd n = buildInApp $ reverse (genNames n)
-
-buildInApp :: [String] -> Exp
-buildInApp [x]    = mkIdent x
-buildInApp (x:xs) = InfixApp (buildInApp xs) expProd (mkIdent x)
+buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)
 
 expProd :: QOp
 expProd = (QConOp . unQualSym) ":*:"
@@ -122,3 +123,52 @@ toEP cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = ppPAppConUnQualIdent "R" $ mkPRs a
     | i == cnt  = ppPAppConUnQualIdent "L" $ mkPRs a
     | otherwise = PApp (unQualIdent "R") [(toEP (cnt + 1) nc vci)]
+
+mkGenG = ClassA (unQualIdent "Generic") [TyVar (Ident "g")]
+
+mkRepName :: String -> String
+mkRepName n = "dggRep_" ++ n
+
+fnApp   = (QVarOp . unQualSym) "$"
+fnRProd = appInfix "rprod"
+fnRSum  = appInfix "rsum"
+appRep  = mkIdent "rep"
+appUnit = mkIdent "runit"
+appInt  = mkIdent "rint"
+appCon  = mkIdent "rcon"
+appFrep = mkIdent "frep"
+
+mkRepFn :: TCInfo -> Decl
+mkRepFn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkRepName tn)
+    Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
+    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (BDecls [])
+
+foldInApp :: QOp -> (a -> Exp) -> [a] -> Exp
+foldInApp _  mk [x]    = mk x
+foldInApp op mk (x:xs) = InfixApp (foldInApp op mk xs) op (mk x)
+
+buildRepProd :: Int -> Exp
+buildRepProd n = foldInApp fnRProd mkIdent $ replicate n "rep"
+
+mkSProd :: VCInfo -> Exp
+mkSProd (VCInfo n 0 _ _ _ _) = App (App appCon (mkConDescr n 0)) appRep
+mkSProd (VCInfo n a _ _ _ _) = App (App appCon (mkConDescr n (toInteger a)))
+                                   (buildRepProd a)
+
+-- TODO: Make constructor information dynamic
+mkConDescr :: String -> Integer -> Exp
+mkConDescr n a = Paren (App (App (App (App (Con
+        (unQualIdent "ConDescr")) (Lit (String n))) (Lit (Int a)))
+        (mkCon "False")) (mkCon "Prefix"))
+
+mkRepInst :: TCInfo -> Decl
+mkRepInst (TCInfo tn _ vcis) = InstDecl srcLoc
+    [mkGenG{- TODO Add rest -}]
+    (unQualIdent "Rep")
+-- TODO: The TyCon currently only supports kind *. Expand support to 
+-- include arbitrarily kinded datatypes.
+    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
+    [InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing
+    (UnGuardedRhs (mkIdent $ mkRepName tn)) (BDecls []))]
+

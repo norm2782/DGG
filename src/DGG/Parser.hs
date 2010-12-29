@@ -17,7 +17,7 @@ genCode (ParseOk m)       p s is = prettyPrint (mkModule p is $ listify s m)
 mkModule :: LibParser -> [ImportDecl] -> [Decl] -> Module
 mkModule _ _  [] = error "No compatible datatypes found."
 mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing is
-                       $ map (p . mkTCI) xs
+                       $ concat $ map (p . mkTCI) xs
 
 mkTCI :: Decl -> TCInfo
 mkTCI (DataDecl _ _ _ n _ ds _) = TCInfo (fromName n) TyDataType $ map mkVCI

@@ -4,8 +4,8 @@ import Language.Haskell.Exts
 import DGG.Data
 
 --testFile = "testmodule.hs"
-testFile = "EMGMTestData.hs"
---testFile = "EMGMAdapter.hs"
+--testFile = "EMGMTestData.hs"
+testFile = "Reps.hs"
 
 main =
     do pr <- parseFile testFile
