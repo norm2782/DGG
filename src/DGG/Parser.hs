@@ -20,13 +20,13 @@ mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing i
                        $ concat $ map (p . mkTCI) xs
 
 mkTCI :: Decl -> TCInfo
-mkTCI (DataDecl _ _ _ n _ ds _) = TCInfo (fromName n) TyDataType $ map mkVCI
-                                                                 $ zip [0..] ds
+mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo (fromName n) TyDataType tv $
+                                          map mkVCI $ zip [0..] ds
 mkTCI _ = error "Only regular datatypes are supported at this moment."
 
 mkVCI :: (Int, QualConDecl) -> VCInfo
-mkVCI (i, (QualConDecl _ _ _ (ConDecl n bts))) = VCInfo (fromName n) (length bts) i Nonfix
-                                           LeftAssoc $ map mkRec bts 
+mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc tvs $ map mkRec bts 
 
 mkRec :: BangType -> Record
 mkRec (BangedTy _)     = error "Not supported yet"

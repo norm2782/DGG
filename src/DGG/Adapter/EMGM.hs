@@ -21,10 +21,10 @@ mkFullDecl :: FullDataDecl -> Either String [Decl]
 mkFullDecl (_, decl) = Right $ (makeEMGM . mkTCI) decl
 
 makeEMGM :: LibParser
-makeEMGM tc@(TCInfo _ TyDataType _) = (createDTEP tc) : (mkDTReps tc)
-makeEMGM tc@(TCInfo _ TyNewType  _) = createNTEP   tc
-makeEMGM tc@(TCInfo _ TySynonym  _) = createSynEP  tc
-makeEMGM tc@(TCInfo _ TyGADT     _) = createGADTEP tc
+makeEMGM tc@(TCInfo _ TyDataType _ _) = (createDTEP tc) : (mkDTReps tc)
+makeEMGM tc@(TCInfo _ TyNewType  _ _) = createNTEP   tc
+makeEMGM tc@(TCInfo _ TySynonym  _ _) = createSynEP  tc
+makeEMGM tc@(TCInfo _ TyGADT     _ _) = createGADTEP tc
 
 -- Returns True when the Decl is of the right type and False otherwise. Several
 -- types return False at the moment, because they are not supported yet by this
@@ -49,12 +49,12 @@ mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
 mkEPName n = "dggEP_" ++ n
 
 createDTEP :: TCInfo -> Decl
-createDTEP (TCInfo tn TyDataType vcis) =
-  PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing rhs (bdecls vcis)
+createDTEP (TCInfo tn TyDataType _ vcis) =
+  PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing rhs (mkBDecls vcis)
 
-createNTEP   (TCInfo tn TyNewType vcis) = undefined
-createSynEP  (TCInfo tn TySynonym vcis) = undefined
-createGADTEP (TCInfo tn TyGADT    vcis) = undefined
+createNTEP   (TCInfo tn TyNewType _ vcis) = undefined
+createSynEP  (TCInfo tn TySynonym _ vcis) = undefined
+createGADTEP (TCInfo tn TyGADT    _ vcis) = undefined
 
 fromFunName, toFunName, unitType :: String
 fromFunName = "from'"
@@ -62,30 +62,29 @@ toFunName   = "to'"
 unitType    = "Unit"
 
 rhs :: Rhs
-rhs = UnGuardedRhs (App (App (Con $ unQualIdent "EP")
+rhs = UnGuardedRhs (App (App (Con $ mkUId "EP")
                              (mkIdent fromFunName))
                              (mkIdent toFunName))
 
-bdecls :: [VCInfo] -> Binds
-bdecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
+mkBDecls :: [VCInfo] -> Binds
+mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
                      , FunBind $ map (bdeclTo ln) vcis ]
     where ln = length vcis
 
 bdeclFrom :: Int -> VCInfo -> Match
-bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkMatch fromFunName [pApp (name n)
-                                                 (map mkPIdent (genNames a))]
-                                                 (fromEP 0 cnt vci)
+bdeclFrom cnt vci@(VCInfo n a _ _ _ _ _) = mkMatch fromFunName [pApp (name n)
+                                                   (map mkPIdent (genNames a))]
+                                                   (fromEP 0 cnt vci)
 
 bdeclTo :: Int -> VCInfo -> Match
 bdeclTo cnt vci = mkMatch toFunName [toEP 0 cnt vci] (mkToRhs vci)
 
 mkMatch :: String -> [Pat] -> Exp -> Match
-mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing
-                         (UnGuardedRhs rhs) (BDecls [])
+mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing (UnGuardedRhs rhs) bdecls
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n 0 _ _ _ _) = mkCon n
-mkToRhs (VCInfo n a _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
+mkToRhs (VCInfo n 0 _ _ _ _ _) = mkCon n
+mkToRhs (VCInfo n a _ _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
 
 buildProd :: Int -> Exp
 buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)
@@ -94,43 +93,47 @@ expProd :: QOp
 expProd = (QConOp . unQualSym) ":*:"
 
 fromEP :: Int -> Int -> VCInfo -> Exp
-fromEP _   1  vci = mkFromRs $ conArity vci
-fromEP cnt nc vci@(VCInfo _ a i _ _ _)
-    | i == cnt + 1 && i == nc - 1 = pAppConUnQualIdent "R" $ mkFromRs a
-    | i == cnt  = pAppConUnQualIdent "L" $ mkFromRs a
-    | otherwise = App (conUnQualIdent "R") (fromEP (cnt + 1) nc vci)
+fromEP = ep mkFromRs mkExpSum owFrom
+
+owFrom cnt nc vci = App (mkCon "R") (fromEP (cnt + 1) nc vci)
+
+mkExpSum :: String -> Int -> Exp
+mkExpSum s n = (App . mkCon) s $ mkFromRs n
 
 mkFromRs :: Int -> Exp
 mkFromRs 0  = mkCon unitType
 mkFromRs rs = buildProd rs
 
-ppPAppConUnQualIdent :: String -> Pat -> Pat
-ppPAppConUnQualIdent s e = pApp (name s) [e]
-
 mkPRs :: Int -> Pat
-mkPRs 0  = pApp (name unitType) []
+mkPRs 0 = pApp (name unitType) []
 mkPRs i = buildPProd i
 
 buildPProd :: Int -> Pat
 buildPProd rs = buildInPApp $ reverse (genNames rs)
 
 buildInPApp :: [String] -> Pat
-buildInPApp [x]    = mkPIdent x
-buildInPApp (x:xs) = PInfixApp (buildInPApp xs) expPProd (mkPIdent x)
+buildInPApp = foldPInApp expPProd mkPIdent
 
 expPProd :: QName
 expPProd = unQualSym ":*:"
 
 toEP :: Int -> Int -> VCInfo -> Pat
-toEP _   1  vci = mkPRs $ conArity vci
-toEP cnt nc vci@(VCInfo _ a i _ _ _)
-    | i == cnt + 1 && i == nc - 1 = ppPAppConUnQualIdent "R" $ mkPRs a
-    | i == cnt  = ppPAppConUnQualIdent "L" $ mkPRs a
-    | otherwise = PApp (unQualIdent "R") [(toEP (cnt + 1) nc vci)]
+toEP = ep mkPRs mkPatSum owTo
 
-mkGenG  = ClassA (unQualIdent "Generic")  [TyVar (Ident "g")]
-mkGenG2 = ClassA (unQualIdent "Generic2") [TyVar (Ident "g")]
-mkGenG3 = ClassA (unQualIdent "Generic3") [TyVar (Ident "g")]
+owTo cnt nc vci = PApp (mkUId "R") [(toEP (cnt + 1) nc vci)]
+
+ep mkr mks ow _   1  vci = mkr $ conArity vci
+ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _ _)
+    | i == cnt + 1 && i == nc - 1 = mks "R" a
+    | i == cnt                    = mks "L" a
+    | otherwise                   = ow cnt nc vci
+
+mkPatSum :: String -> Int -> Pat
+mkPatSum s n = pApp (name s) [mkPRs n]
+
+mkGenG  = ClassA (mkUId "Generic")  [mkTyVar "g"]
+mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
+mkGenG3 = ClassA (mkUId "Generic3") [mkTyVar "g"]
 
 mkRepName :: String -> String
 mkRepName n = "dggRep_" ++ n
@@ -161,34 +164,34 @@ appFrep = mkIdent "frep"
 -- Obviously the code is incomplete and commonalities need to be extracted and
 -- the code refactored.
 mkRepFn :: TCInfo -> Decl
-mkRepFn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkRepName tn)
+mkRepFn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkRepName tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
     (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
-    (BDecls [])
+    bdecls
 
 mkFRepFn :: TCInfo -> Decl
-mkFRepFn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkFRepName tn)
+mkFRepFn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRepName tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
     (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
-    (BDecls [])
+    bdecls
 
 mkFRep2Fn :: TCInfo -> Decl
-mkFRep2Fn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkFRep2Name tn)
+mkFRep2Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRep2Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
     (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
-    (BDecls [])
+    bdecls
 
 mkBiFRep2Fn :: TCInfo -> Decl
-mkBiFRep2Fn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkBiFRep2Name tn)
+mkBiFRep2Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkBiFRep2Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
     (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
-    (BDecls [])
+    bdecls
 
 mkFRep3Fn :: TCInfo -> Decl
-mkFRep3Fn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkFRep3Name tn)
+mkFRep3Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRep3Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
     (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
-    (BDecls [])
+    bdecls
 
 
 
@@ -208,78 +211,74 @@ mkFRep3Fn (TCInfo tn TyDataType vcis) = PatBind srcLoc (mkPIdent $ mkFRep3Name t
 ))))) (Var (UnQual (Ident "rep")))) (QVarOp (UnQual (Ident "rprod"))) (App (Var
 (UnQual (Ident "frep"))) (Var (UnQual (Ident "rep"))))))
           
-          (BDecls [])
+          bdecls
 -}
-
-foldInApp :: QOp -> (a -> Exp) -> [a] -> Exp
-foldInApp _  mk [x]    = mk x
-foldInApp op mk (x:xs) = InfixApp (foldInApp op mk xs) op (mk x)
 
 buildRepProd :: Int -> Exp
 buildRepProd n = foldInApp fnRProd mkIdent $ replicate n "rep"
 
 mkSProd :: VCInfo -> Exp
-mkSProd (VCInfo n 0 _ _ _ _) = mkSProd' n 0 appRep
-mkSProd (VCInfo n a _ _ _ _) = mkSProd' n a (buildRepProd a) 
+mkSProd (VCInfo n 0 _ _ _ _ _) = mkSProd' n 0 appRep
+mkSProd (VCInfo n a _ _ _ _ _) = mkSProd' n a (buildRepProd a) 
 
 mkSProd' :: String -> Int -> Exp -> Exp
-mkSProd' n a r = App (App appCon (mkConDescr n (toInteger a))) r
+mkSProd' n a r = foldApp id $ reverse [appCon, mkConDescr n (toInteger a), r]
 
 -- TODO: Make constructor information dynamic
 mkConDescr :: String -> Integer -> Exp
 mkConDescr n a = Paren (App (App (App (App (Con
-        (unQualIdent "ConDescr")) (Lit (String n))) (Lit (Int a)))
+        (mkUId "ConDescr")) (Lit (String n))) (Lit (Int a)))
         (mkCon "False")) (mkCon "Prefix"))
 
 mkRepInst :: TCInfo -> Decl
-mkRepInst (TCInfo tn _ vcis) = InstDecl srcLoc
+mkRepInst (TCInfo tn _ tcv vcis) = InstDecl srcLoc
     [mkGenG{- TODO Add rest -}]
-    (unQualIdent "Rep")
+    (mkUId "Rep")
 -- TODO: The TyCon currently only supports kind *. Expand support to 
 -- include arbitrarily kinded datatypes.
-    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
-    [InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing
-    (UnGuardedRhs (mkIdent $ mkRepName tn)) (BDecls []))]
+    [mkTyVar "g", mkTyCon tn]
+    [InsDecl (PatBind srcLoc (mkPIdent "rep") Nothing
+    (UnGuardedRhs (mkIdent $ mkRepName tn)) bdecls)]
 
 mkFRepInst :: TCInfo -> Decl
-mkFRepInst (TCInfo tn _ vcis) = InstDecl srcLoc
+mkFRepInst (TCInfo tn _ tcv vcis) = InstDecl srcLoc
     [mkGenG{- TODO Add rest -}]
-    (unQualIdent "FRep")
+    (mkUId "FRep")
 -- TODO: The TyCon currently only supports kind *. Expand support to 
 -- include arbitrarily kinded datatypes.
-    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
-    [InsDecl (PatBind srcLoc (PVar (Ident "frep")) Nothing
-    (UnGuardedRhs (mkIdent $ mkFRepName tn)) (BDecls []))]
+    [mkTyVar "g", mkTyCon tn]
+    [InsDecl (PatBind srcLoc (mkPIdent "frep") Nothing
+    (UnGuardedRhs (mkIdent $ mkFRepName tn)) bdecls)]
 
 mkFRep2Inst :: TCInfo -> Decl
-mkFRep2Inst (TCInfo tn _ vcis) = InstDecl srcLoc
+mkFRep2Inst (TCInfo tn _ tcv vcis) = InstDecl srcLoc
     [mkGenG2{- TODO Add rest -}]
-    (unQualIdent "FRep2")
+    (mkUId "FRep2")
 -- TODO: The TyCon currently only supports kind *. Expand support to 
 -- include arbitrarily kinded datatypes.
-    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
-    [InsDecl (PatBind srcLoc (PVar (Ident "frep2")) Nothing
-    (UnGuardedRhs (mkIdent $ mkFRep2Name tn)) (BDecls []))]
+    [mkTyVar "g", mkTyCon tn]
+    [InsDecl (PatBind srcLoc (mkPIdent "frep2") Nothing
+    (UnGuardedRhs (mkIdent $ mkFRep2Name tn)) bdecls)]
 
 mkBiFRep2Inst :: TCInfo -> Decl
-mkBiFRep2Inst (TCInfo tn _ vcis) = InstDecl srcLoc
+mkBiFRep2Inst (TCInfo tn _ tcv vcis) = InstDecl srcLoc
     [mkGenG2{- TODO Add rest -}]
-    (unQualIdent "BiFRep2")
+    (mkUId "BiFRep2")
 -- TODO: The TyCon currently only supports kind *. Expand support to 
 -- include arbitrarily kinded datatypes.
-    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
-    [InsDecl (PatBind srcLoc (PVar (Ident "bifrep2")) Nothing
-    (UnGuardedRhs (mkIdent $ mkBiFRep2Name tn)) (BDecls []))]
+    [mkTyVar "g", mkTyCon tn]
+    [InsDecl (PatBind srcLoc (mkPIdent "bifrep2") Nothing
+    (UnGuardedRhs (mkIdent $ mkBiFRep2Name tn)) bdecls)]
 
 mkFRep3Inst :: TCInfo -> Decl
-mkFRep3Inst (TCInfo tn _ vcis) = InstDecl srcLoc
+mkFRep3Inst (TCInfo tn _ tcv vcis) = InstDecl srcLoc
     [mkGenG3{- TODO Add rest -}]
-    (unQualIdent "FRep3")
+    (mkUId "FRep3")
 -- TODO: The TyCon currently only supports kind *. Expand support to 
 -- include arbitrarily kinded datatypes.
-    [TyVar (Ident "g"), TyCon (unQualIdent tn)]
-    [InsDecl (PatBind srcLoc (PVar (Ident "frep3")) Nothing
-    (UnGuardedRhs (mkIdent $ mkFRep3Name tn)) (BDecls []))]
+    [mkTyVar "g", mkTyCon tn]
+    [InsDecl (PatBind srcLoc (mkPIdent "frep3") Nothing
+    (UnGuardedRhs (mkIdent $ mkFRep3Name tn)) bdecls)]
 
 {-
 PatBind srcLoc (PVar (Ident "rNonempty")) Nothing (
@@ -291,33 +290,33 @@ UnGuardedRhs (InfixApp (App
 (App (App (Var (UnQual (Ident "mkCon"))) (Lit (String "Nonempty"))) (Lit (Int 2
 ))))) (Var (UnQual (Ident "rep")))) (QVarOp (UnQual (Ident "rprod"))) (App (Var
 (UnQual (Ident "frep"))) (Var (UnQual (Ident "rep"))))))
-) (BDecls [])
+) bdecls
 
 InstDecl srcLoc
-[ ClassA (UnQual (Ident "Generic")) [TyVar (Ident "g")]
-, ClassA (UnQual (Ident "Rep")) [TyVar (Ident "g"),TyVar (Ident "a")]
-, ClassA (UnQual (Ident "FRep")) [TyVar (Ident "g"),TyVar (Ident "f")] ]
+[ ClassA (UnQual (Ident "Generic")) [mkTyVar "g"]
+, ClassA (UnQual (Ident "Rep")) [mkTyVar "g",TyVar (Ident "a")]
+, ClassA (UnQual (Ident "FRep")) [mkTyVar "g",TyVar (Ident "f")] ]
 (UnQual (Ident "Rep"))
-[ TyVar (Ident "g")
+[ mkTyVar "g"
 , TyParen (TyApp (TyApp (TyCon (UnQual (Ident "Nonempty"))) (TyVar (Ident "f"))) (TyVar (Ident "a"))) ]
 [ InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing (UnGuardedRhs (Var (
-UnQual (Ident "rNonempty")))) (BDecls [])) ]
+UnQual (Ident "rNonempty")))) bdecls) ]
 
 
-FunBind [Match srcLoc (Ident "frNonempty") [PVar (Ident "ra")] Nothing (UnGuardedRhs (InfixApp (App (Var (UnQual (Ident "rtype"))) (Var (UnQual (Ident "nonemptyEP")))) (QVarOp (UnQual (Symbol "$"))) (InfixApp (App (App (Var (UnQual (Ident "rcon"))) (Paren (App (App (Var (UnQual (Ident "mkCon"))) (Lit (String "Nonempty"))) (Lit (Int 2))))) (Var (UnQual (Ident "ra")))) (QVarOp (UnQual (Ident "rprod"))) (App (Var (UnQual (Ident "frep"))) (Var (UnQual (Ident "ra"))))))) (BDecls [])]
+FunBind [Match srcLoc (Ident "frNonempty") [PVar (Ident "ra")] Nothing (UnGuardedRhs (InfixApp (App (Var (UnQual (Ident "rtype"))) (Var (UnQual (Ident "nonemptyEP")))) (QVarOp (UnQual (Symbol "$"))) (InfixApp (App (App (Var (UnQual (Ident "rcon"))) (Paren (App (App (Var (UnQual (Ident "mkCon"))) (Lit (String "Nonempty"))) (Lit (Int 2))))) (Var (UnQual (Ident "ra")))) (QVarOp (UnQual (Ident "rprod"))) (App (Var (UnQual (Ident "frep"))) (Var (UnQual (Ident "ra"))))))) bdecls]
 
-InstDecl srcLoc [ClassA (UnQual (Ident "Generic")) [TyVar (Ident "g")],ClassA (UnQual (Ident "FRep")) [TyVar (Ident "g"),TyVar (Ident "f")]] (UnQual (Ident "FRep")) [TyVar (Ident "g"),TyParen (TyApp (TyCon (UnQual (Ident "Nonempty"))) (TyVar (Ident "f")))] [InsDecl (PatBind srcLoc (PVar (Ident "frep")) Nothing (UnGuardedRhs (Var (UnQual (Ident "frNonempty")))) (BDecls []))]
+InstDecl srcLoc [ClassA (UnQual (Ident "Generic")) [mkTyVar "g"],ClassA (UnQual (Ident "FRep")) [mkTyVar "g",TyVar (Ident "f")]] (UnQual (Ident "FRep")) [mkTyVar "g",TyParen (TyApp (TyCon (UnQual (Ident "Nonempty"))) (TyVar (Ident "f")))] [InsDecl (PatBind srcLoc (PVar (Ident "frep")) Nothing (UnGuardedRhs (Var (UnQual (Ident "frNonempty")))) bdecls)]
 
 
-FunBind [Match srcLoc (Ident "fr2Nonempty") [PVar (Ident "ra")] Nothing (UnGuardedRhs (InfixApp (App (App (Var (UnQual (Ident "rtype2"))) (Var (UnQual (Ident "nonemptyEP")))) (Var (UnQual (Ident "nonemptyEP")))) (QVarOp (UnQual (Symbol "$"))) (InfixApp (App (App (Var (UnQual (Ident "rcon2"))) (Paren (App (App (Var (UnQual (Ident "mkCon"))) (Lit (String "Nonempty"))) (Lit (Int 2))))) (Var (UnQual (Ident "ra")))) (QVarOp (UnQual (Ident "rprod2"))) (App (Var (UnQual (Ident "frep2"))) (Var (UnQual (Ident "ra"))))))) (BDecls [])]
+FunBind [Match srcLoc (Ident "fr2Nonempty") [PVar (Ident "ra")] Nothing (UnGuardedRhs (InfixApp (App (App (Var (UnQual (Ident "rtype2"))) (Var (UnQual (Ident "nonemptyEP")))) (Var (UnQual (Ident "nonemptyEP")))) (QVarOp (UnQual (Symbol "$"))) (InfixApp (App (App (Var (UnQual (Ident "rcon2"))) (Paren (App (App (Var (UnQual (Ident "mkCon"))) (Lit (String "Nonempty"))) (Lit (Int 2))))) (Var (UnQual (Ident "ra")))) (QVarOp (UnQual (Ident "rprod2"))) (App (Var (UnQual (Ident "frep2"))) (Var (UnQual (Ident "ra"))))))) bdecls]
 
-InstDecl srcLoc [ClassA (UnQual (Ident "Generic2")) [TyVar (Ident "g")],ClassA (UnQual (Ident "FRep2")) [TyVar (Ident "g"),TyVar (Ident "f")]] (UnQual (Ident "FRep2")) [TyVar (Ident "g"),TyParen (TyApp (TyCon (UnQual (Ident "Nonempty"))) (TyVar (Ident "f")))] [InsDecl (PatBind srcLoc (PVar (Ident "frep2")) Nothing (UnGuardedRhs (Var (UnQual (Ident "fr2Nonempty")))) (BDecls []))]
+InstDecl srcLoc [ClassA (UnQual (Ident "Generic2")) [mkTyVar "g"],ClassA (UnQual (Ident "FRep2")) [mkTyVar "g",TyVar (Ident "f")]] (UnQual (Ident "FRep2")) [mkTyVar "g",TyParen (TyApp (TyCon (UnQual (Ident "Nonempty"))) (TyVar (Ident "f")))] [InsDecl (PatBind srcLoc (PVar (Ident "frep2")) Nothing (UnGuardedRhs (Var (UnQual (Ident "fr2Nonempty")))) bdecls)]
 
 
 mkTreeInst = InstDecl srcLoc
-    [ ClassA (UnQual (Ident "Generic")) [TyVar (Ident "g")]
-    , ClassA (UnQual (Ident "Rep")) [TyVar (Ident "g"),TyCon (UnQual (Ident "Int"))] ]
-    (UnQual (Ident "Rep")) [TyVar (Ident "g"),TyCon (UnQual (Ident "Tree"))]
+    [ ClassA (UnQual (Ident "Generic")) [mkTyVar "g"]
+    , ClassA (UnQual (Ident "Rep")) [mkTyVar "g",TyCon (UnQual (Ident "Int"))] ]
+    (UnQual (Ident "Rep")) [mkTyVar "g",TyCon (UnQual (Ident "Tree"))]
     [InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing 
     (UnGuardedRhs
 
@@ -338,15 +337,15 @@ mkTreeInst = InstDecl srcLoc
         ) (Var (UnQual (Ident "rep")))) (QVarOp (UnQual (Ident "rprod"))) (Var
         (UnQual (Ident "rep"))))))))) 
 
-        (BDecls []))]
+        bdecls)]
 
 mkCompInst = InstDecl srcLoc
-    [ ClassA (UnQual (Ident "Generic")) [TyVar (Ident "g")]
-    , ClassA (UnQual (Ident "Rep")) [TyVar (Ident "g"),TyVar (Ident "a")]
-    , ClassA (UnQual (Ident "FRep")) [TyVar (Ident "g"),TyVar (Ident "f")]
-    , ClassA (UnQual (Ident "FRep")) [TyVar (Ident "g"),TyVar (Ident "h")] ]
+    [ ClassA (UnQual (Ident "Generic")) [mkTyVar "g"]
+    , ClassA (UnQual (Ident "Rep")) [mkTyVar "g",TyVar (Ident "a")]
+    , ClassA (UnQual (Ident "FRep")) [mkTyVar "g",TyVar (Ident "f")]
+    , ClassA (UnQual (Ident "FRep")) [mkTyVar "g",TyVar (Ident "h")] ]
     (UnQual (Ident "Rep"))
-    [TyVar (Ident "g"), TyParen (TyApp (TyApp (TyApp (TyCon (UnQual (Ident "Comp"))) (TyVar (Ident "f"))) (TyVar (Ident "h"))) (TyVar (Ident "a")))]
-    [InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing (UnGuardedRhs (Var (UnQual (Ident "rComp")))) (BDecls []))]
+    [mkTyVar "g", TyParen (TyApp (TyApp (TyApp (TyCon (UnQual (Ident "Comp"))) (TyVar (Ident "f"))) (TyVar (Ident "h"))) (TyVar (Ident "a")))]
+    [InsDecl (PatBind srcLoc (PVar (Ident "rep")) Nothing (UnGuardedRhs (Var (UnQual (Ident "rComp")))) bdecls)]
 
     -}

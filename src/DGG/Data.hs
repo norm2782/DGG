@@ -56,7 +56,7 @@ data Record = Record { recDec    :: Maybe Deconstructor
 -- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo { tcName :: TypeName
                      , tcType :: TypeType
---                     , tcVars :: [TyVarBind]
+                     , tcVars :: [TyVarBind]
                      , tcVCs  :: [VCInfo]
                      }
             deriving (Show)
@@ -66,7 +66,7 @@ data VCInfo = VCInfo { conName    :: ConName
                      , conIndex   :: ConIndex
                      , conFixity  :: ConFixity
                      , conAssoc   :: Associativity
---                     , conVars    :: [TyVarBind]
+                     , conVars    :: [TyVarBind]
                      , conRecords :: [Record]
                      }
             deriving (Show)
