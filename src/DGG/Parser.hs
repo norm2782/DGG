@@ -27,6 +27,10 @@ mkTCI _ = error "Only regular datatypes are supported at this moment."
 mkVCI :: (Int, QualConDecl) -> VCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
     VCInfo (fromName n) (length bts) i Nonfix LeftAssoc tvs $ map mkRec bts 
+mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
+    VCInfo (fromName n) 2 i Nonfix LeftAssoc tvs $ map mkRec [btl, btr]
+mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc tvs $ map mkRec $ map snd bts -- TODO: Somehow capture record information
 
 mkRec :: BangType -> Record
 mkRec (BangedTy _)     = error "Not supported yet"

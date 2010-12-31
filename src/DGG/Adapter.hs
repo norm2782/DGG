@@ -59,6 +59,7 @@ foldApp = foldXApp App
 foldTyApp :: (a -> Type) -> [a] -> Type
 foldTyApp = foldXApp TyApp
 
+-- TODO: Get rid of mk and replace by regular fold?
 foldXApp :: (b -> b -> b) -> (a -> b) -> [a] -> b
 foldXApp _ mk [x]    = mk x
 foldXApp c mk (x:xs) = c (foldXApp c mk xs) (mk x)

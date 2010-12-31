@@ -10,7 +10,14 @@ import DGG.Adapter.EMGM
 
 data Foo = Bar
 data List a = Nil | Cons a (List a)
+data MyTree a = MyLeaf
+              | MyBinNode { lTree :: (MyTree a)
+                          , bVal  :: a
+                          , rTree :: (MyTree a) }
+              | MyRTree a [MyTree a]
 
 $(derive deriveEMGM ''Foo)
 
 $(derive deriveEMGM ''List)
+
+$(derive deriveEMGM ''MyTree)

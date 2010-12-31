@@ -71,26 +71,17 @@ mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
                      , FunBind $ map (bdeclTo ln) vcis ]
     where ln = length vcis
 
+--    --
+--    --
+-- EP --
+--    --
+--    --
+--
+-- From
 bdeclFrom :: Int -> VCInfo -> Match
 bdeclFrom cnt vci@(VCInfo n a _ _ _ _ _) = mkMatch fromFunName [pApp (name n)
                                                    (map mkPIdent (genNames a))]
                                                    (fromEP 0 cnt vci)
-
-bdeclTo :: Int -> VCInfo -> Match
-bdeclTo cnt vci = mkMatch toFunName [toEP 0 cnt vci] (mkToRhs vci)
-
-mkMatch :: String -> [Pat] -> Exp -> Match
-mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing (UnGuardedRhs rhs) bdecls
-
-mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n 0 _ _ _ _ _) = mkCon n
-mkToRhs (VCInfo n a _ _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
-
-buildProd :: Int -> Exp
-buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)
-
-expProd :: QOp
-expProd = (QConOp . unQualSym) ":*:"
 
 fromEP :: Int -> Int -> VCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
@@ -98,16 +89,43 @@ fromEP = ep mkFromRs mkExpSum owFrom
 owFrom :: Int -> Int -> VCInfo -> Exp
 owFrom cnt nc vci = App (mkCon "R") (fromEP (cnt + 1) nc vci)
 
-mkExpSum :: String -> Int -> Exp
-mkExpSum s n = (App . mkCon) s $ mkFromRs n
-
 mkFromRs :: Int -> Exp
 mkFromRs 0  = mkCon unitType
 mkFromRs rs = buildProd rs
 
-mkPRs :: Int -> Pat
-mkPRs 0 = pApp (name unitType) []
-mkPRs i = buildPProd i
+mkExpSum :: String -> Int -> Exp
+mkExpSum s n = (App . mkCon) s $ mkFromRs n
+
+-- To
+bdeclTo :: Int -> VCInfo -> Match
+bdeclTo cnt vci = mkMatch toFunName [toEP 0 cnt vci] (mkToRhs vci)
+
+toEP :: Int -> Int -> VCInfo -> Pat
+toEP = ep mkToRs mkPatSum owTo
+
+owTo :: Int -> Int -> VCInfo -> Pat
+owTo cnt nc vci = PApp (mkUId "R") [(toEP (cnt + 1) nc vci)]
+
+mkToRs :: Int -> Pat
+mkToRs 0 = pApp (name unitType) []
+mkToRs i = buildPProd i
+
+mkToRhs :: VCInfo -> Exp
+mkToRhs (VCInfo n 0 _ _ _ _ _) = mkCon n
+mkToRhs (VCInfo n a _ _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
+
+mkPatSum :: String -> Int -> Pat
+mkPatSum s n = pApp (name s) [mkToRs n]
+
+-- Generic
+mkMatch :: String -> [Pat] -> Exp -> Match
+mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing (UnGuardedRhs rhs) bdecls
+
+buildProd :: Int -> Exp
+buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)
+
+expProd :: QOp
+expProd = (QConOp . unQualSym) ":*:"
 
 buildPProd :: Int -> Pat
 buildPProd rs = buildInPApp $ reverse (genNames rs)
@@ -118,12 +136,6 @@ buildInPApp = foldPInApp expPProd mkPIdent
 expPProd :: QName
 expPProd = unQualSym ":*:"
 
-toEP :: Int -> Int -> VCInfo -> Pat
-toEP = ep mkPRs mkPatSum owTo
-
-owTo :: Int -> Int -> VCInfo -> Pat
-owTo cnt nc vci = PApp (mkUId "R") [(toEP (cnt + 1) nc vci)]
-
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> VCInfo -> a)
    -> Int -> Int -> VCInfo -> a
 ep mkr mks ow _   1  vci = mkr $ conArity vci
@@ -132,8 +144,6 @@ ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _ _)
     | i == cnt                    = mks "L" a
     | otherwise                   = ow cnt nc vci
 
-mkPatSum :: String -> Int -> Pat
-mkPatSum s n = pApp (name s) [mkPRs n]
 
 mkGenG  = ClassA (mkUId "Generic")  [mkTyVar "g"]
 mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
