@@ -95,6 +95,7 @@ expProd = (QConOp . unQualSym) ":*:"
 fromEP :: Int -> Int -> VCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
 
+owFrom :: Int -> Int -> VCInfo -> Exp
 owFrom cnt nc vci = App (mkCon "R") (fromEP (cnt + 1) nc vci)
 
 mkExpSum :: String -> Int -> Exp
@@ -120,8 +121,11 @@ expPProd = unQualSym ":*:"
 toEP :: Int -> Int -> VCInfo -> Pat
 toEP = ep mkPRs mkPatSum owTo
 
+owTo :: Int -> Int -> VCInfo -> Pat
 owTo cnt nc vci = PApp (mkUId "R") [(toEP (cnt + 1) nc vci)]
 
+ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> VCInfo -> a)
+   -> Int -> Int -> VCInfo -> a
 ep mkr mks ow _   1  vci = mkr $ conArity vci
 ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _ _)
     | i == cnt + 1 && i == nc - 1 = mks "R" a
