@@ -78,8 +78,11 @@ mkGunfold vcs = [Match srcLoc (Ident "gunfold")
 
 mkGunfoldAlt :: (Int, VCInfo) -> Alt
 mkGunfoldAlt (i, (VCInfo n a _ _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
-    ) (UnGuardedAlt (foldApp id ((App (mkIdent "z") (mkCon n)) :
-        (replicate a $ mkIdent "k")))) bdecls
+    ) (UnGuardedAlt (mkGunfoldKs n a)) bdecls
+
+mkGunfoldKs :: String -> Int -> Exp
+mkGunfoldKs n 0 = App (mkIdent "z") (mkCon n)
+mkGunfoldKs n a = Paren (App (mkIdent "k") (mkGunfoldKs n $ a - 1))
 
 mkToConstr :: VCInfo -> Match
 mkToConstr (VCInfo n a _ _ _ _ _) = mkMatch "toConstr" [PApp (mkUId
