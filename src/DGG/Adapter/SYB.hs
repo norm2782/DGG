@@ -21,8 +21,7 @@ mkFullDecl :: FullDataDecl -> Either String [Decl]
 mkFullDecl (_, decl) = Right $ (makeSYB . mkTCI) decl
 
 makeSYB :: LibParser
-makeSYB tc@(TCInfo n TyDataType tvs vcs) = [mkTypeable tc] ++
-                                           (mkTypeableNs tc) ++
+makeSYB tc@(TCInfo n TyDataType tvs vcs) = (mkTypeableNs tc) ++
                                            [mkData tc, mkDT tc] ++
                                            map (mkConstr n) vcs
 
@@ -41,26 +40,28 @@ isSuppSYB _                           = False
 
 -- TODO: No gunfold when quantification is used?
 
--- TODO: For these two we need more information about the kinds. The current
--- approach for determining the kind of datatypes is plain wrong: it just
--- counts the number of tycon arguments. Instead, it should take the kind of
--- those arguments into account.
+-- TODO: For these next tgree we need more information about the kinds. The
+-- current approach for determining the kind of datatypes is plain wrong: it
+-- just counts the number of tycon arguments. Instead, it should take the kind
+-- of those arguments into account.
+mkTypeableNs :: TCInfo -> [Decl]
+mkTypeableNs tci@(TCInfo _ _ tvs _) | n == 0           = [mkTypeable tci]
+                                    | n >= 1 && n <= 7 = [mkTypeableN tci]
+                                    | otherwise        = []
+                                    where n = length tvs
+
+-- TODO: Refactor the next two: lots of shared stuff here!
 mkTypeable :: TCInfo -> Decl
 mkTypeable (TCInfo n _ tvs _) = InstDecl srcLoc [] (mkUId "Typeable")
     (mkClassInst n tvs)
-    [mkInsDecl [Match srcLoc (Ident "typeOf") [PWildCard] Nothing (
+    [mkInFun [Match srcLoc (Ident "typeOf") [PWildCard] Nothing (
     UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon") (Lit
     (String n)))) (List []))) bdecls]]
-
-mkTypeableNs :: TCInfo -> [Decl]
-mkTypeableNs tci@(TCInfo _ _ tvs _) | n > 0 && n < 8 = [mkTypeableN tci]
-                                    | otherwise      = []
-                                    where n = length tvs
 
 mkTypeableN :: TCInfo -> Decl
 mkTypeableN (TCInfo n _ tvs _) = InstDecl srcLoc [] (mkUId $ "Typeable" ++ show lt)
     (mkClassInstN (lt - 1) n)
-    [mkInsDecl [Match srcLoc (Ident $ "typeOf" ++ show lt) [PWildCard] Nothing (
+    [mkInFun [Match srcLoc (Ident $ "typeOf" ++ show lt) [PWildCard] Nothing (
     UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon") (Lit
     (String n)))) (List []))) bdecls]]
     where lt = length tvs
@@ -82,11 +83,11 @@ mkDTName n = "dggDT_" ++ n
 mkData :: TCInfo -> Decl
 mkData (TCInfo n _ tvs vcs) = InstDecl srcLoc
     (map mkClassReq $ genNames $ length tvs) (mkUId "Data") (mkClassInst n tvs)
-    ([mkInsDecl (map mkToConstr vcs),
-    mkInsDecl [Match srcLoc (Ident "dataTypeOf") [PWildCard] Nothing
+    ([mkInFun (map mkToConstr vcs),
+    mkInFun [Match srcLoc (Ident "dataTypeOf") [PWildCard] Nothing
                      (UnGuardedRhs (mkIdent $ mkDTName n)) bdecls],
-    mkInsDecl (map mkGfoldl vcs),
-    mkInsDecl $ mkGunfold vcs] ++ ((mkDataCast . length) tvs)
+    mkInFun (map mkGfoldl vcs),
+    mkInFun $ mkGunfold vcs] ++ ((mkDataCast . length) tvs)
     )
 
 -- TODO: Verify that kind information is used correctly this way
@@ -96,10 +97,10 @@ mkDataCast 2 = mkDCID "dataCast2" "gcast2"
 mkDataCast _ = []
 
 mkDCID :: String -> String -> [InstDecl]
-mkDCID lhs rhs = [mkInsDecl [mkMatch lhs [mkPIdent "f"] (App (mkIdent rhs) (mkIdent "f"))]]
+mkDCID lhs rhs = [mkInFun [mkMatch lhs [mkPIdent "f"] (App (mkIdent rhs) (mkIdent "f"))]]
 
-mkInsDecl :: [Match] -> InstDecl
-mkInsDecl = InsDecl . FunBind
+mkInFun :: [Match] -> InstDecl
+mkInFun = InsDecl . FunBind
 
 mkGunfold :: [VCInfo] -> [Match]
 mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
