@@ -118,8 +118,6 @@ mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
 
 -- Generic
-mkMatch :: String -> [Pat] -> Exp -> Match
-mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing (UnGuardedRhs rhs) bdecls
 
 buildProd :: Int -> Exp
 buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)

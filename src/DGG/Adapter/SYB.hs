@@ -12,7 +12,8 @@ importsSYB :: [ImportDecl]
 importsSYB = [mkImport "Data.Data", mkImport "Data.Generics"]
 
 makeSYB :: LibParser
-makeSYB tc@(TCInfo _ TyDataType _ _) = [mkTypeable tc, mkData tc]
+makeSYB tc@(TCInfo n TyDataType _ vcs) = [mkTypeable tc, mkData tc, mkDT tc] ++
+                                         map (mkConstr n) vcs
 
 -- Returns True when the Decl is of the right type and False otherwise. Several
 -- types return False at the moment, because they are not supported yet by this
@@ -27,59 +28,73 @@ isSuppSYB (GDataDecl _ _ _ _ _ _ _ _) = False
 isSuppSYB (DataFamDecl _ _ _ _ _)     = False
 isSuppSYB _                           = False
 
+-- TODO: No gunfold when quantification is used?
+-- TODO: Defined dataCast1  = gcast1 when perfect datatype? or when nested?
 mkTypeable :: TCInfo -> Decl
 mkTypeable (TCInfo n _ tvs vcs) = InstDecl srcLoc [] (mkUId "Typeable")
-    [foldTyApp id $ reverse $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
-    [InsDecl (FunBind [Match srcLoc (Ident "typeOf") [PWildCard] Nothing (
+    (mkClassInst n tvs)
+    [mkInsDecl [Match srcLoc (Ident "typeOf") [PWildCard] Nothing (
     UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon") (Lit
-    (String n)))) (List []))) bdecls])]
+    (String n)))) (List []))) bdecls]]
+
+mkClassReq :: String -> Asst
+mkClassReq n = ClassA (mkUId "Data") [mkTyVar n]
+
+mkClassInst :: String -> [TyVarBind] -> [Type]
+mkClassInst n tvs = [foldTyApp id $ reverse
+                  $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
+
+mkDTName :: String -> String
+mkDTName n = "dggDT_" ++ n
 
 mkData :: TCInfo -> Decl
 mkData (TCInfo n _ tvs vcs) = InstDecl srcLoc
-    [ClassA (mkUId "Data") [mkTyVar "a"]]
-    (mkUId "Data") [TyParen (TyApp (mkTyCon "MyTree") (mkTyVar "a"))] 
-    [InsDecl (FunBind [Match srcLoc (Ident "toConstr") [PApp (mkUId "MyLeaf")
-    []] Nothing (UnGuardedRhs (mkIdent "myLeafConstr")) (BDecls []),Match
-    srcLoc (Ident "toConstr") [PParen (PApp (mkUId "MyBinNode") [PWildCard,
-    PWildCard,PWildCard])] Nothing (UnGuardedRhs (mkIdent "myBinNConstr"))
-    bdecls,Match srcLoc (Ident "toConstr") [PParen (PApp (mkUId "MyRTree")
-    [PWildCard,PWildCard])] Nothing (UnGuardedRhs (mkIdent "myRTreeConstr"))
-    bdecls]),
-    InsDecl (FunBind [Match srcLoc (Ident "dataTypeOf") [PWildCard]
-    Nothing (UnGuardedRhs (mkIdent "myTreeDT")) bdecls]),
-    InsDecl (FunBind $ map mkGfoldl vcs)
-    {-
-    [Match srcLoc (Ident "gfoldl") [mkPIdent "k", mkPIdent "z",PApp (mkUId
-    "MyLeaf") []] Nothing (UnGuardedRhs (App (mkIdent "z") (mkCon "MyLeaf")))
-    bdecls,
-    Match srcLoc (Ident "gfoldl") [mkPIdent "k", mkPIdent "z",PParen (
-    PApp (mkUId "MyBinNode") [mkPIdent "t1", mkPIdent "a", mkPIdent "t2"])]
-    Nothing (UnGuardedRhs (InfixApp (InfixApp (InfixApp (App (mkIdent "z")
-    (mkCon "MyBinNode")) (appInfix "k") (mkIdent "t1")) (appInfix "k") (mkIdent
-    "a")) (appInfix "k") (mkIdent "t2"))) bdecls,
-    Match srcLoc (Ident "gfoldl")
-    [mkPIdent "k", mkPIdent "z", PParen (PApp (mkUId "MyRTree") [mkPIdent "a",
-    mkPIdent "t"])] Nothing (UnGuardedRhs (InfixApp (InfixApp (App (mkIdent "z"
-    ) (mkCon "MyRTree")) (appInfix "k") (mkIdent "a")) (appInfix "k") (mkIdent
-    "t"))) bdecls])
-    -}
-    ,
-    InsDecl (FunBind [Match srcLoc (Ident "gunfold") [mkPIdent
-    "k", mkPIdent "z", mkPIdent "c"] Nothing (UnGuardedRhs (Case (App (mkIdent
-    "constrIndex") (mkIdent "c")) [Alt srcLoc (PLit (Int 1)) (UnGuardedAlt (App
-    (mkIdent "z") (mkCon "MyLeaf"))) bdecls,Alt srcLoc (PLit (Int 2)) (
-    UnGuardedAlt (App (mkIdent "k") (Paren (App (mkIdent "k") (Paren (App (
-    mkIdent "k") (Paren (App (mkIdent "z") (mkCon "MyBinNode"))))))))) (BDecls
-    []),Alt srcLoc (PLit (Int 3)) (UnGuardedAlt (Paren (App (mkIdent "k") (
-    Paren (App (mkIdent "k") (Paren (App (mkIdent "z") (mkCon "MyRTree"))))))))
-    bdecls,Alt srcLoc PWildCard (UnGuardedAlt (App (mkIdent "error") (Lit (
-    String "")))) (BDecls [])])) bdecls])]
+    (map mkClassReq $ genNames $ length tvs) (mkUId "Data") (mkClassInst n tvs)
+    [mkInsDecl (map mkToConstr vcs),
+    mkInsDecl [Match srcLoc (Ident "dataTypeOf") [PWildCard] Nothing
+                     (UnGuardedRhs (mkIdent $ mkDTName n)) bdecls],
+    mkInsDecl (map mkGfoldl vcs),
+    mkInsDecl $ mkGunfold vcs]
+
+mkInsDecl :: [Match] -> InstDecl
+mkInsDecl = InsDecl . FunBind
+
+mkGunfold vcs = [Match srcLoc (Ident "gunfold")
+    [mkPIdent "k", mkPIdent "z", mkPIdent "c"] Nothing
+    (UnGuardedRhs (Case (App (mkIdent "constrIndex") (mkIdent "c"))
+    ((map mkGunfoldAlt $ zip [1..] vcs) ++ [Alt srcLoc PWildCard (UnGuardedAlt
+     (App (mkIdent "error") (Lit (String "gunfold: no match for ctor index"))))
+      bdecls])
+    )) bdecls]
+
+mkGunfoldAlt :: (Int, VCInfo) -> Alt
+mkGunfoldAlt (i, (VCInfo n a _ _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
+    ) (UnGuardedAlt (foldApp id ((App (mkIdent "z") (mkCon n)) :
+        (replicate a $ mkIdent "k")))) bdecls
+
+mkToConstr :: VCInfo -> Match
+mkToConstr (VCInfo n a _ _ _ _ _) = mkMatch "toConstr" [PApp (mkUId
+    n) (replicate a PWildCard)] (mkIdent $ mkConstrName n)
 
 mkGfoldl :: VCInfo -> Match
-mkGfoldl (VCInfo n a _ _ _ _ _) = Match srcLoc (Ident "gfoldl")
-    [mkPIdent "k", mkPIdent "z", PApp (mkUId n) (map mkPIdent $ genNames a)]
-    Nothing (UnGuardedRhs (foldInApp (appInfix "k") id $ reverse $
-    App (mkIdent "z") (mkCon n) : (map mkIdent $ genNames a))) bdecls
+mkGfoldl (VCInfo n a _ _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
+    PApp (mkUId n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
+    reverse $ App (mkIdent "z") (mkCon n) : (map mkIdent $ genNames a))
+
+mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
+    (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String n))) (List
+    (map (mkIdent . mkConstrName . conName) vcs)))) bdecls
+
+mkConstrName :: String -> String
+mkConstrName n = "dggConstr_" ++ n
+
+mkConstr tcn (VCInfo n _ _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
+    Nothing (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
+    (mkIdent $ mkDTName tcn)) (Lit (String n)))
+    (List [])
+--    (List [Lit (String "lTree"),Lit (String "bVal"),Lit (String "rTree")]) TODO: Record names
+    ) (Con (UnQual(Ident "Prefix"))))) bdecls -- TODO: Fixity
+
 
 {-
 DataDecl srcLoc DataType [] (Ident "MyTree") [UnkindedVar (Ident "a")] [
