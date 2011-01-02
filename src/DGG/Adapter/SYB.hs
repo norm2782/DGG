@@ -1,15 +1,24 @@
 module DGG.Adapter.SYB (
-      makeSYB
-    , isSuppSYB
+      deriveSYB
     , importsSYB
+    , isSuppSYB
+    , makeSYB
     ) where
 
-import DGG.Data
+import Data.Derive.Internal.Derivation
 import DGG.Adapter
-import Language.Haskell.Exts.Syntax
+import DGG.Data
+import DGG.Parser
+import Language.Haskell hiding (genNames)
 
 importsSYB :: [ImportDecl]
 importsSYB = [mkImport "Data.Data", mkImport "Data.Generics"]
+
+deriveSYB :: Derivation
+deriveSYB = derivationCustom "DGG.Adapter.SYB.Derivation" mkFullDecl
+
+mkFullDecl :: FullDataDecl -> Either String [Decl]
+mkFullDecl (_, decl) = Right $ (makeSYB . mkTCI) decl
 
 makeSYB :: LibParser
 makeSYB tc@(TCInfo n TyDataType _ vcs) = [mkTypeable tc, mkData tc, mkDT tc] ++
