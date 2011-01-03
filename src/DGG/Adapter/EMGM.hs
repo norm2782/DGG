@@ -120,19 +120,13 @@ mkPatSum s n = pApp (name s) [mkToRs n]
 -- Generic
 
 buildProd :: Int -> Exp
-buildProd n = foldInApp expProd mkIdent $ reverse (genNames n)
-
-expProd :: QOp
-expProd = (QConOp . unQualSym) ":*:"
+buildProd n = foldInApp ((QConOp . unQualSym) ":*:") mkIdent $ reverse (genNames n)
 
 buildPProd :: Int -> Pat
 buildPProd rs = buildInPApp $ reverse (genNames rs)
 
 buildInPApp :: [String] -> Pat
-buildInPApp = foldPInApp expPProd mkPIdent
-
-expPProd :: QName
-expPProd = unQualSym ":*:"
+buildInPApp = foldPInApp (unQualSym ":*:") mkPIdent
 
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> VCInfo -> a)
    -> Int -> Int -> VCInfo -> a
@@ -141,7 +135,6 @@ ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = mks "R" a
     | i == cnt                    = mks "L" a
     | otherwise                   = ow cnt nc vci
-
 
 mkGenG  = ClassA (mkUId "Generic")  [mkTyVar "g"]
 mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
@@ -161,7 +154,6 @@ mkBiFRep2Name n = "dggBiFRep2_" ++ n
 
 mkFRep3Name :: String -> String
 mkFRep3Name n = "dggFRep3_" ++ n
-
 
 fnApp   = (QVarOp . unQualSym) "$"
 fnRProd = appInfix "rprod"
