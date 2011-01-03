@@ -41,12 +41,11 @@ data ConType = PrefixType
 
 data TCVar = TCVar { tcvName :: String
                    , tcvKind :: Maybe Kind }
-           deriving Show
+           deriving (Show)
 
 data VCVar = VCVar { vcvRec   :: Maybe String
-                   , vcvBType :: BangType
-                   , vcvKind  :: Maybe Kind }
-           deriving Show
+                   , vcvBType :: Type }
+           deriving (Show)
 
 -- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo { tcName :: String

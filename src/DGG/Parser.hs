@@ -29,8 +29,9 @@ parseTyVarBind = foldr parseBind []
 
 parseBind :: TyVarBind -> [TCVar] -> [TCVar]
 parseBind (KindedVar n k) ts = TCVar (fromName n) (Just k) : ts
-parseBind (UnkindedVar n) ts = TCVar (fromName n) Nothing : ts
+parseBind (UnkindedVar n) ts = TCVar (fromName n) Nothing  : ts
 
+-- TODO: Support for infix operators and support for assiciativity.
 mkVCI :: (Int, QualConDecl) -> VCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
     VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
@@ -40,23 +41,21 @@ mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
     VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
 
 fromRec :: [([Name], BangType)] -> [(String, BangType)]
-fromRec []     = []
-fromRec (x:xs) = fromNBT x ++ fromRec xs -- TODO: Horribly inefficient!
+fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!
 
 fromNBT :: ([Name], BangType) -> [(String, BangType)]
 fromNBT ([], _)      = []
 fromNBT ((x:xs), bt) = (fromName x, bt) : fromNBT (xs, bt)
 
 mkRec :: (String, BangType) -> VCVar
-mkRec (_, BangedTy _)       = error "Not supported yet"
-mkRec (_, UnpackedTy _)     = error "Not supported yet"
-mkRec (n, r@(UnBangedTy t)) = VCVar (Just n) r Nothing -- TODO: Kind info?
+mkRec (n, BangedTy t)   = VCVar (Just n) t
+mkRec (n, UnpackedTy t) = VCVar (Just n) t
+mkRec (n, UnBangedTy t) = VCVar (Just n) t
 
--- TODO: Lots
 mkBTRec :: BangType -> VCVar
-mkBTRec (BangedTy _)     = error "Not supported yet"
-mkBTRec r@(UnBangedTy t) = VCVar Nothing r Nothing 
-mkBTRec (UnpackedTy _)   = error "Not supported yet"
+mkBTRec (BangedTy t)   = VCVar Nothing t
+mkBTRec (UnBangedTy t) = VCVar Nothing t
+mkBTRec (UnpackedTy t) = VCVar Nothing t
 
 fromName :: Name -> String
 fromName (Ident n)  = n
