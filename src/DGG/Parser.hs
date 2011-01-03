@@ -20,17 +20,24 @@ mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing i
                        $ concat $ map (p . mkTCI) xs
 
 mkTCI :: Decl -> TCInfo
-mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo (fromName n) TyDataType tv $
-                                          map mkVCI $ zip [0..] ds
+mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo (fromName n) TyDataType
+    (parseTyVarBind tv) $ map mkVCI $ zip [0..] ds
 mkTCI _ = error "Only regular datatypes are supported at this moment."
+
+parseTyVarBind :: [TyVarBind] -> [TVar]
+parseTyVarBind = foldr parseBind []
+
+parseBind :: TyVarBind -> [TVar] -> [TVar]
+parseBind (KindedVar n k) ts = TVar (fromName n) (Just k) : ts
+parseBind (UnkindedVar n) ts = TVar (fromName n) Nothing : ts
 
 mkVCI :: (Int, QualConDecl) -> VCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc tvs $ map mkRec bts 
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec bts 
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    VCInfo (fromName n) 2 i Nonfix LeftAssoc tvs $ map mkRec [btl, btr]
+    VCInfo (fromName n) 2 i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc tvs $ map mkRec $ map snd bts -- TODO: Somehow capture record information
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec $ map snd bts -- TODO: Somehow capture record information
 
 mkRec :: BangType -> Record
 mkRec (BangedTy _)     = error "Not supported yet"

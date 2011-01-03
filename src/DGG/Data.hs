@@ -45,6 +45,10 @@ data ConType = PrefixType
              | InfixType
              deriving (Show)
 
+data TVar = TVar { tcvName :: String
+                 , tcvKind :: Maybe Kind }
+          deriving Show
+
 -- TODO: Typename should either be something like "a", or it should be a
 -- reference to some primitive or another datatype. Just a string won't do.
 data Record = Record { recDec    :: Maybe Deconstructor
@@ -56,7 +60,7 @@ data Record = Record { recDec    :: Maybe Deconstructor
 -- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo { tcName :: TypeName
                      , tcType :: TypeType
-                     , tcVars :: [TyVarBind]
+                     , tcVars :: [TVar]
                      , tcVCs  :: [VCInfo]
                      }
             deriving (Show)
@@ -66,7 +70,7 @@ data VCInfo = VCInfo { conName    :: ConName
                      , conIndex   :: ConIndex
                      , conFixity  :: ConFixity
                      , conAssoc   :: Associativity
-                     , conVars    :: [TyVarBind]
+                     , conVars    :: [TVar]
                      , conRecords :: [Record]
                      }
             deriving (Show)

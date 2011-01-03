@@ -73,7 +73,7 @@ mkClassInstN i n = [foldTyApp id $ reverse
 mkClassReq :: String -> Asst
 mkClassReq n = ClassA (mkUId "Data") [mkTyVar n]
 
-mkClassInst :: String -> [TyVarBind] -> [Type]
+mkClassInst :: String -> [TVar] -> [Type]
 mkClassInst n tvs = [foldTyApp id $ reverse
                   $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
 
