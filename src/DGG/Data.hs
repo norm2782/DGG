@@ -34,11 +34,6 @@ data Associativity = LeftAssoc
                    | RightAssoc
                    deriving (Show)
 
-data ConType = PrefixType
-             | RecordType
-             | InfixType
-             deriving (Show)
-
 data TCVar = TCVar { tcvName :: String
                    , tcvKind :: Maybe Kind }
            deriving (Show)
