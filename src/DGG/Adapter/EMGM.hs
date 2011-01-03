@@ -79,7 +79,7 @@ mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
 --
 -- From
 bdeclFrom :: Int -> VCInfo -> Match
-bdeclFrom cnt vci@(VCInfo n a _ _ _ _ _) = mkMatch fromFunName [pApp (name n)
+bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkMatch fromFunName [pApp (name n)
                                                    (map mkPIdent (genNames a))]
                                                    (fromEP 0 cnt vci)
 
@@ -111,8 +111,8 @@ mkToRs 0 = pApp (name unitType) []
 mkToRs i = buildPProd i
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n 0 _ _ _ _ _) = mkCon n
-mkToRhs (VCInfo n a _ _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
+mkToRhs (VCInfo n 0 _ _ _ _) = mkCon n
+mkToRhs (VCInfo n a _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
 
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
@@ -136,8 +136,8 @@ expPProd = unQualSym ":*:"
 
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> VCInfo -> a)
    -> Int -> Int -> VCInfo -> a
-ep mkr mks ow _   1  vci = mkr $ conArity vci
-ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _ _)
+ep mkr mks ow _   1  vci = mkr $ vcArity vci
+ep mkr mks ow cnt nc vci@(VCInfo _ a i _ _ _)
     | i == cnt + 1 && i == nc - 1 = mks "R" a
     | i == cnt                    = mks "L" a
     | otherwise                   = ow cnt nc vci
@@ -230,8 +230,8 @@ buildRepProd :: Int -> Exp
 buildRepProd n = foldInApp fnRProd mkIdent $ replicate n "rep"
 
 mkSProd :: VCInfo -> Exp
-mkSProd (VCInfo n 0 _ _ _ _ _) = mkSProd' n 0 appRep
-mkSProd (VCInfo n a _ _ _ _ _) = mkSProd' n a (buildRepProd a) 
+mkSProd (VCInfo n 0 _ _ _ _) = mkSProd' n 0 appRep
+mkSProd (VCInfo n a _ _ _ _) = mkSProd' n a (buildRepProd a) 
 
 mkSProd' :: String -> Int -> Exp -> Exp
 mkSProd' n a r = foldApp id $ reverse [appCon, mkConDescr n (toInteger a), r]

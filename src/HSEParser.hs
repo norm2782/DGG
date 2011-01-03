@@ -6,7 +6,8 @@ import DGG.Data
 --testFile = "testmodule.hs"
 --testFile = "EMGMTestData.hs"
 --testFile = "Reps.hs"
-testFile = "SYBTest.hs"
+--testFile = "SYBTest.hs"
+testFile = "foo.hs"
 
 main =
     do pr <- parseFile testFile

@@ -18,12 +18,6 @@ import Language.Haskell.Exts.Syntax
 type LibParser  = TCInfo -> [Decl]
 type LibSupport = Decl -> Bool
 
-type Arity    = Int
-type TypeName = String
-type ConName  = String
-type ConIndex = Int
-type Deconstructor = String
-
 data TypeType = TyDataType
               | TyNewType
               | TySynonym
@@ -45,32 +39,28 @@ data ConType = PrefixType
              | InfixType
              deriving (Show)
 
-data TVar = TVar { tcvName :: String
-                 , tcvKind :: Maybe Kind }
-          deriving Show
+data TCVar = TCVar { tcvName :: String
+                   , tcvKind :: Maybe Kind }
+           deriving Show
 
--- TODO: Typename should either be something like "a", or it should be a
--- reference to some primitive or another datatype. Just a string won't do.
-data Record = Record { recDec    :: Maybe Deconstructor
-                     , recTyname :: TypeName
-                     , recBType  :: BangType
-                     }
-            deriving (Show)
+data VCVar = VCVar { vcvRec   :: Maybe String
+                   , vcvBType :: BangType
+                   , vcvKind  :: Maybe Kind }
+           deriving Show
 
 -- TODO: Do we need tycon arity? or just distill that from list length?
-data TCInfo = TCInfo { tcName :: TypeName
+data TCInfo = TCInfo { tcName :: String
                      , tcType :: TypeType
-                     , tcVars :: [TVar]
+                     , tcVars :: [TCVar]
                      , tcVCs  :: [VCInfo]
                      }
             deriving (Show)
 
-data VCInfo = VCInfo { conName    :: ConName
-                     , conArity   :: Arity
-                     , conIndex   :: ConIndex
-                     , conFixity  :: ConFixity
-                     , conAssoc   :: Associativity
-                     , conVars    :: [TVar]
-                     , conRecords :: [Record]
+data VCInfo = VCInfo { vcName    :: String
+                     , vcArity   :: Int
+                     , vcIndex   :: Int
+                     , vcFixity  :: ConFixity
+                     , vcAssoc   :: Associativity
+                     , vcVars    :: [VCVar]
                      }
             deriving (Show)

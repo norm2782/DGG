@@ -24,25 +24,39 @@ mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo (fromName n) TyDataType
     (parseTyVarBind tv) $ map mkVCI $ zip [0..] ds
 mkTCI _ = error "Only regular datatypes are supported at this moment."
 
-parseTyVarBind :: [TyVarBind] -> [TVar]
+parseTyVarBind :: [TyVarBind] -> [TCVar]
 parseTyVarBind = foldr parseBind []
 
-parseBind :: TyVarBind -> [TVar] -> [TVar]
-parseBind (KindedVar n k) ts = TVar (fromName n) (Just k) : ts
-parseBind (UnkindedVar n) ts = TVar (fromName n) Nothing : ts
+parseBind :: TyVarBind -> [TCVar] -> [TCVar]
+parseBind (KindedVar n k) ts = TCVar (fromName n) (Just k) : ts
+parseBind (UnkindedVar n) ts = TCVar (fromName n) Nothing : ts
 
 mkVCI :: (Int, QualConDecl) -> VCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec bts 
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    VCInfo (fromName n) 2 i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec [btl, btr]
+    VCInfo (fromName n) 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc (parseTyVarBind tvs) $ map mkRec $ map snd bts -- TODO: Somehow capture record information
+    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
 
-mkRec :: BangType -> Record
-mkRec (BangedTy _)     = error "Not supported yet"
-mkRec r@(UnBangedTy _) = Record Nothing "someNam" r
-mkRec (UnpackedTy _)   = error "Not supported yet"
+fromRec :: [([Name], BangType)] -> [(String, BangType)]
+fromRec []     = []
+fromRec (x:xs) = fromNBT x ++ fromRec xs -- TODO: Horribly inefficient!
+
+fromNBT :: ([Name], BangType) -> [(String, BangType)]
+fromNBT ([], _)      = []
+fromNBT ((x:xs), bt) = (fromName x, bt) : fromNBT (xs, bt)
+
+mkRec :: (String, BangType) -> VCVar
+mkRec (_, BangedTy _)       = error "Not supported yet"
+mkRec (_, UnpackedTy _)     = error "Not supported yet"
+mkRec (n, r@(UnBangedTy t)) = VCVar (Just n) r Nothing -- TODO: Kind info?
+
+-- TODO: Lots
+mkBTRec :: BangType -> VCVar
+mkBTRec (BangedTy _)     = error "Not supported yet"
+mkBTRec r@(UnBangedTy t) = VCVar Nothing r Nothing 
+mkBTRec (UnpackedTy _)   = error "Not supported yet"
 
 fromName :: Name -> String
 fromName (Ident n)  = n

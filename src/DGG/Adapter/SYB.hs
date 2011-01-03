@@ -73,7 +73,7 @@ mkClassInstN i n = [foldTyApp id $ reverse
 mkClassReq :: String -> Asst
 mkClassReq n = ClassA (mkUId "Data") [mkTyVar n]
 
-mkClassInst :: String -> [TVar] -> [Type]
+mkClassInst :: String -> [TCVar] -> [Type]
 mkClassInst n tvs = [foldTyApp id $ reverse
                   $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
 
@@ -111,7 +111,7 @@ mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
     )]
 
 mkGunfoldAlt :: (Int, VCInfo) -> Alt
-mkGunfoldAlt (i, (VCInfo n a _ _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
+mkGunfoldAlt (i, (VCInfo n a _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
     ) (UnGuardedAlt (mkGunfoldKs n a)) bdecls
 
 mkGunfoldKs :: String -> Int -> Exp
@@ -119,22 +119,22 @@ mkGunfoldKs n 0 = App (mkIdent "z") (mkCon n)
 mkGunfoldKs n a = Paren (App (mkIdent "k") (mkGunfoldKs n $ a - 1))
 
 mkToConstr :: VCInfo -> Match
-mkToConstr (VCInfo n a _ _ _ _ _) = mkMatch "toConstr" [PApp (mkUId
+mkToConstr (VCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (mkUId
     n) (replicate a PWildCard)] (mkIdent $ mkConstrName n)
 
 mkGfoldl :: VCInfo -> Match
-mkGfoldl (VCInfo n a _ _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
+mkGfoldl (VCInfo n a _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
     PApp (mkUId n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
     reverse $ App (mkIdent "z") (mkCon n) : (map mkIdent $ genNames a))
 
 mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
     (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String n))) (List
-    (map (mkIdent . mkConstrName . conName) vcs)))) bdecls
+    (map (mkIdent . mkConstrName . vcName) vcs)))) bdecls
 
 mkConstrName :: String -> String
 mkConstrName n = "dggConstr_" ++ n
 
-mkConstr tcn (VCInfo n _ _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
+mkConstr tcn (VCInfo n _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
     Nothing (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
     (mkIdent $ mkDTName tcn)) (Lit (String n)))
     (List [])
