@@ -27,19 +27,21 @@ data DGGArgs = DGGArgs { adapter  :: String
 
 dgg :: DGGArgs
 dgg = DGGArgs { adapter  = def &= help "Adapter name. E.g.: EMGM"
-              , input    = def &= help "Input file"
+              , input    = def &= typFile &= help "Input file"
               , datatype = def &= help "Specify datatype for which to derive. Generates for all datatypes if left blank."
-              , output   = def &= help "Output file. E.g.: Instances.hs"
+              , output   = def &= typFile &= help "Output file. E.g.: Instances.hs"
               }
               &= summary "DGG: Datatype Generic Generator v0.1-dev"
+              &= program "dgg"
+              
 
 main :: IO ()
 main = do
     args <- cmdArgs dgg
     -- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?
---    if (null $ adapter dgg) || (null $ input dgg)
---        then error "Specify at least an adapter and input file."
---        else return ()
+    if (null $ adapter args) || (null $ input args)
+        then error "Specify at least an adapter and an input file."
+        else return ()
     pr   <- parseFile (input args)
     adap <- return $ adapters ! (map toLower $ adapter args)
     code <- return $ genCode pr (makeFn adap) (isSuppFn adap) (importsFn adap)
