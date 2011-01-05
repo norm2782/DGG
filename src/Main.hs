@@ -14,6 +14,10 @@ import DGG.Parser
 import Language.Haskell.Exts
 import System.Console.CmdArgs
 
+data Adapter = Adapter { makeFn    :: LibParser
+                       , isSuppFn  :: (Decl -> Bool)
+                       , importsFn :: [ImportDecl] }
+
 data DGGArgs = DGGArgs { adapter  :: String
                        , input    :: String
                        , datatype :: String
@@ -37,8 +41,8 @@ main = do
 --        then error "Specify at least an adapter and input file."
 --        else return ()
     pr   <- parseFile (input args)
-    adap <- return (map toLower $ adapter args)
-    code <- return $ genCode pr (adapters ! adap) (supports ! adap) (imports ! adap)
+    adap <- return $ adapters ! (map toLower $ adapter args)
+    code <- return $ genCode pr (makeFn adap) (isSuppFn adap) (importsFn adap)
     if hasFileOutput args
         then writeFile (output args) code
         else putStrLn code
@@ -46,20 +50,7 @@ main = do
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput = not . null . output
 
--- TODO: This is all hardcoded now. Perhaps this could be done more nicely?
--- Do these three maps need to be combined using a tuple ?
-adapters :: Map String LibParser
-adapters = fromList [ ("emgm",     makeEMGM)
-                    , ("syb",      makeSYB)
-                    , ("multirec", makeMultiRec) ]
-
-supports :: Map String (Decl -> Bool)
-supports = fromList [ ("emgm",     isSuppEMGM)
-                    , ("syb",      isSuppSYB)
-                    , ("multirec", isSuppMultiRec) ]
-
-imports :: Map String [ImportDecl]
-imports = fromList [ ("emgm",     importsEMGM)
-                   , ("syb",      importsSYB)
-                   , ("multirec", importsMultiRec) ]
-
+adapters :: Map String Adapter
+adapters = fromList [ ("emgm",     Adapter makeEMGM     isSuppEMGM     importsEMGM)
+                    , ("syb",      Adapter makeSYB      isSuppSYB      importsSYB)
+                    , ("multirec", Adapter makeMultiRec isSuppMultiRec importsMultiRec) ]
