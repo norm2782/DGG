@@ -16,7 +16,7 @@ deriveEMGM = derivationCustom "DGG.Adapter.EMGM.Derivation" mkFullDecl
 mkFullDecl :: FullDataDecl -> Either String [Decl]
 mkFullDecl (_, decl) = Right $ (makeEMGM . mkTCI) decl
 
-makeEMGM :: LibParser
+makeEMGM :: CodeGenerator
 makeEMGM tc@(TCInfo _ TyDataType _ _) = (createDTEP tc) : (mkDTReps tc)
 makeEMGM tc@(TCInfo _ TyNewType  _ _) = createNTEP   tc
 makeEMGM tc@(TCInfo _ TySynonym  _ _) = createSynEP  tc

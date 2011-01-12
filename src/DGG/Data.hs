@@ -15,8 +15,8 @@ import Language.Haskell.Exts.Syntax
 -- Newtypes: DataDecl NewType
 --
 
-type LibParser  = TCInfo -> [Decl]
-type LibSupport = Decl -> Bool
+type CodeGenerator = TCInfo -> [Decl]
+type LibSupport    = Decl -> Bool
 
 data TypeType = TyDataType
               | TyNewType

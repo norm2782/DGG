@@ -16,7 +16,7 @@ deriveSYB = derivationCustom "DGG.Adapter.SYB.Derivation" mkFullDecl
 mkFullDecl :: FullDataDecl -> Either String [Decl]
 mkFullDecl (_, decl) = Right $ (makeSYB . mkTCI) decl
 
-makeSYB :: LibParser
+makeSYB :: CodeGenerator
 makeSYB tc@(TCInfo n TyDataType tvs vcs) = (mkTypeableNs tc) ++
                                            [mkData tc, mkDT tc] ++
                                            map (mkConstr n) vcs

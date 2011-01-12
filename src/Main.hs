@@ -12,7 +12,7 @@ import DGG.Adapter.MultiRec
 import DGG.Adapter.SYB
 import System.Console.CmdArgs
 
-data Adapter = Adapter { makeFn    :: LibParser
+data Adapter = Adapter { makeFn    :: CodeGenerator
                        , isSuppFn  :: (Decl -> Bool)
                        , importsFn :: [ImportDecl] }
 
@@ -49,12 +49,12 @@ main = do
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput = not . null . output
 
-genCode :: ParseResult Module -> LibParser -> LibSupport -> [ImportDecl] -> String
+genCode :: ParseResult Module -> CodeGenerator -> LibSupport -> [ImportDecl] -> String
 genCode (ParseFailed l m) _ _ _  = error $ "Failed to parse module."
                                         ++ "Error on line " ++ show l ++ ": " ++ m
 genCode (ParseOk m)       p s is = prettyPrint (mkModule p is $ listify s m)
 
-mkModule :: LibParser -> [ImportDecl] -> [Decl] -> Module
+mkModule :: CodeGenerator -> [ImportDecl] -> [Decl] -> Module
 mkModule _ _  [] = error "No compatible datatypes found."
 mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing is
                        $ concat $ map (p . mkTCI) xs

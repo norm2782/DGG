@@ -9,7 +9,7 @@ import DGG.AdapterAbstract
 importsMultiRec :: [ImportDecl]
 importsMultiRec = [mkImport "Generics.MultiRec"]
 
-makeMultiRec :: LibParser
+makeMultiRec :: CodeGenerator
 makeMultiRec = undefined
 
 -- Returns True when the Decl is of the right type and False otherwise. Several
