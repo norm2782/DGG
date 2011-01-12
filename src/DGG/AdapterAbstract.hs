@@ -1,7 +1,17 @@
-module DGG.Adapter where
+module DGG.AdapterAbstract (
+      srcLoc, mkStrCon, mkNCon, mkIdent, mkUId, mkPIdent, genNames, unQualSym
+    , mkImport, appInfix, bdecls, mkTyCon, mkTyVar, foldInApp, foldPInApp
+    , foldXInApp, foldApp, foldTyApp, foldXApp, mkMatch, fromName, mkStrLit
+    , module Data.Derive.Internal.Derivation
+    , module DGG.Data
+    , module DGG.Parser
+    , module Language.Haskell
+    ) where
 
-import Language.Haskell.Exts
-import Language.Haskell.Exts.Syntax
+import Data.Derive.Internal.Derivation
+import DGG.Data
+import DGG.Parser
+import Language.Haskell hiding (genNames)
 
 srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0

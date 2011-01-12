@@ -5,11 +5,7 @@ module DGG.Adapter.EMGM (
     , importsEMGM
     ) where
 
-import Data.Derive.Internal.Derivation
-import DGG.Adapter
-import DGG.Data
-import DGG.Parser
-import Language.Haskell hiding (genNames)
+import DGG.AdapterAbstract
 
 importsEMGM :: [ImportDecl]
 importsEMGM = [mkImport "Generics.EMGM"]

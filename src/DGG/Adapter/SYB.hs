@@ -5,11 +5,7 @@ module DGG.Adapter.SYB (
     , makeSYB
     ) where
 
-import Data.Derive.Internal.Derivation
-import DGG.Adapter
-import DGG.Data
-import DGG.Parser
-import Language.Haskell hiding (genNames)
+import DGG.AdapterAbstract
 
 importsSYB :: [ImportDecl]
 importsSYB = [mkImport "Data.Data", mkImport "Data.Generics"]

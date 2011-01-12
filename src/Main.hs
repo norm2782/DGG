@@ -6,13 +6,10 @@ import Data.Char (toLower)
 import Data.Generics
 import Data.Map (fromList, (!), Map)
 import Data.Typeable
-import DGG.Adapter
+import DGG.AdapterAbstract
 import DGG.Adapter.EMGM
 import DGG.Adapter.MultiRec
 import DGG.Adapter.SYB
-import DGG.Data
-import DGG.Parser
-import Language.Haskell.Exts
 import System.Console.CmdArgs
 
 data Adapter = Adapter { makeFn    :: LibParser

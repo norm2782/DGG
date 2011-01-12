@@ -2,7 +2,6 @@ module DGG.Parser (
       mkTCI
     ) where
 
-import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts
 

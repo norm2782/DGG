@@ -4,9 +4,7 @@ module DGG.Adapter.MultiRec (
     , importsMultiRec
     ) where
 
-import DGG.Adapter
-import DGG.Data
-import Language.Haskell.Exts.Syntax
+import DGG.AdapterAbstract
 
 importsMultiRec :: [ImportDecl]
 importsMultiRec = [mkImport "Generics.MultiRec"]
