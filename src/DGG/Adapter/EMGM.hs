@@ -46,7 +46,8 @@ mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
                           , mkBiFRep2Fn, mkBiFRep2Inst
                           , mkFRep3Fn,   mkFRep3Inst ] -}
 
-mkEPName n = "dggEP_" ++ n
+mkEPName :: Name -> String
+mkEPName n = "dggEP_" ++ (fromName n)
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType _ vcis) =
@@ -79,7 +80,7 @@ mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
 --
 -- From
 bdeclFrom :: Int -> VCInfo -> Match
-bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkMatch fromFunName [pApp (name n)
+bdeclFrom cnt vci@(VCInfo n a _ _ _ _) = mkMatch fromFunName [pApp n
                                                    (map mkPIdent (genNames a))]
                                                    (fromEP 0 cnt vci)
 
@@ -87,14 +88,14 @@ fromEP :: Int -> Int -> VCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
 
 owFrom :: Int -> Int -> VCInfo -> Exp
-owFrom cnt nc vci = App (mkCon "R") (fromEP (cnt + 1) nc vci)
+owFrom cnt nc vci = App (mkStrCon "R") (fromEP (cnt + 1) nc vci)
 
 mkFromRs :: Int -> Exp
-mkFromRs 0  = mkCon unitType
+mkFromRs 0  = mkStrCon unitType
 mkFromRs rs = buildProd rs
 
 mkExpSum :: String -> Int -> Exp
-mkExpSum s n = (App . mkCon) s $ mkFromRs n
+mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
 
 -- To
 bdeclTo :: Int -> VCInfo -> Match
@@ -111,8 +112,8 @@ mkToRs 0 = pApp (name unitType) []
 mkToRs i = buildPProd i
 
 mkToRhs :: VCInfo -> Exp
-mkToRhs (VCInfo n 0 _ _ _ _) = mkCon n
-mkToRhs (VCInfo n a _ _ _ _) = appFun (mkCon n) (map mkIdent $ genNames a)
+mkToRhs (VCInfo n 0 _ _ _ _) = mkNCon n
+mkToRhs (VCInfo n a _ _ _ _) = appFun (mkNCon n) (map mkIdent $ genNames a)
 
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
@@ -140,20 +141,20 @@ mkGenG  = ClassA (mkUId "Generic")  [mkTyVar "g"]
 mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
 mkGenG3 = ClassA (mkUId "Generic3") [mkTyVar "g"]
 
-mkRepName :: String -> String
-mkRepName n = "dggRep_" ++ n
+mkRepName :: Name -> String
+mkRepName n = "dggRep_" ++ fromName n
 
-mkFRepName :: String -> String
-mkFRepName n = "dggFRep_" ++ n
+mkFRepName :: Name -> String
+mkFRepName n = "dggFRep_" ++ fromName n
 
-mkFRep2Name :: String -> String
-mkFRep2Name n = "dggFRep2_" ++ n
+mkFRep2Name :: Name -> String
+mkFRep2Name n = "dggFRep2_" ++ fromName n
 
-mkBiFRep2Name :: String -> String
-mkBiFRep2Name n = "dggBiFRep2_" ++ n
+mkBiFRep2Name :: Name -> String
+mkBiFRep2Name n = "dggBiFRep2_" ++ fromName n
 
-mkFRep3Name :: String -> String
-mkFRep3Name n = "dggFRep3_" ++ n
+mkFRep3Name :: Name -> String
+mkFRep3Name n = "dggFRep3_" ++ fromName n
 
 fnApp   = (QVarOp . unQualSym) "$"
 fnRProd = appInfix "rprod"
@@ -225,14 +226,14 @@ mkSProd :: VCInfo -> Exp
 mkSProd (VCInfo n 0 _ _ _ _) = mkSProd' n 0 appRep
 mkSProd (VCInfo n a _ _ _ _) = mkSProd' n a (buildRepProd a) 
 
-mkSProd' :: String -> Int -> Exp -> Exp
+mkSProd' :: Name -> Int -> Exp -> Exp
 mkSProd' n a r = foldApp id $ reverse [appCon, mkConDescr n (toInteger a), r]
 
 -- TODO: Make constructor information dynamic
-mkConDescr :: String -> Integer -> Exp
+mkConDescr :: Name -> Integer -> Exp
 mkConDescr n a = Paren (App (App (App (App (Con
-        (mkUId "ConDescr")) (Lit (String n))) (Lit (Int a)))
-        (mkCon "False")) (mkCon "Prefix"))
+        (mkUId "ConDescr")) (mkStrLit n)) (Lit (Int a)))
+        (mkStrCon "False")) (mkStrCon "Prefix"))
 
 mkRepInst :: TCInfo -> Decl
 mkRepInst (TCInfo tn _ tcv vcis) = InstDecl srcLoc

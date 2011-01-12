@@ -34,23 +34,23 @@ data Associativity = LeftAssoc
                    | RightAssoc
                    deriving (Show)
 
-data TCVar = TCVar { tcvName :: String
+data TCVar = TCVar { tcvName :: Name
                    , tcvKind :: Maybe Kind }
            deriving (Show)
 
-data VCVar = VCVar { vcvRec   :: Maybe String
+data VCVar = VCVar { vcvRec   :: Maybe Name
                    , vcvBType :: Type }
            deriving (Show)
 
 -- TODO: Do we need tycon arity? or just distill that from list length?
-data TCInfo = TCInfo { tcName :: String
+data TCInfo = TCInfo { tcName :: Name 
                      , tcType :: TypeType
                      , tcVars :: [TCVar]
                      , tcVCs  :: [VCInfo]
                      }
             deriving (Show)
 
-data VCInfo = VCInfo { vcName    :: String
+data VCInfo = VCInfo { vcName    :: Name
                      , vcArity   :: Int
                      , vcIndex   :: Int
                      , vcFixity  :: ConFixity

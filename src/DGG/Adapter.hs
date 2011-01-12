@@ -6,8 +6,11 @@ import Language.Haskell.Exts.Syntax
 srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0
 
-mkCon :: String -> Exp
-mkCon = Con . mkUId
+mkStrCon :: String -> Exp
+mkStrCon = Con . mkUId
+
+mkNCon :: Name -> Exp
+mkNCon = Con . UnQual
 
 mkIdent :: String -> Exp
 mkIdent = Var . mkUId 
@@ -37,8 +40,8 @@ appInfix = QVarOp . mkUId
 bdecls :: Binds
 bdecls = BDecls []
 
-mkTyCon :: String -> Type
-mkTyCon = TyCon . mkUId
+mkTyCon :: Name -> Type
+mkTyCon = TyCon . UnQual
 
 mkTyVar :: String -> Type
 mkTyVar = TyVar . Ident
@@ -67,3 +70,9 @@ foldXApp c mk (x:xs) = c (foldXApp c mk xs) (mk x)
 mkMatch :: String -> [Pat] -> Exp -> Match
 mkMatch n ps rhs = Match srcLoc (Ident n) ps Nothing (UnGuardedRhs rhs) bdecls
 
+fromName :: Name -> String
+fromName (Ident n)  = n
+fromName (Symbol n) = n
+
+mkStrLit :: Name -> Exp
+mkStrLit n = (Lit . String) $ fromName n

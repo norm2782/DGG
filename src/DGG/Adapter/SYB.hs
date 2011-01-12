@@ -55,30 +55,30 @@ mkTypeable :: TCInfo -> Decl
 mkTypeable (TCInfo n _ tvs _) = InstDecl srcLoc [] (mkUId "Typeable")
     (mkClassInst n tvs)
     [mkInFun [Match srcLoc (Ident "typeOf") [PWildCard] Nothing (
-    UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon") (Lit
-    (String n)))) (List []))) bdecls]]
+    UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon")
+    (mkStrLit n))) (List []))) bdecls]]
 
 mkTypeableN :: TCInfo -> Decl
 mkTypeableN (TCInfo n _ tvs _) = InstDecl srcLoc [] (mkUId $ "Typeable" ++ show lt)
     (mkClassInstN (lt - 1) n)
     [mkInFun [Match srcLoc (Ident $ "typeOf" ++ show lt) [PWildCard] Nothing (
-    UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon") (Lit
-    (String n)))) (List []))) bdecls]]
+    UnGuardedRhs (App (App (mkIdent "mkTyConApp") (App (mkIdent "mkTyCon")
+    (mkStrLit n))) (List []))) bdecls]]
     where lt = length tvs
 
-mkClassInstN :: Int -> String -> [Type]
+mkClassInstN :: Int -> Name -> [Type]
 mkClassInstN i n = [foldTyApp id $ reverse
                    $ (mkTyCon n) : (map mkTyVar $ genNames i)]
 
 mkClassReq :: String -> Asst
 mkClassReq n = ClassA (mkUId "Data") [mkTyVar n]
 
-mkClassInst :: String -> [TCVar] -> [Type]
+mkClassInst :: Name -> [TCVar] -> [Type]
 mkClassInst n tvs = [foldTyApp id $ reverse
                   $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
 
-mkDTName :: String -> String
-mkDTName n = "dggDT_" ++ n
+mkDTName :: Name -> String
+mkDTName n = "dggDT_" ++ fromName n
 
 mkData :: TCInfo -> Decl
 mkData (TCInfo n _ tvs vcs) = InstDecl srcLoc
@@ -114,30 +114,29 @@ mkGunfoldAlt :: (Int, VCInfo) -> Alt
 mkGunfoldAlt (i, (VCInfo n a _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
     ) (UnGuardedAlt (mkGunfoldKs n a)) bdecls
 
-mkGunfoldKs :: String -> Int -> Exp
-mkGunfoldKs n 0 = App (mkIdent "z") (mkCon n)
+mkGunfoldKs :: Name -> Int -> Exp
+mkGunfoldKs n 0 = App (mkIdent "z") (mkNCon n)
 mkGunfoldKs n a = Paren (App (mkIdent "k") (mkGunfoldKs n $ a - 1))
 
 mkToConstr :: VCInfo -> Match
-mkToConstr (VCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (mkUId
+mkToConstr (VCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (UnQual 
     n) (replicate a PWildCard)] (mkIdent $ mkConstrName n)
 
 mkGfoldl :: VCInfo -> Match
 mkGfoldl (VCInfo n a _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
-    PApp (mkUId n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
-    reverse $ App (mkIdent "z") (mkCon n) : (map mkIdent $ genNames a))
+    PApp (UnQual n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
+    reverse $ App (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
 
 mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
-    (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String n))) (List
+    (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String (fromName n)))) (List
     (map (mkIdent . mkConstrName . vcName) vcs)))) bdecls
 
-mkConstrName :: String -> String
-mkConstrName n = "dggConstr_" ++ n
+mkConstrName :: Name -> String
+mkConstrName n = "dggConstr_" ++ fromName n
 
 mkConstr tcn (VCInfo n _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
     Nothing (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
-    (mkIdent $ mkDTName tcn)) (Lit (String n)))
-    (List [])
+    (mkIdent $ mkDTName tcn)) (mkStrLit n)) (List [])
 --    (List [Lit (String "lTree"),Lit (String "bVal"),Lit (String "rTree")]) TODO: Record names
     ) (Con (UnQual(Ident "Prefix"))))) bdecls -- TODO: Fixity
 
