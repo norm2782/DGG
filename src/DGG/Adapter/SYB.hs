@@ -34,6 +34,19 @@ isSuppSYB (GDataDecl _ _ _ _ _ _ _ _) = False
 isSuppSYB (DataFamDecl _ _ _ _ _)     = False
 isSuppSYB _                           = False
 
+isSuppSYB' :: UnivSupp -> Bool
+isSuppSYB' Regular      = True
+isSuppSYB' HigherKinded = True
+isSuppSYB' Nested       = True
+isSuppSYB' NestedHigherKinded = False
+isSuppSYB' OtherH98     = True
+isSuppSYB' SubUniv      = False
+-- TODO: Verify truth values
+isSuppSYB' HigherRankCon = False
+isSuppSYB' ExistentialTypes = False
+isSuppSYB' SuppGADTs        = False
+
+
 -- TODO: No gunfold when quantification is used?
 
 -- TODO: For these next tgree we need more information about the kinds. The

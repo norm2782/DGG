@@ -35,6 +35,18 @@ isSuppEMGM (GDataDecl _ _ _ _ _ _ _ _) = False
 isSuppEMGM (DataFamDecl _ _ _ _ _)     = False
 isSuppEMGM _                           = False
 
+isSuppEMGM' :: UnivSupp -> Bool
+isSuppEMGM' Regular      = True
+isSuppEMGM' HigherKinded = True
+isSuppEMGM' Nested       = True
+isSuppEMGM' NestedHigherKinded = True
+isSuppEMGM' OtherH98     = True
+isSuppEMGM' SubUniv      = True
+-- TODO: Verify truth values
+isSuppEMGM' HigherRankCon = False
+isSuppEMGM' ExistentialTypes = False
+isSuppEMGM' SuppGADTs        = False
+
 mkDTReps :: TCInfo -> [Decl]
 mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
                           , mkFRepFn,    mkFRepInst

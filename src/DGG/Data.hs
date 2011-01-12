@@ -18,6 +18,17 @@ import Language.Haskell.Exts.Syntax
 type CodeGenerator = TCInfo -> [Decl]
 type LibSupport    = Decl -> Bool
 
+data UnivSupp = Regular
+              | HigherKinded
+              | Nested
+              | NestedHigherKinded
+              | OtherH98
+              | SubUniv
+              | HigherRankCon
+              | ExistentialTypes
+              | SuppGADTs
+              deriving (Show)
+
 data TypeType = TyDataType
               | TyNewType
               | TySynonym
@@ -50,6 +61,7 @@ data TCInfo = TCInfo { tcName :: Name
                      }
             deriving (Show)
 
+-- TODO: Remove Arity here and calculate that based on vcVars
 data VCInfo = VCInfo { vcName    :: Name
                      , vcArity   :: Int
                      , vcIndex   :: Int
