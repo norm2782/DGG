@@ -1,26 +1,13 @@
 module DGG.Parser (
-      genCode
-    , mkTCI
+      mkTCI
     ) where
 
-import Data.Generics
 import DGG.Adapter
 import DGG.Data
 import Language.Haskell.Exts
 
-genCode :: ParseResult Module -> LibParser -> LibSupport -> [ImportDecl] -> String
-genCode (ParseFailed l m) _ _ _  = error $ "Failed to parse module."
-                                        ++ "Error on line " ++ show l ++ ": " ++ m
-genCode (ParseOk m)       p s is = prettyPrint (mkModule p is $ listify s m)
-
--- TODO: This is called a parser, but it also generates code. Naming conflict!
-mkModule :: LibParser -> [ImportDecl] -> [Decl] -> Module
-mkModule _ _  [] = error "No compatible datatypes found."
-mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing is
-                       $ concat $ map (p . mkTCI) xs
-
 mkTCI :: Decl -> TCInfo
-mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo (fromName n) TyDataType
+mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo n TyDataType
     (parseTyVarBind tv) $ map mkVCI $ zip [0..] ds
 mkTCI _ = error "Only regular datatypes are supported at this moment."
 
@@ -28,26 +15,26 @@ parseTyVarBind :: [TyVarBind] -> [TCVar]
 parseTyVarBind = foldr parseBind []
 
 parseBind :: TyVarBind -> [TCVar] -> [TCVar]
-parseBind (KindedVar n k) ts = TCVar (fromName n) (Just k) : ts
-parseBind (UnkindedVar n) ts = TCVar (fromName n) Nothing  : ts
+parseBind (KindedVar n k) ts = TCVar n (Just k) : ts
+parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 
 -- TODO: Support for infix operators and support for assiciativity.
 mkVCI :: (Int, QualConDecl) -> VCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
+    VCInfo n (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    VCInfo (fromName n) 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
+    VCInfo n 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    VCInfo (fromName n) (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
+    VCInfo n (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
 
-fromRec :: [([Name], BangType)] -> [(String, BangType)]
+fromRec :: [([Name], BangType)] -> [(Name, BangType)]
 fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!
 
-fromNBT :: ([Name], BangType) -> [(String, BangType)]
+fromNBT :: ([Name], BangType) -> [(Name, BangType)]
 fromNBT ([], _)      = []
-fromNBT ((x:xs), bt) = (fromName x, bt) : fromNBT (xs, bt)
+fromNBT ((x:xs), bt) = (x, bt) : fromNBT (xs, bt)
 
-mkRec :: (String, BangType) -> VCVar
+mkRec :: (Name, BangType) -> VCVar
 mkRec (n, BangedTy t)   = VCVar (Just n) t
 mkRec (n, UnpackedTy t) = VCVar (Just n) t
 mkRec (n, UnBangedTy t) = VCVar (Just n) t
@@ -56,8 +43,4 @@ mkBTRec :: BangType -> VCVar
 mkBTRec (BangedTy t)   = VCVar Nothing t
 mkBTRec (UnBangedTy t) = VCVar Nothing t
 mkBTRec (UnpackedTy t) = VCVar Nothing t
-
-fromName :: Name -> String
-fromName (Ident n)  = n
-fromName (Symbol n) = n
 
