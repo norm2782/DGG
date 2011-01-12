@@ -45,7 +45,7 @@ isSuppSYB' SubUniv      = False
 isSuppSYB' HigherRankCon = False
 isSuppSYB' ExistentialTypes = False
 isSuppSYB' SuppGADTs        = False
-
+isSuppSYB' MutRec    = False
 
 -- TODO: No gunfold when quantification is used?
 

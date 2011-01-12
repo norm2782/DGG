@@ -27,6 +27,7 @@ data UnivSupp = Regular
               | HigherRankCon
               | ExistentialTypes
               | SuppGADTs
+              | MutRec
               deriving (Show)
 
 data TypeType = TyDataType

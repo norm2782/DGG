@@ -34,4 +34,5 @@ isSuppMultiRec' SubUniv      = False
 isSuppMultiRec' HigherRankCon = False
 isSuppMultiRec' ExistentialTypes = False
 isSuppMultiRec' SuppGADTs        = False
+isSuppMultiRec' MutRec        = True
 

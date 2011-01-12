@@ -43,9 +43,10 @@ isSuppEMGM' NestedHigherKinded = True
 isSuppEMGM' OtherH98     = True
 isSuppEMGM' SubUniv      = True
 -- TODO: Verify truth values
-isSuppEMGM' HigherRankCon = False
-isSuppEMGM' ExistentialTypes = False
-isSuppEMGM' SuppGADTs        = False
+isSuppEMGM' HigherRankCon      = False
+isSuppEMGM' ExistentialTypes   = False
+isSuppEMGM' SuppGADTs = False
+isSuppEMGM' MutRec    = False
 
 mkDTReps :: TCInfo -> [Decl]
 mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
