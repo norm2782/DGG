@@ -47,12 +47,15 @@ main = do
             then return "GenericReps"
             else return $ modulename args
     pr   <- parseFile (input args)
-    adap <- return $ adapters ! (map toLower $ adapter args)
+    adap <- return $ adapters ! (strToLower $ adapter args)
     code <- return $ genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
     if hasFileOutput args
         then writeFile (output args) code
         else putStrLn code
-    
+
+strToLower :: String -> String
+strToLower = map toLower
+
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput = not . null . output
 
