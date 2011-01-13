@@ -2,6 +2,7 @@
 
 module Main where
 
+import Control.Monad
 import Data.Char (toLower)
 import Data.Generics
 import Data.Map (fromList, (!), Map)
@@ -18,16 +19,19 @@ data Adapter = Adapter { makeFn    :: CodeGenerator
 
 data DGGArgs = DGGArgs { adapter  :: String
                        , input    :: String
-                       , datatype :: String
+--                       , datatype :: String
+                       , modulename  :: String
                        , output   :: String
                        }
                        deriving (Show, Data, Typeable)
 
+-- TODO: Add output module name as parameter
 dgg :: DGGArgs
-dgg = DGGArgs { adapter  = def &= help "Adapter name. E.g.: EMGM"
-              , input    = def &= typFile &= help "Input file"
-              , datatype = def &= help "Specify datatype for which to derive. Generates for all datatypes if left blank."
-              , output   = def &= typFile &= help "Output file. E.g.: Instances.hs"
+dgg = DGGArgs { adapter    = def &= help "Adapter name. E.g.: EMGM"
+              , input      = def &= typFile &= help "Input file"
+--              , datatype = def &= help "Specify datatype for which to derive. Generates for all datatypes if left blank."
+              , modulename = def &= help "Name of the module. Defaults to GenericReps."
+              , output     = def &= typFile &= help "Output file. E.g.: Instances.hs"
               }
               &= summary "DGG: Datatype Generic Generator v0.1-dev"
               &= program "dgg"
@@ -39,9 +43,12 @@ main = do
     if (null $ adapter args) || (null $ input args)
         then error "Specify at least an adapter and an input file."
         else return ()
+    mn <- if (null $ modulename args)
+            then return "GenericReps"
+            else return $ modulename args
     pr   <- parseFile (input args)
     adap <- return $ adapters ! (map toLower $ adapter args)
-    code <- return $ genCode pr (makeFn adap) (isSuppFn adap) (importsFn adap)
+    code <- return $ genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
     if hasFileOutput args
         then writeFile (output args) code
         else putStrLn code
@@ -49,14 +56,14 @@ main = do
 hasFileOutput :: DGGArgs -> Bool
 hasFileOutput = not . null . output
 
-genCode :: ParseResult Module -> CodeGenerator -> LibSupport -> [ImportDecl] -> String
-genCode (ParseFailed l m) _ _ _  = error $ "Failed to parse module."
+genCode :: ParseResult Module -> String -> CodeGenerator -> LibSupport -> [ImportDecl] -> String
+genCode (ParseFailed l m) _ _ _ _  = error $ "Failed to parse module."
                                         ++ "Error on line " ++ show l ++ ": " ++ m
-genCode (ParseOk m)       p s is = prettyPrint (mkModule p is $ listify s m)
+genCode (ParseOk m)       n p s is = prettyPrint (mkModule n p is $ listify s m)
 
-mkModule :: CodeGenerator -> [ImportDecl] -> [Decl] -> Module
-mkModule _ _  [] = error "No compatible datatypes found."
-mkModule p is xs = Module srcLoc (ModuleName "GenericReps") [] Nothing Nothing is
+mkModule :: String -> CodeGenerator -> [ImportDecl] -> [Decl] -> Module
+mkModule _ _ _  [] = error "No compatible datatypes found."
+mkModule n p is xs = Module srcLoc (ModuleName n) [] Nothing Nothing is
                        $ concat $ map (p . mkTCI) xs
 
 adapters :: Map String Adapter
