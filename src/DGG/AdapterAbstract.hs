@@ -2,6 +2,7 @@ module DGG.AdapterAbstract (
       srcLoc, mkStrCon, mkNCon, mkIdent, mkUId, mkPIdent, genNames, unQualSym
     , mkImport, appInfix, bdecls, mkTyCon, mkTyVar, foldInApp, foldPInApp
     , foldXInApp, foldApp, foldTyApp, foldXApp, mkMatch, fromName, mkStrLit
+    , deriveLib
     , module Data.Derive.Internal.Derivation
     , module DGG.Data
     , module DGG.Parser
@@ -86,3 +87,10 @@ fromName (Symbol n) = n
 
 mkStrLit :: Name -> Exp
 mkStrLit n = (Lit . String) $ fromName n
+
+deriveLib :: String -> CodeGenerator -> Derivation
+deriveLib n cg = derivationCustom ("DGG.Adapter." ++ n ++ ".Derivation") $ mkFullDecl cg
+
+mkFullDecl :: CodeGenerator -> FullDataDecl -> Either String [Decl]
+mkFullDecl cg (_, decl) = Right $ (cg . mkTCI) decl
+

@@ -11,10 +11,7 @@ importsSYB :: [ImportDecl]
 importsSYB = [mkImport "Data.Data", mkImport "Data.Generics"]
 
 deriveSYB :: Derivation
-deriveSYB = derivationCustom "DGG.Adapter.SYB.Derivation" mkFullDecl
-
-mkFullDecl :: FullDataDecl -> Either String [Decl]
-mkFullDecl (_, decl) = Right $ (makeSYB . mkTCI) decl
+deriveSYB = deriveLib "SYB" makeSYB
 
 makeSYB :: CodeGenerator
 makeSYB tc@(TCInfo n TyDataType tvs vcs) = (mkTypeableNs tc) ++

@@ -11,10 +11,7 @@ importsEMGM :: [ImportDecl]
 importsEMGM = [mkImport "Generics.EMGM"]
 
 deriveEMGM :: Derivation
-deriveEMGM = derivationCustom "DGG.Adapter.EMGM.Derivation" mkFullDecl
-
-mkFullDecl :: FullDataDecl -> Either String [Decl]
-mkFullDecl (_, decl) = Right $ (makeEMGM . mkTCI) decl
+deriveEMGM = deriveLib "EMGM" makeEMGM
 
 makeEMGM :: CodeGenerator
 makeEMGM tc@(TCInfo _ TyDataType _ _) = (createDTEP tc) : (mkDTReps tc)
