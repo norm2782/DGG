@@ -71,14 +71,14 @@ Jurriën Stutterheim
 
 \begin_layout Abstract
 Template Haskell is a tool frequently used by generic programming library
- developers to generate generic represenations for datatypes.
+ developers to generate generic representations for datatypes.
  Unfortunately, developing for Template Haskell can be problematic.
  Debugging Template Haskell code is hard and its implementation changes
  frequently with new GHC releases.
  This paper presents a solution, called DGG, which offers a solution to
  both of these problems without losing the benefits Template Haskell brings.
- This is achieved by offering both a commandline tool to generate code and
- by offering Template Haskell support via the Derive library.
+ This is achieved by offering both a command-line tool to generate code
+ and by offering Template Haskell support via the Derive library.
 \end_layout
 
 \begin_layout Section
@@ -86,8 +86,9 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Generic programming libraries commonly offer the ability to generate generic
- representations of datatypes at compile time using Template Haskell
+Datatype generic programming (DGP) libraries commonly offer the ability
+ to generate generic representations of datatypes at compile time using
+ Template Haskell
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sheard:2002p631"
@@ -97,14 +98,11 @@ key "Sheard:2002p631"
 .
  While this approach is convenient for most end-users, it poses problems
  for library developers.
- Template Haskell is only supported by GHC[TODO: Citation?], making the
- libraries inconvenient to use in combination with other compilers.
+ Template Haskell is currently only supported by GHC, making the libraries
+ inconvenient to use in combination with other compilers.
  In addition, the Template Haskell implementation tends to change with each
  new GHC release, causing library writers extra work to maintain backward
  and forward compatibility.
- Another drawback to the current situation is that different libraries implement
- similar code to interface with Template Haskell, which goes against the
- DRY (Do not Repeat Yourself) principle.
  Finally, developing Template Haskell code is a lot of work for library
  developers, since it is hard to debug.
 \end_layout
@@ -120,7 +118,7 @@ key "Mitchell:2009p599"
 
 \end_inset
 
- and haskell-src-exts[TODO: Citation?] packages.
+ and haskell-src-exts packages.
  The library allows the user to generate generic representations using either
  a command-line tool or Template Haskell.
  The command-line tool generates a module containing the generic representations.
@@ -156,7 +154,7 @@ Can be used on any Haskell compiler.
 \end_layout
 
 \begin_layout Itemize
-Makes it easier to maintain backward and forward compatiblity with different
+Makes it easier to maintain backward and forward compatibility with different
  versions of GHC.
 \end_layout
 
@@ -167,8 +165,46 @@ Allows generic programming library writers to get rid of boilerplate code
 \end_layout
 
 \begin_layout Standard
-The rest of the paper is structured as follows....
- [TODO: Write the rest of the paper!]
+The rest of the paper is structured as follows.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Command-line-Support"
+
+\end_inset
+
+ introduces the DGG command-line facilities, after which section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Template-Haskell-Support"
+
+\end_inset
+
+ will show the Template Haskell support.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Extending-DGG"
+
+\end_inset
+
+ will detail what DGP library developers need to do to add support for their
+ library to DGG.
+ Finally, section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Future-Work"
+
+\end_inset
+
+ will discuss current challenges and future work, after which section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusion"
+
+\end_inset
+
+ concludes.
 \end_layout
 
 \begin_layout Section
@@ -183,8 +219,8 @@ name "sec:Command-line-Support"
 \end_layout
 
 \begin_layout Standard
-DGG offers a commandline infrastructure to generate generic code using DGG
- as a standalone application.
+DGG offers a command-line infrastructure to generate generic code using
+ DGG as a standalone application.
  This approach offers two advantages.
  Firstly, library developers can more easily debug their generic code, since
  the generated code is either outputted to the standard output or is written
@@ -589,10 +625,17 @@ FooGP
 
 \begin_layout Section
 Future Work
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Future-Work"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Although DGG's main featurs can already be demonstrated, it is still very
+Although DGG's main features can already be demonstrated, it is still very
  much a work in progress.
  As such, plenty of work still remains to be done.
 \end_layout
@@ -657,6 +700,13 @@ key "Rodriguez:2008p606"
 
 \begin_layout Section
 Conclusion
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusion"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
