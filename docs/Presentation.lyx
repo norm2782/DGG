@@ -24,7 +24,7 @@
 
 \graphics default
 \default_output_format default
-\output_sync 0
+\output_sync 1
 \bibtex_command default
 \index_command default
 \paperfontsize default
@@ -96,11 +96,448 @@ DGG: Your One-Stop Shop for Generic Representations
 \end_layout
 
 \begin_layout Subsection
-Introduction
+Introduction to Datatype Generic Programming
 \end_layout
 
 \begin_layout BeginFrame
-The Idea
+Nota Bene
+\end_layout
+
+\begin_layout Itemize
+The following slides give a very short introduction to generic programming
+ for the purpose of setting a context for this presentation
+\end_layout
+
+\begin_layout Itemize
+This introduction is incomplete and does not aim to provide you with a full
+ understanding of generic programming
+\end_layout
+
+\begin_layout Itemize
+Take the course on generic programming next year.
+ It is awesome.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Datatype Generic Programming
+\end_layout
+
+\begin_layout Itemize
+Datatype generic programming allows functions to be defined once for a wide
+ range of different datatypes.
+\end_layout
+
+\begin_layout Itemize
+Functions are programmed over the shape of a datatype, rather than the datatypes
+ themselves
+\end_layout
+
+\begin_layout Itemize
+No more countless numbers of class instances
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Representing Datatypes in EMGM
+\end_layout
+
+\begin_layout Standard
+Regular datatype:
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename list.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Sum of products view:
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename list-sop.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+EMGM embedding-projection pair
+\end_layout
+
+\begin_layout Standard
+Converting from and to generic representations is done using an embedding-projec
+tion pair (EP).
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename list-emgm.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Generic representations
+\end_layout
+
+\begin_layout Itemize
+A lot of the generic representation code is highly regular and can be automatica
+lly generated
+\end_layout
+
+\begin_layout Itemize
+Most generic programming libraries do so using Template Haskell
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Introducing DGG
+\end_layout
+
+\begin_layout BeginFrame
+The problem
+\end_layout
+
+\begin_layout Standard
+Individual DGP libraries often have similar functionality for deriving generic
+ representations
+\end_layout
+
+\begin_layout Standard
+Also, Template Haskell suffers from a few drawbacks
+\end_layout
+
+\begin_layout Itemize
+Its implementation changes with almost every GHC release
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+DGP libraries need to be updated to the new API
+\end_layout
+
+\begin_layout Itemize
+Hard to maintain BC with older versions
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Debugging TH code is hard.
+ Need to use 
+\family typewriter
+-ddump-splices
+\family default
+ with GHCi
+\end_layout
+
+\begin_layout Itemize
+TH is only available on GHC
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+The solution
+\end_layout
+
+\begin_layout Itemize
+Offer a custom EDSL with datatype information, reducing the amount work
+ required for individual DGP libraries do
+\end_layout
+
+\begin_layout Itemize
+Abstract from Template Haskell
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Generic code is created using 
+\family typewriter
+haskell-src-exts
+\family default
+ and a custom datatype with target datatype information
+\end_layout
+
+\begin_layout Itemize
+The Derive library offers Template Haskell support which consumes 
+\family typewriter
+haskell-src-exts
+\family default
+ values
+\end_layout
+
+\begin_layout Itemize
+Offers a single, more stable API for DGP library developers to use
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Offer a command line tool
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Output generated code to file or stdout
+\end_layout
+
+\begin_layout Itemize
+Easy for debugging when developing a DGP library
+\end_layout
+
+\begin_layout Itemize
+Compiler independent
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Architecture
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename dgg.dot
+	height 17em
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Template Haskell usage
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+derive
+\family default
+ function is from the Derive library
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+deriveEMGM
+\family default
+ function is from DGG
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename th.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+CLI usage
+\end_layout
+
+\begin_layout Standard
+Parse all datatypes in 
+\family typewriter
+DataTypes.hs
+\family default
+ and generate code for SYB, output code to stdout
+\end_layout
+
+\begin_layout LyX-Code
+dgg -i 
+\begin_inset Quotes eld
+\end_inset
+
+DataTpes.hs
+\begin_inset Quotes erd
+\end_inset
+
+ -a 
+\begin_inset Quotes eld
+\end_inset
+
+SYB
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Parse all datatypes in 
+\family typewriter
+DataTypes.hs
+\family default
+ and generate code for EMGM, write code to 
+\family typewriter
+Reps.hs
+\end_layout
+
+\begin_layout LyX-Code
+dgg -i 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+DataTypes
+\family default
+.hs
+\begin_inset Quotes erd
+\end_inset
+
+ -a 
+\begin_inset Quotes eld
+\end_inset
+
+EMGM
+\begin_inset Quotes erd
+\end_inset
+
+ -o 
+\begin_inset Quotes eld
+\end_inset
+
+Reps.hs
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Extending DGG
+\end_layout
+
+\begin_layout BeginFrame
+Extending DGG
+\end_layout
+
+\begin_layout Itemize
+DGG is easily extended to support new DGP libraries
+\end_layout
+
+\begin_layout Itemize
+Each adapter module exports four functions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename adapterInterface.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $*$
+\end_inset
+
+ is replaced by the name of the DGP library
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+CLI tool
+\end_layout
+
+\begin_layout Itemize
+After writing the adapter, only the 
+\family typewriter
+Main.hs
+\family default
+ file needs to be modified.
+\end_layout
+
+\begin_layout Itemize
+The following line is added to make the library selectable via the 
+\family typewriter
+-a
+\family default
+ flag:
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename adaptersEntry.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Conclusion
+\end_layout
+
+\begin_layout BeginFrame
+Conclusion
+\end_layout
+
+\begin_layout Standard
+DGG is awesome!
 \end_layout
 
 \begin_layout EndFrame

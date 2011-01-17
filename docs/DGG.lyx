@@ -667,6 +667,61 @@ deriveLib
 \end_layout
 
 \begin_layout Standard
+A high-level overview of the structure of DGG is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "fig:High-level-overview-of"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename dgg.dot
+	width 200pt
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:High-level-overview-of"
+
+\end_inset
+
+High-level overview of DGG
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Developing the individual adapters for EMGM and SYB posed a challenge.
  In this process, the knowledge obtained from the course in Generic Programming
  proved to be invaluable.
