@@ -127,13 +127,23 @@ mkPatSum s n = pApp (name s) [mkToRs n]
 -- Generic
 
 buildProd :: Int -> Exp
-buildProd n = foldInApp ((QConOp . unQualSym) ":*:") mkIdent $ reverse (genNames n)
+buildProd n = foldInApp' ((QConOp . unQualSym) ":*:") mkIdent $ genNames n
+
+-- TODO: Port this back to foldInApp
+foldInApp' :: QOp -> (a -> Exp) -> [a] -> Exp
+foldInApp' _  mk [x]    = mk x
+foldInApp' op mk (x:xs) = InfixApp (mk x) op (foldInApp' op mk xs)
 
 buildPProd :: Int -> Pat
-buildPProd rs = buildInPApp $ reverse (genNames rs)
+buildPProd rs = buildInPApp (genNames rs)
 
 buildInPApp :: [String] -> Pat
-buildInPApp = foldPInApp (unQualSym ":*:") mkPIdent
+buildInPApp = foldPInApp' (unQualSym ":*:") mkPIdent
+
+-- TODO: Port this back to foldPInApp
+foldPInApp' :: QName -> (a -> Pat) -> [a] -> Pat
+foldPInApp' _  mk [x]    = mk x
+foldPInApp' op mk (x:xs) = PInfixApp (mk x) op (foldPInApp' op mk xs)
 
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> VCInfo -> a)
    -> Int -> Int -> VCInfo -> a
