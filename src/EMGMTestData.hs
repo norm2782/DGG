@@ -3,17 +3,27 @@
 module EMGMTestData where
 
 import DGG.Adapter.EMGM
-import Language.Haskell.Exts.Syntax
+--import Language.Haskell.Exts.Syntax
 import Generics.EMGM as E
 import Prelude as P
 import DGG.Data as M
-import Language.Haskell.Exts.Pretty
+--import Language.Haskell.Exts.Pretty
 
 -- Test code:
 --
 data Tree a = Leaf a | Branch (Tree a) (Tree a) | LBranch (Tree a) (Tree a) (Tree a)
-data List a = Nil | List a (List a)
 data Foo = Bar | Baz | Bat
+
+data List a = Nil | Cons a (List a)
+type ListRep a = Unit :+: a :*: List a
+
+listEP :: EP (List a) (ListRep a)
+listEP = EP from to
+    where
+        from Nil           = L Unit
+        from (Cons a la)   = R (a :*: la)
+        to (L Unit)        = Nil
+        to (R (a :*: la))  = Cons a la
 
 data Foo' = Bar'
 
@@ -56,13 +66,13 @@ ggFoo = EP from' to'
         to' (R (R Unit)) = Bat
 
 data A = Ba | Ca | Da | Ea
+{-
 
 aTC = TCInfo "A" TyDataType [
     VCInfo "Ba" 0 0 Nonfix M.LeftAssoc [],
     VCInfo "Ca" 0 1 Nonfix M.LeftAssoc [],
     VCInfo "Da" 0 2 Nonfix M.LeftAssoc [],
     VCInfo "Ea" 0 3 Nonfix M.LeftAssoc []]
-
 aList = TCInfo "List" TyDataType [
     VCInfo "Nil"  0 0 Nonfix M.LeftAssoc [],
     VCInfo "List" 2 1 Nonfix M.LeftAssoc [ Record Nothing "a" undefined
@@ -77,7 +87,7 @@ ggComp = EP from' to' where
     to' fga = C fga
 
 data HFix f a   = Hln (f (HFix f) a)
-
+-}
 -- To describe any value constructor in an EP, all that is required are the
 -- value constructor name and the number of records to the value constructor.
 -- These do need to be given unique names, but their type is not explicitly 
@@ -87,10 +97,10 @@ data HFix f a   = Hln (f (HFix f) a)
 -- The question is if we want to generate a type signature for the EP. In
 -- general, the compiler can infer that by itself. TODO: Ask Sean about cases
 -- where the compiler would fail to infer the types.
-ggHFix = EP from' to' where
+{-ggHFix = EP from' to' where
     from' (Hln ffa) = ffa
     to' ffa = Hln ffa
-
+-}
 {-
 [UnBangedTy (TyParen (TyApp (TyApp (TyVar (Ident "f"))
             (TyParen (TyApp (TyCon (UnQual (Ident "HFix")))

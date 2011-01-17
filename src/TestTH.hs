@@ -5,12 +5,12 @@
 {-# LANGUAGE GADTs #-}
 module TestTH where
 
---import Generics.EMGM
+import Generics.EMGM
 import Data.DeriveTH
---import DGG.Adapter.EMGM
+import DGG.Adapter.EMGM
 import DGG.Adapter.SYB
-import Data.Data
-import Data.Typeable
+--import Data.Data
+--import Data.Typeable
 
 data Foo = Bar
 data List a = Nil | Cons a (List a)
@@ -26,18 +26,18 @@ data Perfect a = Leaf { unLeaf :: a }
                | Node (Perfect (a, a))
 
 -- $(derive deriveSYB ''Dynamic)
-$(derive deriveSYB ''Perfect)
-{-
+-- $(derive deriveSYB ''Perfect)
+
 $(derive deriveEMGM ''Foo)
 
 $(derive deriveEMGM ''List)
 
 $(derive deriveEMGM ''MyTree)
 
--}
-$(derive deriveSYB ''Foo)
 
-$(derive deriveSYB ''List)
+-- $(derive deriveSYB ''Foo)
 
-$(derive deriveSYB ''MyTree)
+-- $(derive deriveSYB ''List)
+
+-- $(derive deriveSYB ''MyTree)
 
