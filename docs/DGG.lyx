@@ -70,11 +70,15 @@ Jurriën Stutterheim
 \end_layout
 
 \begin_layout Abstract
-Template Haskell is a tool frequently used by generic programming library
- developers to generate generic representations for datatypes.
+[TODO: Rewrite this abstract!] Template Haskell is a tool frequently used
+ by generic programming library developers to generate generic representations
+ for data types.
  Unfortunately, developing for Template Haskell can be problematic.
  Debugging Template Haskell code is hard and its implementation changes
  frequently with new GHC releases.
+ In addition, the ways the data types are analyzed are very similar between
+ individual generic programming libraries, causing a lot of work to be duplicate
+d.
  This paper presents a solution, called DGG, which offers a solution to
  both of these problems without losing the benefits Template Haskell brings.
  This is achieved by offering both a command-line tool to generate code
@@ -88,7 +92,7 @@ Introduction
 \begin_layout Standard
 Datatype generic programming (DGP) libraries commonly offer the ability
  to generate generic representations of datatypes at compile time using
- Template Haskell
+ Template Haskell (TH) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sheard:2002p631"
@@ -96,76 +100,110 @@ key "Sheard:2002p631"
 \end_inset
 
 .
+ When the TH code is executed during compilation, a function from the DGP
+ library parses the data type passed to it and translates that to some intermedi
+ate representation and generates code based on that representation.
  While this approach is convenient for most end-users, it poses problems
  for library developers.
- Template Haskell is currently only supported by GHC, making the libraries
- inconvenient to use in combination with other compilers.
- In addition, the Template Haskell implementation tends to change with each
- new GHC release, causing library writers extra work to maintain backward
- and forward compatibility.
- Finally, developing Template Haskell code is a lot of work for library
- developers, since it is hard to debug.
+ The process of parsing data types to an internal representation is largely
+ similar in different DGP libraries.
+ However, currently each library has its own mechanism for doing so, duplicating
+ a lot of work.
+ Other problems arise from the use of TH itself.
+ Currently, TH is only supported by GHC, making the libraries inconvenient
+ to use in combination with other compilers.
+ In addition, the TH implementation tends to change with each new GHC release,
+ causing library writers extra work to maintain backward and forward compatibili
+ty.
+ Finally, developing TH code is hard, because the generated code is hard
+ to debug.
 \end_layout
 
 \begin_layout Standard
-DGG aims to provide a solution to the aforementioned drawbacks of using
- Template Haskell, without losing any of the benefits.
+DGG aims to provide a solution to the aforementioned problems.
  It does so by abstracting over the process of generating generic representation
-s by using the Derive
+s by using the 
+\family typewriter
+Derive
+\family default
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mitchell:2009p599"
 
 \end_inset
 
- and haskell-src-exts packages.
- The library allows the user to generate generic representations using either
- a command-line tool or Template Haskell.
+ and 
+\family typewriter
+haskell-src-exts
+\family default
+ libraries.
+ It provides the ability to parse data types and convert them to a simple
+ DSL which captures all information required for generating generic representati
+ons in a concise form.
+ Individual DGP libraries can then provide an adapter for DGG which generates
+ the desired code from this DSL.
+ 
+\end_layout
+
+\begin_layout Standard
+In addition to providing TH support in the way one might expect, DGG also
+ offers a command-line tool as a solutions to some of the TH drawbacks.
  The command-line tool generates a module containing the generic representations.
  This approach offers two advantages: it is compiler independent and it
  allows library writers to more easily debug their code.
  The downside of this approach is that the tool has to be invoked whenever
- the datatypes change.
- In addition to the command-line tool, DGG also offers Template Haskell
- support to generate generic representations on compile-time.
+ the data types change.
 \end_layout
 
 \begin_layout Standard
-Another advantage of the DGG library is that generic programming library
- writers can defer a lot of work to DGG.
- It will take care of analyzing the datatypes specified by the end-user
- and translate them to a simple DSL.
- Generic programming library writers then only have to write code generating
- functions based on this DSL.
- DGG will take care of the rest.
+By using 
+\family typewriter
+Derive
+\family default
+ to abstract from TH, any change in TH only needs to be captured by the
+ 
+\family typewriter
+Derive
+\family default
+ library, making it easier to offer support for multiple TH versions.
 \end_layout
 
 \begin_layout Standard
-This paper makes the following contributions:
+The solution presented in this paper makes the following contributions:
 \end_layout
 
 \begin_layout Itemize
-Gets rid of the Template Haskell dependency for generic programming libraries,
- without loosing the benefits of Template Haskell.
+It offers an alternative to using Template Haskell for generating generic
+ representations, without losing its benefits.
 \end_layout
 
 \begin_layout Itemize
-Can be used on any Haskell compiler.
+It can be used in combination with any Haskell compiler.
 \end_layout
 
 \begin_layout Itemize
-Makes it easier to maintain backward and forward compatibility with different
- versions of GHC.
+It makes it easier to maintain backward and forward compatibility with different
+ versions of GHC by abstracting from Template Haskell.
 \end_layout
 
 \begin_layout Itemize
-Allows generic programming library writers to get rid of boilerplate code
- for generating generic representations\SpecialChar \@.
+It allows generic programming library writers to get rid of boilerplate
+ code for analyzing data types to extract the information required for generatin
+g generic representations\SpecialChar \@.
 
 \end_layout
 
 \begin_layout Standard
 The rest of the paper is structured as follows.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:DGG-DSL"
+
+\end_inset
+
+ presents the DGG DSL upon which the rest of the library is built.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -213,6 +251,148 @@ reference "sec:Conclusion"
 \end_inset
 
  concludes.
+\end_layout
+
+\begin_layout Section
+DGG DSL
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:DGG-DSL"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+DGP libraries generally offer an ability to generate generic representations
+ for data types.
+ In order to generate this code, a data type needs to be parsed, various
+ properties of the data type need to be established and all information
+ required to generate the generic representations need to be extracted.
+ This process is very similar across different DGP libraries.
+ DGG offers a simple DSL which captures all required information about data
+ types in a consice format and parsing facilities to to parse data types
+ into this DSL.
+ DGP library writers can then proceed to generate generic representations
+ from this DSL, eliminating the need to do data type parsing and analysis
+ for every individual DGP library.
+ 
+\end_layout
+
+\begin_layout Standard
+Presented in Algorithm 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "alg:DGG-DSL-data"
+
+\end_inset
+
+ are the top-level data types of the DGG DSL.
+ The 
+\family typewriter
+TCInfo
+\family default
+ data type contains information for the type constructor, while the 
+\family typewriter
+DCInfo
+\family default
+ data type contains information for the data constructor.
+ Properties such as the type constructor arity can be derived from the available
+ information.
+ Several data types have been omitted for brievety.
+ The 
+\family typewriter
+DCVar
+\family default
+ and 
+\family typewriter
+TCVar
+\family default
+ types contain information such as the variable's name, kind and wheather
+ or not the variable is universally quantified.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset External
+	template LHS
+	filename data-tcvc.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:DGG-DSL-data"
+
+\end_inset
+
+DGG DSL data types
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From the information in the data types other useful information can be derived.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset External
+	template LHS
+	filename data-univ.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Universe-data-type"
+
+\end_inset
+
+Universe data type
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -638,8 +818,11 @@ y and becayse the library needs to be extendible, the library needed to
 \end_layout
 
 \begin_layout Standard
-DGG makes use of Derive's ability to generate Template Haskell code based
- on 
+DGG makes use of 
+\family typewriter
+Derive
+\family default
+'s ability to generate Template Haskell code based on 
 \family typewriter
 Decl
 \family default
@@ -648,7 +831,11 @@ s from
 haskell-src-exts
 \family default
 .
- This feature is supported by Derive's 
+ This feature is supported by 
+\family typewriter
+Derive
+\family default
+'s 
 \family typewriter
 derivationCustom
 \family default
@@ -661,8 +848,15 @@ deriveLib
  specific code.
  While the code for this feature is small and simple, it brings a powerful
  feature to DGG which optimally uses the rest of the infrastructure.
- A major advantage of using Derive for this is that DGG does not have a
- direct dependency on Template Haskell either, but instead relies on Derive
+ A major advantage of using 
+\family typewriter
+Derive
+\family default
+ for this is that DGG does not have a direct dependency on Template Haskell
+ either, but instead relies on 
+\family typewriter
+Derive
+\family default
  to interface with Template Haskell.
 \end_layout
 

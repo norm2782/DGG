@@ -47,27 +47,30 @@ data Associativity = LeftAssoc
                    deriving (Show)
 
 data TCVar = TCVar { tcvName :: Name
-                   , tcvKind :: Maybe Kind }
+                   , tcvKind :: Maybe Kind 
+                   }
            deriving (Show)
 
-data VCVar = VCVar { vcvRec   :: Maybe Name
-                   , vcvBType :: Type }
+data DCVar = DCVar { dcvRec   :: Maybe Name
+                   , dcvBType :: Type 
+                   -- TODO: dcvQuantified :: Bool
+                   }
            deriving (Show)
 
 -- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo { tcName :: Name 
                      , tcType :: TypeType
                      , tcVars :: [TCVar]
-                     , tcVCs  :: [VCInfo]
+                     , tcDCs  :: [DCInfo]
                      }
             deriving (Show)
 
--- TODO: Remove Arity here and calculate that based on vcVars
-data VCInfo = VCInfo { vcName    :: Name
-                     , vcArity   :: Int
-                     , vcIndex   :: Int
-                     , vcFixity  :: ConFixity
-                     , vcAssoc   :: Associativity
-                     , vcVars    :: [VCVar]
+-- TODO: Remove Arity here and calculate that based on dcVars
+data DCInfo = DCInfo { dcName    :: Name
+                     , dcArity   :: Int
+                     , dcIndex   :: Int
+                     , dcFixity  :: ConFixity
+                     , dcAssoc   :: Associativity
+                     , dcVars    :: [DCVar]
                      }
             deriving (Show)

@@ -108,7 +108,7 @@ mkDCID lhs rhs = [mkInFun [mkMatch lhs [mkPIdent "f"] (App (mkIdent rhs) (mkIden
 mkInFun :: [Match] -> InstDecl
 mkInFun = InsDecl . FunBind
 
-mkGunfold :: [VCInfo] -> [Match]
+mkGunfold :: [DCInfo] -> [Match]
 mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
     (Case (App (mkIdent "constrIndex") (mkIdent "c"))
     ((map mkGunfoldAlt $ zip [1..] vcs) ++ [Alt srcLoc PWildCard (UnGuardedAlt
@@ -116,31 +116,31 @@ mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
       bdecls])
     )]
 
-mkGunfoldAlt :: (Int, VCInfo) -> Alt
-mkGunfoldAlt (i, (VCInfo n a _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
+mkGunfoldAlt :: (Int, DCInfo) -> Alt
+mkGunfoldAlt (i, (DCInfo n a _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
     ) (UnGuardedAlt (mkGunfoldKs n a)) bdecls
 
 mkGunfoldKs :: Name -> Int -> Exp
 mkGunfoldKs n 0 = App (mkIdent "z") (mkNCon n)
 mkGunfoldKs n a = Paren (App (mkIdent "k") (mkGunfoldKs n $ a - 1))
 
-mkToConstr :: VCInfo -> Match
-mkToConstr (VCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (UnQual 
+mkToConstr :: DCInfo -> Match
+mkToConstr (DCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (UnQual 
     n) (replicate a PWildCard)] (mkIdent $ mkConstrName n)
 
-mkGfoldl :: VCInfo -> Match
-mkGfoldl (VCInfo n a _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
+mkGfoldl :: DCInfo -> Match
+mkGfoldl (DCInfo n a _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
     PApp (UnQual n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
     reverse $ App (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
 
 mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
     (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String (fromName n)))) (List
-    (map (mkIdent . mkConstrName . vcName) vcs)))) bdecls
+    (map (mkIdent . mkConstrName . dcName) vcs)))) bdecls
 
 mkConstrName :: Name -> String
 mkConstrName n = "dggConstr_" ++ fromName n
 
-mkConstr tcn (VCInfo n _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
+mkConstr tcn (DCInfo n _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
     Nothing (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
     (mkIdent $ mkDTName tcn)) (mkStrLit n)) (List [])
 --    (List [Lit (String "lTree"),Lit (String "bVal"),Lit (String "rTree")]) TODO: Record names

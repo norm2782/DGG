@@ -18,13 +18,13 @@ parseBind (KindedVar n k) ts = TCVar n (Just k) : ts
 parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 
 -- TODO: Support for infix operators and support for assiciativity.
-mkVCI :: (Int, QualConDecl) -> VCInfo
+mkVCI :: (Int, QualConDecl) -> DCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    VCInfo n (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
+    DCInfo n (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    VCInfo n 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
+    DCInfo n 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    VCInfo n (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
+    DCInfo n (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
 
 fromRec :: [([Name], BangType)] -> [(Name, BangType)]
 fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!
@@ -33,13 +33,13 @@ fromNBT :: ([Name], BangType) -> [(Name, BangType)]
 fromNBT ([], _)      = []
 fromNBT ((x:xs), bt) = (x, bt) : fromNBT (xs, bt)
 
-mkRec :: (Name, BangType) -> VCVar
-mkRec (n, BangedTy t)   = VCVar (Just n) t
-mkRec (n, UnpackedTy t) = VCVar (Just n) t
-mkRec (n, UnBangedTy t) = VCVar (Just n) t
+mkRec :: (Name, BangType) -> DCVar
+mkRec (n, BangedTy t)   = DCVar (Just n) t
+mkRec (n, UnpackedTy t) = DCVar (Just n) t
+mkRec (n, UnBangedTy t) = DCVar (Just n) t
 
-mkBTRec :: BangType -> VCVar
-mkBTRec (BangedTy t)   = VCVar Nothing t
-mkBTRec (UnBangedTy t) = VCVar Nothing t
-mkBTRec (UnpackedTy t) = VCVar Nothing t
+mkBTRec :: BangType -> DCVar
+mkBTRec (BangedTy t)   = DCVar Nothing t
+mkBTRec (UnBangedTy t) = DCVar Nothing t
+mkBTRec (UnpackedTy t) = DCVar Nothing t
 
