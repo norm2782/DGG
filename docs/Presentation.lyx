@@ -96,7 +96,7 @@ DGG: Your One-Stop Shop for Generic Representations
 \end_layout
 
 \begin_layout Subsection
-Introduction to Datatype Generic Programming
+Introduction to Datatype-Generic Programming
 \end_layout
 
 \begin_layout BeginFrame
@@ -115,7 +115,7 @@ This introduction is incomplete and does not aim to provide you with a full
 
 \begin_layout Itemize
 Take the course on generic programming next year.
- It is awesome.
+ It is great.
 \end_layout
 
 \begin_layout EndFrame
@@ -132,8 +132,8 @@ Datatype generic programming allows functions to be defined once for a wide
 \end_layout
 
 \begin_layout Itemize
-Functions are programmed over the shape of a datatype, rather than the datatypes
- themselves
+Functions are programmed over the structure of a data type, rather than
+ the data types themselves
 \end_layout
 
 \begin_layout Itemize
@@ -145,7 +145,7 @@ No more countless numbers of class instances
 \end_layout
 
 \begin_layout BeginFrame
-Representing Datatypes in EMGM
+Sum of Products
 \end_layout
 
 \begin_layout Standard
@@ -167,10 +167,11 @@ Sum of products view:
 \end_layout
 
 \begin_layout Standard
-\begin_inset External
-	template LHS
-	filename list-sop.lhs
+\begin_inset space \qquad{}
+\end_inset
 
+
+\begin_inset Formula $\mathbf{1}+(a\times List\, a)$
 \end_inset
 
 
@@ -228,15 +229,16 @@ Introducing DGG
 The problem
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 Individual DGP libraries often have similar functionality for deriving generic
  representations
 \end_layout
 
-\begin_layout Standard
-Also, Template Haskell suffers from a few drawbacks
+\begin_layout Itemize
+Template Haskell suffers from a few drawbacks
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
 Its implementation changes with almost every GHC release
 \end_layout
@@ -264,6 +266,7 @@ Debugging TH code is hard.
 TH is only available on GHC
 \end_layout
 
+\end_deeper
 \begin_layout EndFrame
 
 \end_layout
@@ -273,8 +276,8 @@ The solution
 \end_layout
 
 \begin_layout Itemize
-Offer a custom EDSL with datatype information, reducing the amount work
- required for individual DGP libraries do
+Parse data types to a custom DSL which individual DGP libraries can use
+ to generate code, reducing duplicate work
 \end_layout
 
 \begin_layout Itemize
@@ -495,6 +498,28 @@ Where
 \end_layout
 
 \begin_layout BeginFrame
+DGG DSL
+\end_layout
+
+\begin_layout Standard
+DGP library specific code is generated from these data types
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename data-tcvc.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
 CLI tool
 \end_layout
 
@@ -529,17 +554,99 @@ The following line is added to make the library selectable via the
 \end_layout
 
 \begin_layout Subsection
-Conclusion
+Developing DGG
+\end_layout
+
+\begin_layout BeginFrame
+Developing DGG
+\end_layout
+
+\begin_layout Itemize
+Designing an architecture with good separation of concerns and making the
+ library easily extendible
+\end_layout
+
+\begin_layout Itemize
+Determining what data to keep in parsing data types and how to store it
+\end_layout
+
+\begin_layout Itemize
+Deciding on how to determine support for certain data types
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Based on Comparing Libraries for Generic Programming in Haskell by Rodriguez
+ et al.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Reverse-engineering generic code generation for EMGM and SYB
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Wrapping up
+\end_layout
+
+\begin_layout BeginFrame
+Future work
+\end_layout
+
+\begin_layout Itemize
+Truly detect whether data types are supported by the DGP library
+\end_layout
+
+\begin_layout Itemize
+Code generation up to standards of the existing TH solutions
+\end_layout
+
+\begin_layout Itemize
+Add support for GADTs and type synonyms
+\end_layout
+
+\begin_layout Itemize
+Improved kind analysis
+\end_layout
+
+\begin_layout Itemize
+Infix operators and associativity information
+\end_layout
+
+\begin_layout EndFrame
+
 \end_layout
 
 \begin_layout BeginFrame
 Conclusion
 \end_layout
 
-\begin_layout Standard
-DGG is awesome!
+\begin_layout Itemize
+Reduces the amount of duplicate work for DGP library developers
 \end_layout
 
+\begin_layout Itemize
+Abstracts from Template Haskell
+\end_layout
+
+\begin_layout Itemize
+Offers CLI utility
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Improved adapter debugging
+\end_layout
+
+\begin_layout Itemize
+Compiler independent
+\end_layout
+
+\end_deeper
 \begin_layout EndFrame
 
 \end_layout

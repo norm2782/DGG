@@ -91,7 +91,7 @@ Introduction
 
 \begin_layout Standard
 Datatype generic programming (DGP) libraries commonly offer the ability
- to generate generic representations of datatypes at compile time using
+ to generate generic representations of data types at compile time using
  Template Haskell (TH) 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -317,7 +317,7 @@ TCVar
 \begin_inset Float algorithm
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset External
@@ -425,9 +425,9 @@ DGG offers a command-line infrastructure to generate generic code using
 \begin_layout Standard
 Invoking the tool causes a complete module to be generated.
  If written to a file, this module can directly be imported from other code.
- By default, generic code will be generated for all datatypes found in the
- input file.
- Future iterations of the tool will allow for cherry-picking the datatypes
+ By default, generic code will be generated for all data types found in
+ the input file.
+ Future iterations of the tool will allow for cherry-picking the data types
  for which code needs to be generated.
 \end_layout
 
@@ -452,7 +452,7 @@ At least two arguments need to be passed to the tool for it to work: the
 --adapter
 \family default
  flag.
- The following snippet generates generic code for EMGM for the datatypes
+ The following snippet generates generic code for EMGM for the data types
  found in the file 
 \family typewriter
 DataTypes.hs
@@ -551,8 +551,8 @@ End-users of DGP libraries will often want to have the generic code generated
  for them automatically during compile-time.
  DGG uses the Derive library to offer end-users the ability to generate
  the generic representation types using Template Haskell.
- The main advantage of this approach is that changing the programmer's datatypes
- does require the code to be regenerated, since this happens automatically
+ The main advantage of this approach is that changing the programmer's data
+ types does require the code to be regenerated, since this happens automatically
  at compile-time.
 \end_layout
 
@@ -575,7 +575,7 @@ derive
 \family typewriter
 derive*
 \family default
- function and the datatype for which generic code needs to be generated
+ function and the data type for which generic code needs to be generated
  is all that's needed.
  The following snippet shows typical usage.
 \end_layout
@@ -684,7 +684,7 @@ The
 \family typewriter
 derive*
 \family default
- function is used to generate generic code for individual datatypes using
+ function is used to generate generic code for individual data types using
  Template Haskell.
  Its definition is very simple.
  It calls the 
@@ -717,7 +717,8 @@ The
 \family typewriter
 make*
 \family default
- function is responsible for generating the generic code for a single datatype.
+ function is responsible for generating the generic code for a single data
+ type.
  It takes a 
 \family typewriter
 TCInfo
@@ -743,8 +744,9 @@ Finally, the
 \family typewriter
 isSupp*
 \family default
- function specifies which datatype properties are supported by the DGP library,
- e.g., does the library support GADTs or mutually recursive datatypes?
+ function specifies which data type properties are supported by the DGP
+ library, e.g., does the library support GADTs or mutually recursive data
+ types?
 \end_layout
 
 \begin_layout Standard
@@ -926,7 +928,7 @@ Developing the individual adapters for EMGM and SYB posed a challenge.
 \family typewriter
 deriving (Data, Typeable)
 \family default
- to the datatypes and running GHCi with the 
+ to the data types and running GHCi with the 
 \family typewriter
 -ddump-deriv
 \family default
@@ -943,7 +945,7 @@ haskell-src-exts
 \family default
  could be used to get a representation of the generic code in its syntax.
  This representation could then be made dynamic so that the code could be
- generated for arbitrary datatypes.
+ generated for arbitrary data types.
  The downside to this approach is that the resulting adapters do not necessarily
  support all the usecases the original libraries support.
 \end_layout
@@ -951,12 +953,16 @@ haskell-src-exts
 \begin_layout Standard
 Another approach to constructing the adapters could have been to analyse
  the existing Template Haskell code from the DGP libraries and modify that
- to work with the DGG datatypes and haskell-src-exts.
+ to work with the DGG data types and 
+\family typewriter
+haskell-src-exts
+\family default
+.
  The advantage to this approach would be that the new adapter would support
  the same use cases as the library code.
  However, since the Template Haskell code was significantly different from
  the manually created adapter code and the code would have to be adapted
- to work with the DGG datatypes, this approach seemed to be at least as
+ to work with the DGG data types, this approach seemed to be at least as
  much work as writing the adapters from scratch.
 \end_layout
 
@@ -979,7 +985,7 @@ Although DGG's main features can already be demonstrated, it is still very
 
 \begin_layout Standard
 First and foremost, the adapters that are currently available need to be
- improved so that they support the same datatypes as the existing DGP libraries.
+ improved so that they support the same data types as the existing DGP libraries.
  Only then can DGG be considered an alternative to existing solutions.
  Several other current issues are directly related to this issue.
 \end_layout
@@ -989,16 +995,16 @@ Currently DGG only supports parsing data declarations.
  In the future, it must support other types as well, such as type synonyms
  and GADTs.
  Type synonyms would then first be resolved, after which generic code would
- be generated based on the original datatype.
+ be generated based on the original data type.
  
 \end_layout
 
 \begin_layout Standard
 After support for various types has been added, an improved algorithm for
  determining type support must be added.
- The current approach allows only normal datatypes and disallows any other
+ The current approach allows only normal data types and disallows any other
  types.
- However, it is desirable to analyse the datatypes for specific properties,
+ However, it is desirable to analyse the data types for specific properties,
  such as those described by Rodriguez et al.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1008,7 +1014,7 @@ key "Rodriguez:2008p606"
 
 .
  For example, some DGP libraries support nested types, while others do not.
- In case a datatype is not supported and Template Haskell is used, an error
+ In case a data type is not supported and Template Haskell is used, an error
  should be raised and compilation should be aborted.
  When using the CLI tool, the generated code could just contain comments
  with support notices.
@@ -1019,7 +1025,7 @@ In the current implementation, kind analysis is wrongly implemented.
  While the current approach of counting the number of type variables works
  fine for the SYB adapter, it fails to produce the right code for more complex
  kinds.
- Proper analysis of the kind information stored in the DGG datatypes can
+ Proper analysis of the kind information stored in the DGG data types can
  solve this problem.
  Both the EMGM and SYB adapters currently suffer from this problem.
 \end_layout
@@ -1043,7 +1049,7 @@ name "sec:Conclusion"
 \end_layout
 
 \begin_layout Standard
-Using DGG, one is able to generate generic code for custom datatypes using
+Using DGG, one is able to generate generic code for custom data types using
  either the DGG CLI tool or Template Haskell.
  The CLI tool offers convenience for DGP library developers, while the Template
  Haskell support offers convenience to the end-users of those libraries.
