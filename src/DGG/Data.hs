@@ -53,7 +53,6 @@ data TCVar = TCVar { tcvName :: Name
 
 data DCVar = DCVar { dcvRec   :: Maybe Name
                    , dcvBType :: Type 
-                   -- TODO: dcvQuantified :: Bool
                    }
            deriving (Show)
 
