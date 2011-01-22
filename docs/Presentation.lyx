@@ -113,11 +113,6 @@ This introduction is incomplete and does not aim to provide you with a full
  understanding of generic programming
 \end_layout
 
-\begin_layout Itemize
-Take the course on generic programming next year.
- It is great.
-\end_layout
-
 \begin_layout EndFrame
 
 \end_layout
@@ -128,7 +123,7 @@ Datatype Generic Programming
 
 \begin_layout Itemize
 Datatype generic programming allows functions to be defined once for a wide
- range of different datatypes.
+ range of different data types
 \end_layout
 
 \begin_layout Itemize
@@ -230,17 +225,17 @@ The problem
 \end_layout
 
 \begin_layout Itemize
-Individual DGP libraries often have similar functionality for deriving generic
- representations
+Individual DGP libraries often have similar functionality for gathering
+ information about data types
 \end_layout
 
 \begin_layout Itemize
-Template Haskell suffers from a few drawbacks
+Problems with Template Haskell
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-Its implementation changes with almost every GHC release
+Changes frequently with new GHC releases
 \end_layout
 
 \begin_deeper
@@ -254,12 +249,9 @@ Hard to maintain BC with older versions
 
 \end_deeper
 \begin_layout Itemize
-Debugging TH code is hard.
- Need to use 
+Debugging TH code is hard: 
 \family typewriter
 -ddump-splices
-\family default
- with GHCi
 \end_layout
 
 \begin_layout Itemize
@@ -286,23 +278,21 @@ Abstract from Template Haskell
 
 \begin_deeper
 \begin_layout Itemize
-Generic code is created using 
+Using 
 \family typewriter
 haskell-src-exts
 \family default
- and a custom datatype with target datatype information
+ and the DSL
 \end_layout
 
 \begin_layout Itemize
-The Derive library offers Template Haskell support which consumes 
+Derive supports using TH with 
 \family typewriter
 haskell-src-exts
-\family default
- values
 \end_layout
 
 \begin_layout Itemize
-Offers a single, more stable API for DGP library developers to use
+Offers a more stable API to DGP library developers
 \end_layout
 
 \end_deeper
@@ -341,6 +331,44 @@ Architecture
 \end_inset
 
 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Using DGG
+\end_layout
+
+\begin_layout BeginFrame
+Current support
+\end_layout
+
+\begin_layout Itemize
+Regular data types
+\end_layout
+
+\begin_layout Itemize
+EMGM's embedding-project pair and (very) limited support for 
+\family typewriter
+Rep
+\family default
+, 
+\family typewriter
+FRep
+\family default
+ etc.
+\end_layout
+
+\begin_layout Itemize
+SYB 
+\family typewriter
+Data
+\family default
+ and 
+\family typewriter
+Typeable
 \end_layout
 
 \begin_layout EndFrame
@@ -576,8 +604,11 @@ Deciding on how to determine support for certain data types
 
 \begin_deeper
 \begin_layout Itemize
-Based on Comparing Libraries for Generic Programming in Haskell by Rodriguez
- et al.
+Based on 
+\shape italic
+Comparing Libraries for Generic Programming in Haskell
+\shape default
+ by Rodriguez et al.
 \end_layout
 
 \end_deeper
