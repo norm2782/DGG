@@ -79,10 +79,18 @@ Jurriën Stutterheim
  In addition, the ways the data types are analyzed are very similar between
  individual generic programming libraries, causing a lot of work to be duplicate
 d.
- This paper presents a solution, called DGG, which offers a solution to
- both of these problems without losing the benefits Template Haskell brings.
+ This paper presents a solution, called 
+\family sans
+DGG
+\family default
+, which offers a solution to both of these problems without losing the benefits
+ Template Haskell brings.
  This is achieved by offering both a command-line tool to generate code
- and by offering Template Haskell support via the Derive library.
+ and by offering Template Haskell support via the 
+\family sans
+Derive
+\family default
+ library.
 \end_layout
 
 \begin_layout Section
@@ -91,8 +99,9 @@ Introduction
 
 \begin_layout Standard
 Datatype generic programming (DGP) libraries commonly offer the ability
- to generate generic representations of data types at compile time using
- Template Haskell (TH) 
+ to generate the code required to obtain generic representations of data
+ types and to operate on these representations.
+ Generating this code is generally done at compile time using Template Haskell
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sheard:2002p631"
@@ -100,30 +109,34 @@ key "Sheard:2002p631"
 \end_inset
 
 .
- When the TH code is executed during compilation, a function from the DGP
- library parses the data type passed to it and translates that to some intermedi
-ate representation and generates code based on that representation.
+ When the Template Haskell code is executed during compilation, a function
+ from the DGP library parses the data type passed to it and generates code
+ based on the information extracted from the data type.
  While this approach is convenient for most end-users, it poses problems
  for library developers.
- The process of parsing data types to an internal representation is largely
- similar in different DGP libraries.
- However, currently each library has its own mechanism for doing so, duplicating
- a lot of work.
- Other problems arise from the use of TH itself.
- Currently, TH is only supported by GHC, making the libraries inconvenient
- to use in combination with other compilers.
- In addition, the TH implementation tends to change with each new GHC release,
- causing library writers extra work to maintain backward and forward compatibili
-ty.
- Finally, developing TH code is hard, because the generated code is hard
- to debug.
+ The process of parsing data types and extracting information is largely
+ similar across different DGP libraries.
+ However, currently each library has its own mechanism for obtaining this
+ information, duplicating a lot of work.
+ Other problems arise from the use of Template Haskell itself.
+ Currently, Template Haskell is only supported by GHC, making the libraries
+ inconvenient to use in combination with other compilers.
+ In addition, the Template Haskell implementation tends to change frequently
+ with new GHC releases, causing library writers extra work to maintain compatibi
+lity with different Template Haskell versions.
+ Finally, developing Template Haskell code is hard, because the generated
+ code is hard to debug.
 \end_layout
 
 \begin_layout Standard
-DGG aims to provide a solution to the aforementioned problems.
- It does so by abstracting over the process of generating generic representation
-s by using the 
-\family typewriter
+
+\family sans
+DGG
+\family default
+ aims to provide a solution to the aforementioned problems.
+ It does so by abstracting over the process of generating generic code by
+ using the 
+\family sans
 Derive
 \family default
 
@@ -134,22 +147,27 @@ key "Mitchell:2009p599"
 \end_inset
 
  and 
-\family typewriter
+\family sans
 haskell-src-exts
 \family default
  libraries.
  It provides the ability to parse data types and convert them to a simple
- DSL which captures all information required for generating generic representati
-ons in a concise form.
- Individual DGP libraries can then provide an adapter for DGG which generates
- the desired code from this DSL.
- 
+ DSL which captures all information required for generating generic code
+ in a concise form.
+ Individual DGP libraries can then provide an adapter which translates this
+ DSL into the generic code required by the library.
 \end_layout
 
 \begin_layout Standard
-In addition to providing TH support in the way one might expect, DGG also
- offers a command-line tool as a solutions to some of the TH drawbacks.
- The command-line tool generates a module containing the generic representations.
+In addition to providing Template Haskell support in the way one might expect,
+ 
+\family sans
+DGG
+\family default
+ also offers a command-line tool as a solutions to some of the Template
+ Haskell drawbacks.
+ It is able to generate a module containing the generic code, which can
+ be outputted to file or standard output.
  This approach offers two advantages: it is compiler independent and it
  allows library writers to more easily debug their code.
  The downside of this approach is that the tool has to be invoked whenever
@@ -158,40 +176,20 @@ In addition to providing TH support in the way one might expect, DGG also
 
 \begin_layout Standard
 By using 
-\family typewriter
+\family sans
 Derive
 \family default
- to abstract from TH, any change in TH only needs to be captured by the
- 
-\family typewriter
+ to abstract from Template Haskell, any change in Template Haskell only
+ needs to be captured by the 
+\family sans
 Derive
 \family default
- library, making it easier to offer support for multiple TH versions.
-\end_layout
-
-\begin_layout Standard
-The solution presented in this paper makes the following contributions:
-\end_layout
-
-\begin_layout Itemize
-It offers an alternative to using Template Haskell for generating generic
- representations, without losing its benefits.
-\end_layout
-
-\begin_layout Itemize
-It can be used in combination with any Haskell compiler.
-\end_layout
-
-\begin_layout Itemize
-It makes it easier to maintain backward and forward compatibility with different
- versions of GHC by abstracting from Template Haskell.
-\end_layout
-
-\begin_layout Itemize
-It allows generic programming library writers to get rid of boilerplate
- code for analyzing data types to extract the information required for generatin
-g generic representations\SpecialChar \@.
-
+ library, making it easier for 
+\family sans
+DGG
+\family default
+ and DGP library writers to offer support for multiple Template Haskell
+ versions.
 \end_layout
 
 \begin_layout Standard
@@ -203,7 +201,11 @@ reference "sec:DGG-DSL"
 
 \end_inset
 
- presents the DGG DSL upon which the rest of the library is built.
+ presents the 
+\family sans
+DGG
+\family default
+ DSL upon which the rest of the library is built.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -211,7 +213,11 @@ reference "sec:Command-line-Support"
 
 \end_inset
 
- introduces the DGG command-line facilities, after which section 
+ introduces the 
+\family sans
+DGG
+\family default
+ command-line facilities, after which section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Template-Haskell-Support"
@@ -227,7 +233,11 @@ reference "sec:Extending-DGG"
 \end_inset
 
  will detail what DGP library developers need to do to add support for their
- library to DGG.
+ library to 
+\family sans
+DGG
+\family default
+.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -265,18 +275,22 @@ name "sec:DGG-DSL"
 \end_layout
 
 \begin_layout Standard
-DGP libraries generally offer an ability to generate generic representations
- for data types.
+DGP libraries generally offer an ability to generate generic code for data
+ types.
  In order to generate this code, a data type needs to be parsed, various
  properties of the data type need to be established and all information
- required to generate the generic representations need to be extracted.
+ required to generate the generic code need to be extracted.
  This process is very similar across different DGP libraries.
- DGG offers a simple DSL which captures all required information about data
- types in a consice format and parsing facilities to to parse data types
- into this DSL.
- DGP library writers can then proceed to generate generic representations
- from this DSL, eliminating the need to do data type parsing and analysis
- for every individual DGP library.
+ 
+\family sans
+DGG
+\family default
+ offers a simple DSL which captures all required information about data
+ types in a consice format and parsing facilities to parse data types into
+ this DSL.
+ DGP library writers can then proceed to generate generic code from this
+ DSL, eliminating the need to do data type parsing and analysis for every
+ individual DGP library.
  
 \end_layout
 
@@ -288,7 +302,11 @@ reference "alg:DGG-DSL-data"
 
 \end_inset
 
- are the top-level data types of the DGG DSL.
+ are the top-level data types of the 
+\family sans
+DGG
+\family default
+ DSL.
  The 
 \family typewriter
 TCInfo
@@ -300,7 +318,7 @@ DCInfo
  data type contains information for the data constructor.
  Properties such as the type constructor arity can be derived from the available
  information.
- Several data types have been omitted for brievety.
+ Several smaller data types have been omitted for brievety.
  The 
 \family typewriter
 DCVar
@@ -309,15 +327,16 @@ DCVar
 \family typewriter
 TCVar
 \family default
- types contain information such as the variable's name, kind and wheather
+ types contain information such as the variable's name, kind and whether
  or not the variable is universally quantified.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float algorithm
+placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset External
@@ -339,7 +358,11 @@ name "alg:DGG-DSL-data"
 
 \end_inset
 
-DGG DSL data types
+
+\family sans
+DGG
+\family default
+ DSL data types
 \end_layout
 
 \end_inset
@@ -353,11 +376,31 @@ DGG DSL data types
 \end_layout
 
 \begin_layout Standard
-From the information in the data types other useful information can be derived.
+[TODO: Rewrite this paragraph]From the information in the data types other
+ useful information can be derived, which can then be used to determine
+ if specific DGP libraries support the data type in question or not.
+ A data type is analysed, after which various properties are established.
+ These properties are based on those used in the comparison in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rodriguez:2008p606"
+
+\end_inset
+
+, with some additional properties added.
+ Algorithm 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "alg:Universe-data-type"
+
+\end_inset
+
+ shows the data type which is used to classify support properties.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float algorithm
+placement H
 wide false
 sideways false
 status collapsed
@@ -396,6 +439,95 @@ Universe data type
 \end_layout
 
 \begin_layout Section
+Template Haskell Support
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Template-Haskell-Support"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+End-users of DGP libraries will often want to have the generic code generated
+ for them automatically during compile-time.
+ 
+\family sans
+DGG
+\family default
+ uses the 
+\family sans
+Derive
+\family default
+ library to offer end-users the ability to generate the generic representation
+ types using Template Haskell.
+ The main advantage of this approach is that changing the programmer's data
+ types does require the code to be regenerated, since this happens automatically
+ at compile-time.
+\end_layout
+
+\begin_layout Standard
+Using 
+\family sans
+Derive
+\family default
+ to generate code is simple.
+ Each 
+\family sans
+DGG
+\family default
+ adapter offers a function called 
+\family typewriter
+derive*
+\family default
+, where the 
+\family typewriter
+*
+\family default
+ is the name of the DGP library in question.
+ Calling the 
+\family typewriter
+derive
+\family default
+ function with Template Haskell and passing the 
+\family typewriter
+derive*
+\family default
+ function and the data type for which generic code needs to be generated
+ is all that's needed.
+ The following snippet shows typical usage.
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename th.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Internally the 
+\family typewriter
+derive*
+\family default
+ function makes use of the same function the command-line tool uses to generate
+ the generic code.
+ Library writers only have to implement the generator code once.
+ More on this in section 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:Extending-DGG"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
 Command-line Support
 \begin_inset CommandInset label
 LatexCommand label
@@ -407,8 +539,15 @@ name "sec:Command-line-Support"
 \end_layout
 
 \begin_layout Standard
-DGG offers a command-line infrastructure to generate generic code using
- DGG as a standalone application.
+
+\family sans
+DGG
+\family default
+ offers a command-line infrastructure to generate generic code using 
+\family sans
+DGG
+\family default
+ as a standalone application.
  This approach offers two advantages.
  Firstly, library developers can more easily debug their generic code, since
  the generated code is either outputted to the standard output or is written
@@ -452,8 +591,11 @@ At least two arguments need to be passed to the tool for it to work: the
 --adapter
 \family default
  flag.
- The following snippet generates generic code for EMGM for the data types
- found in the file 
+ The following snippet generates generic code for 
+\family sans
+EMGM
+\family default
+ for the data types found in the file 
 \family typewriter
 DataTypes.hs
 \family default
@@ -536,76 +678,105 @@ Generated.hs
 \end_layout
 
 \begin_layout Section
-Template Haskell Support
-\begin_inset CommandInset label
-LatexCommand label
-name "sec:Template-Haskell-Support"
-
-\end_inset
-
-
+DGG Architecture
 \end_layout
 
 \begin_layout Standard
-End-users of DGP libraries will often want to have the generic code generated
- for them automatically during compile-time.
- DGG uses the Derive library to offer end-users the ability to generate
- the generic representation types using Template Haskell.
- The main advantage of this approach is that changing the programmer's data
- types does require the code to be regenerated, since this happens automatically
- at compile-time.
-\end_layout
-
-\begin_layout Standard
-Using Derive to generate code is simple.
- Each DGG adapter offers a function called 
-\family typewriter
-derive*
+This section will give a broad overview of the 
+\family sans
+DGG
 \family default
-, where the 
-\family typewriter
-*
-\family default
- is the name of the DGP library in question.
- Calling the 
-\family typewriter
-derive
-\family default
- function with Template Haskell and passing the 
-\family typewriter
-derive*
-\family default
- function and the data type for which generic code needs to be generated
- is all that's needed.
- The following snippet shows typical usage.
-\end_layout
-
-\begin_layout Standard
-\begin_inset External
-	template LHS
-	filename th.lhs
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Internally the 
-\family typewriter
-derive*
-\family default
- function makes use of the same function the CLI tool uses to generate the
- generic code.
- Library writers only have to implement the generator code once.
- More on this in section 
+ architecture.
+ Figure 
 \begin_inset CommandInset ref
 LatexCommand vref
-reference "sec:Extending-DGG"
+reference "fig:High-level-overview-of"
 
 \end_inset
 
-.
+ presents a high-level overview of the various components in the library
+ and how they related to one another.
+ It neatly shows how various concerns are separated so that the library
+ can be easily extended.
+\end_layout
+
+\begin_layout Standard
+As the figure shows, 
+\family sans
+DGG
+\family default
+ accepts two sources for input; a Haskell source file from the command-line
+ utility or a data type passed via Template Haskell.
+ Each data type passed to it is first parsed by the 
+\family sans
+haskell-src-exts
+\family default
+ parser, which produces an abstract syntax tree (AST) with information about
+ the data type in question.
+ This AST is converted into the 
+\family sans
+DGG
+\family default
+ DSL, which in turn is consumed by the adapter specified in either the command-l
+ine call or the Template Haskell call to produce a new 
+\family sans
+haskell-src-exts
+\family default
+ AST.
+ This new AST contains the library specific code that is to be generated.
+ In case the command-line tool is used, the 
+\family sans
+haskell-src-exts
+\family default
+ pretty printer is used to either write the generated code to standard output
+ or to file.
+ In case of Template Haskell, the AST is passed to 
+\family sans
+Derive
+\family default
+ which then instructs Template Haskell to output the generated code.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename dgg.dot
+	width 200pt
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:High-level-overview-of"
+
+\end_inset
+
+High-level overview of 
+\family sans
+DGG
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -646,7 +817,11 @@ DGG.AdapterAbstract
 \end_layout
 
 \begin_layout Standard
-An adapter module exports four functions:
+An adapter module exports four functions, where the 
+\family typewriter
+*
+\family default
+ is replaced with the name of the library:
 \end_layout
 
 \begin_layout Standard
@@ -660,12 +835,7 @@ An adapter module exports four functions:
 \end_layout
 
 \begin_layout Standard
-where the 
-\family typewriter
-*
-\family default
- is replaced with the name of the library.
- The 
+The 
 \family typewriter
 imports*
 \family default
@@ -674,8 +844,12 @@ imports*
 ImportDecl
 \family default
 s specifying the modules required to use the DGP library.
- This information is used by the DGG CLI tool to generate a module which
- can be compiled without further editing.
+ This information is used by the 
+\family sans
+DGG
+\family default
+ command-line tool to generate a module which can be compiled without further
+ editing.
  
 \end_layout
 
@@ -736,7 +910,11 @@ Decl
 \family typewriter
 derive*
 \family default
- function or by the DGG CLI tool.
+ function or by the 
+\family sans
+DGG
+\family default
+ command-line tool.
 \end_layout
 
 \begin_layout Standard
@@ -750,7 +928,7 @@ isSupp*
 \end_layout
 
 \begin_layout Standard
-To add support for the new DGP library to the CLI tool, the 
+To add support for the new DGP library to the command-line tool, the 
 \family typewriter
 Main
 \family default
@@ -806,22 +984,30 @@ name "sec:Developing-DGG"
 \end_layout
 
 \begin_layout Standard
-In developing DGG, several requirements needed to be met.
+In developing 
+\family sans
+DGG
+\family default
+, several requirements needed to be met.
  As stated before, the final product needs to be used via both Template
  Haskell and the command line.
  In addition, the library needed to be easily extendible with with support
  for new DGP libraries.
- Since the Template Haskell support and the CLI tool share a lot of functionalit
-y and becayse the library needs to be extendible, the library needed to
- be designed modularly in such a way that individual adapters are self-contained
- and expose a simple API.
+ Since the Template Haskell support and the command-line tool share a lot
+ of functionality and because the library needs to be extendible, the library
+ needed to be designed modularly in such a way that individual adapters
+ are self-contained and expose a simple API.
  Due to this approach, the code reuse for the various purposes is excellent.
  No functionality needs to be duplicated inside the adapters.
 \end_layout
 
 \begin_layout Standard
-DGG makes use of 
-\family typewriter
+
+\family sans
+DGG
+\family default
+ makes use of 
+\family sans
 Derive
 \family default
 's ability to generate Template Haskell code based on 
@@ -829,15 +1015,10 @@ Derive
 Decl
 \family default
 s from 
-\family typewriter
+\family sans
 haskell-src-exts
 \family default
-.
- This feature is supported by 
-\family typewriter
-Derive
-\family default
-'s 
+, using the 
 \family typewriter
 derivationCustom
 \family default
@@ -849,82 +1030,47 @@ deriveLib
  accepts a code generator function which is used to generate DGP library
  specific code.
  While the code for this feature is small and simple, it brings a powerful
- feature to DGG which optimally uses the rest of the infrastructure.
+ feature to 
+\family sans
+DGG
+\family default
+ which optimally uses the rest of the infrastructure.
  A major advantage of using 
-\family typewriter
+\family sans
 Derive
 \family default
- for this is that DGG does not have a direct dependency on Template Haskell
- either, but instead relies on 
-\family typewriter
+ for this is that 
+\family sans
+DGG
+\family default
+ does not have a direct dependency on Template Haskell either, but instead
+ relies on 
+\family sans
 Derive
 \family default
  to interface with Template Haskell.
 \end_layout
 
 \begin_layout Standard
-A high-level overview of the structure of DGG is presented in Figure 
-\begin_inset CommandInset ref
-LatexCommand vref
-reference "fig:High-level-overview-of"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename dgg.dot
-	width 200pt
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:High-level-overview-of"
-
-\end_inset
-
-High-level overview of DGG
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Developing the individual adapters for EMGM and SYB posed a challenge.
+Developing the individual adapters for 
+\family sans
+EMGM
+\family default
+ and 
+\family sans
+SYB
+\family default
+ posed a challenge.
  In this process, the knowledge obtained from the course in Generic Programming
  proved to be invaluable.
  For each of the adapters the approach taken was as follows.
  First, generic representations were created either manually or using existing
  generic code generation techniques.
- For SYB this was adding 
+ For 
+\family sans
+SYB
+\family default
+ this was adding 
 \family typewriter
 deriving (Data, Typeable)
 \family default
@@ -932,15 +1078,23 @@ deriving (Data, Typeable)
 \family typewriter
 -ddump-deriv
 \family default
- flag, after which the derived code could be copied to a separate module.
- Doing the same with EMGM proved a bit more challenging, since Template
- Haskell support for EMGM 0.3.1 is broken on GHC 6.12 and 7.0 and the latest
- development version lacks Template Haskell support.
+ flag to obtain the generated code on which the generated code from the
+ adapter could be based.
+ Doing the same with 
+\family sans
+EMGM
+\family default
+ proved a bit more challenging, since Template Haskell support for 
+\family sans
+EMGM
+\family default
+ 0.3.1 is broken on GHC 6.12 and 7.0 and the latest development version lacks
+ Template Haskell support.
  Instead, manual definitions from the exercises from the Generic Programming
  course were used instead.
  With the code available in a separate module, the parsing facilities from
  
-\family typewriter
+\family sans
 haskell-src-exts
 \family default
  could be used to get a representation of the generic code in its syntax.
@@ -953,8 +1107,12 @@ haskell-src-exts
 \begin_layout Standard
 Another approach to constructing the adapters could have been to analyse
  the existing Template Haskell code from the DGP libraries and modify that
- to work with the DGG data types and 
-\family typewriter
+ to work with the 
+\family sans
+DGG
+\family default
+ data types and 
+\family sans
 haskell-src-exts
 \family default
 .
@@ -962,8 +1120,12 @@ haskell-src-exts
  the same use cases as the library code.
  However, since the Template Haskell code was significantly different from
  the manually created adapter code and the code would have to be adapted
- to work with the DGG data types, this approach seemed to be at least as
- much work as writing the adapters from scratch.
+ to work with the 
+\family sans
+DGG
+\family default
+ data types, this approach seemed to be at least as much work as writing
+ the adapters from scratch.
 \end_layout
 
 \begin_layout Section
@@ -978,20 +1140,32 @@ name "sec:Future-Work"
 \end_layout
 
 \begin_layout Standard
-Although DGG's main features can already be demonstrated, it is still very
- much a work in progress.
+Although 
+\family sans
+DGG
+\family default
+'s main features can already be demonstrated, it is still very much a work
+ in progress.
  As such, plenty of work still remains to be done.
 \end_layout
 
 \begin_layout Standard
 First and foremost, the adapters that are currently available need to be
  improved so that they support the same data types as the existing DGP libraries.
- Only then can DGG be considered an alternative to existing solutions.
+ Only then can 
+\family sans
+DGG
+\family default
+ be considered an alternative to existing solutions.
  Several other current issues are directly related to this issue.
 \end_layout
 
 \begin_layout Standard
-Currently DGG only supports parsing data declarations.
+Currently 
+\family sans
+DGG
+\family default
+ only supports parsing data declarations.
  In the future, it must support other types as well, such as type synonyms
  and GADTs.
  Type synonyms would then first be resolved, after which generic code would
@@ -1016,25 +1190,39 @@ key "Rodriguez:2008p606"
  For example, some DGP libraries support nested types, while others do not.
  In case a data type is not supported and Template Haskell is used, an error
  should be raised and compilation should be aborted.
- When using the CLI tool, the generated code could just contain comments
- with support notices.
+ When using the command-line tool, the generated code could just contain
+ comments with support notices.
 \end_layout
 
 \begin_layout Standard
 In the current implementation, kind analysis is wrongly implemented.
  While the current approach of counting the number of type variables works
- fine for the SYB adapter, it fails to produce the right code for more complex
- kinds.
- Proper analysis of the kind information stored in the DGG data types can
- solve this problem.
- Both the EMGM and SYB adapters currently suffer from this problem.
+ fine for the 
+\family sans
+SYB
+\family default
+ adapter, it fails to produce the right code for more complex kinds.
+ Proper analysis of the kind information stored in the 
+\family sans
+DGG
+\family default
+ data types can solve this problem.
+ Both the 
+\family sans
+EMGM
+\family default
+ and 
+\family sans
+SYB
+\family default
+ adapters currently suffer from this problem.
 \end_layout
 
 \begin_layout Standard
 Wrapping up, infix constructors and operator associativity are not currently
  supported.
- Other work that is left to be done is improving the CLI argument parsing
- and adding support for more popular DGP libraries.
+ Other work that is left to be done is improving the command-line argument
+ parsing and adding support for more popular DGP libraries.
 \end_layout
 
 \begin_layout Section
@@ -1049,24 +1237,43 @@ name "sec:Conclusion"
 \end_layout
 
 \begin_layout Standard
-Using DGG, one is able to generate generic code for custom data types using
- either the DGG CLI tool or Template Haskell.
- The CLI tool offers convenience for DGP library developers, while the Template
- Haskell support offers convenience to the end-users of those libraries.
+Using 
+\family sans
+DGG
+\family default
+, one is able to generate generic code for custom data types using either
+ the 
+\family sans
+DGG
+\family default
+ command-line tool or Template Haskell.
+ The command-line tool offers convenience for DGP library developers, while
+ the Template Haskell support offers convenience to the end-users of those
+ libraries.
 \end_layout
 
 \begin_layout Standard
-Writing adapters for DGG instead of Template Haskell directly also frees
- DGP library developers from a direct dependency on Template Haskell, which
- normally requires them to modify library code on each new Template Haskell
- release.
+Writing adapters for 
+\family sans
+DGG
+\family default
+ instead of Template Haskell directly also frees DGP library developers
+ from a direct dependency on Template Haskell, which normally requires them
+ to modify library code on each new Template Haskell release.
 \end_layout
 
 \begin_layout Standard
-While the DGG version presented in this paper still requires significant
- work, a working proof of concept which shows its benefits is already available.
- Continued development can make DGG a viable solution to DGP library developers
- and their end-users.
+While the 
+\family sans
+DGG
+\family default
+ version presented in this paper still requires significant work, a working
+ proof of concept which shows its benefits is already available.
+ Continued development can make 
+\family sans
+DGG
+\family default
+ a viable solution to DGP library developers and their end-users.
 \end_layout
 
 \begin_layout Standard
