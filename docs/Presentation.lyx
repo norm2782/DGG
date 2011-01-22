@@ -6,6 +6,7 @@
 \begin_preamble
 \usetheme{uucs}
 \usepackage{lhs2tex}
+\usepackage{bbm}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
@@ -166,7 +167,7 @@ Sum of products view:
 \end_inset
 
 
-\begin_inset Formula $\mathbf{1}+(a\times List\, a)$
+\begin_inset Formula $\mathbbm{1}+(a\times List\, a)$
 \end_inset
 
 
@@ -606,7 +607,7 @@ Deciding on how to determine support for certain data types
 \begin_layout Itemize
 Based on 
 \shape italic
-Comparing Libraries for Generic Programming in Haskell
+Comparing Libraries for Generic Programming in Haskell`
 \shape default
  by Rodriguez et al.
 \end_layout
