@@ -679,6 +679,17 @@ Compiler independent
 \end_layout
 
 \end_deeper
+\begin_layout Itemize
+Available on GitHub: 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/norm2782/DGG"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout

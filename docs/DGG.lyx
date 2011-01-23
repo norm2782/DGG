@@ -70,27 +70,34 @@ Jurriën Stutterheim
 \end_layout
 
 \begin_layout Abstract
-[TODO: Rewrite this abstract!] Template Haskell is a tool frequently used
- by generic programming library developers to generate generic representations
- for data types.
- Unfortunately, developing for Template Haskell can be problematic.
- Debugging Template Haskell code is hard and its implementation changes
- frequently with new GHC releases.
- In addition, the ways the data types are analyzed are very similar between
- individual generic programming libraries, causing a lot of work to be duplicate
-d.
+Libraries for datatype-generic programming (DGP) often follow a similar
+ pattern when generating boilerplate code for converting data types to and
+ from their generic representations.
+ A data type is parsed and analysed and code is generated, often using Template
+ Haskell.
+ While this approach is convenient for the end-user of the DGP library,
+ it is not so for the library developer.
+ Parsing and analysing data types is done very similarly across different
+ DGP libraries, effectively duplicating work.
+ In addition, the Template Haskell implementation frequently changes with
+ new GHC releases, causing library developers a lot of work to maintain
+ compatibility with different GHC versions.
+ Also, debugging Template Haskell code can be hard, since it is only visible
+ using GHCi.
+ Finally, Template Haskell is only available on GHC, making the libraries
+ inconvenient to use on other compilers.
  This paper presents a solution, called 
 \family sans
 DGG
 \family default
-, which offers a solution to both of these problems without losing the benefits
- Template Haskell brings.
- This is achieved by offering both a command-line tool to generate code
- and by offering Template Haskell support via the 
+, which solves the aforementioned problems by parsing data types to a custom
+ DSL, by abstracting from Template Haskell using the 
 \family sans
 Derive
 \family default
- library.
+ library and by offering a command-line tool as an alternative to Template
+ Haskell for use in development or with other compilers.
+ 
 \end_layout
 
 \begin_layout Section
@@ -376,9 +383,9 @@ DGG
 \end_layout
 
 \begin_layout Standard
-[TODO: Rewrite this paragraph]From the information in the data types other
- useful information can be derived, which can then be used to determine
- if specific DGP libraries support the data type in question or not.
+From the information in the data types other useful information can be derived,
+ which can then be used to determine if specific DGP libraries support the
+ data type in question or not.
  A data type is analysed, after which various properties are established.
  These properties are based on those used in the comparison in 
 \begin_inset CommandInset citation
@@ -396,6 +403,9 @@ reference "alg:Universe-data-type"
 \end_inset
 
  shows the data type which is used to classify support properties.
+ The first nine properties are described in the aforementioned paper and
+ will therefor not be explained here.
+ The last one indicates support for mutually recursive data types.
 \end_layout
 
 \begin_layout Standard
