@@ -1,0 +1,24 @@
+digraph G {
+    "DGG CLI" -> "HSE Parser";
+    "TH Call" -> "HSE Parser";
+    
+    subgraph cluster0 {
+        label = "Core";
+        "HSE Parser" -> "DGG DSL";
+        "HSE Parser" -> "DGG DSL";
+        "DGG DSL" -> "DGG Adapter";
+        "DGG DSL" -> "DGG Adapter";
+    }
+
+    subgraph cluster1 {
+        label = "CLI Output"
+        "DGG Adapter" -> "HSE Pretty";
+        "HSE Pretty" -> stdout;
+        "HSE Pretty" -> File;
+    }
+
+    subgraph cluster2 {
+        label = "TH Output"
+        "DGG Adapter" -> Derive -> "TH Generation";
+    }
+}
