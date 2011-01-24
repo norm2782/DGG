@@ -73,11 +73,11 @@ Jurriën Stutterheim
 Libraries for datatype-generic programming (DGP) often follow a similar
  pattern when generating boilerplate code for converting data types to and
  from their generic representations.
- A data type is parsed and analysed and code is generated, often using Template
+ A data type is parsed and analyzed and code is generated, often using Template
  Haskell.
  While this approach is convenient for the end-user of the DGP library,
  it is not so for the library developer.
- Parsing and analysing data types is done very similarly across different
+ Parsing and analyzing data types is done very similarly across different
  DGP libraries, effectively duplicating work.
  In addition, the Template Haskell implementation frequently changes with
  new GHC releases, causing library developers a lot of work to maintain
@@ -293,7 +293,7 @@ DGP libraries generally offer an ability to generate generic code for data
 DGG
 \family default
  offers a simple DSL which captures all required information about data
- types in a consice format and parsing facilities to parse data types into
+ types in a concise format and parsing facilities to parse data types into
  this DSL.
  DGP library writers can then proceed to generate generic code from this
  DSL, eliminating the need to do data type parsing and analysis for every
@@ -325,7 +325,7 @@ DCInfo
  data type contains information for the data constructor.
  Properties such as the type constructor arity can be derived from the available
  information.
- Several smaller data types have been omitted for brievety.
+ Several smaller data types have been omitted for brevity.
  The 
 \family typewriter
 DCVar
@@ -386,7 +386,7 @@ DGG
 From the information in the data types other useful information can be derived,
  which can then be used to determine if specific DGP libraries support the
  data type in question or not.
- A data type is analysed, after which various properties are established.
+ A data type is analyzed, after which various properties are established.
  These properties are based on those used in the comparison in 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -809,7 +809,7 @@ DGG.Adapter
  namespace.
  The convention is that this new adapter has the same name as the generic
  programming library.
- E.g., if the DGP library is called 
+ For instance, if the DGP library is called 
 \family typewriter
 FooGP
 \family default
@@ -1001,8 +1001,8 @@ DGG
 , several requirements needed to be met.
  As stated before, the final product needs to be used via both Template
  Haskell and the command line.
- In addition, the library needed to be easily extendible with with support
- for new DGP libraries.
+ In addition, the library needed to be easily extendible with support for
+ new DGP libraries.
  Since the Template Haskell support and the command-line tool share a lot
  of functionality and because the library needs to be extendible, the library
  needed to be designed modularly in such a way that individual adapters
@@ -1111,11 +1111,11 @@ haskell-src-exts
  This representation could then be made dynamic so that the code could be
  generated for arbitrary data types.
  The downside to this approach is that the resulting adapters do not necessarily
- support all the usecases the original libraries support.
+ support all the use cases the original libraries support.
 \end_layout
 
 \begin_layout Standard
-Another approach to constructing the adapters could have been to analyse
+Another approach to constructing the adapters could have been to analyze
  the existing Template Haskell code from the DGP libraries and modify that
  to work with the 
 \family sans
@@ -1188,7 +1188,7 @@ After support for various types has been added, an improved algorithm for
  determining type support must be added.
  The current approach allows only normal data types and disallows any other
  types.
- However, it is desirable to analyse the data types for specific properties,
+ However, it is desirable to analyze the data types for specific properties,
  such as those described by Rodriguez et al.
 \begin_inset CommandInset citation
 LatexCommand cite
