@@ -64,7 +64,7 @@
 \begin_body
 
 \begin_layout Title
-DGG: Your One-Stop Shop for Generic Representations
+DGG: Datatype-generic Generator
 \end_layout
 
 \begin_layout Author
@@ -93,11 +93,11 @@ LatexCommand tableofcontents
 \end_layout
 
 \begin_layout Section
-DGG: Your One-Stop Shop for Generic Representations
+DGG: Datatype-generic Generator
 \end_layout
 
 \begin_layout Subsection
-Introduction to Datatype-Generic Programming
+Datatype-generic Programming
 \end_layout
 
 \begin_layout BeginFrame
@@ -119,12 +119,12 @@ This introduction is incomplete and does not aim to provide you with a full
 \end_layout
 
 \begin_layout BeginFrame
-Datatype Generic Programming
+Datatype-generic Programming
 \end_layout
 
 \begin_layout Itemize
-Datatype generic programming allows functions to be defined once for a wide
- range of different data types
+Datatype-generic programming (DGP) allows functions to be defined once for
+ a wide range of different data types
 \end_layout
 
 \begin_layout Itemize
@@ -182,8 +182,8 @@ EMGM embedding-projection pair
 \end_layout
 
 \begin_layout Standard
-Converting from and to generic representations is done using an embedding-projec
-tion pair (EP).
+Converting from and to a generic view is done using an embedding-projection
+ pair (EP).
 \end_layout
 
 \begin_layout Standard
@@ -201,7 +201,7 @@ tion pair (EP).
 \end_layout
 
 \begin_layout BeginFrame
-Generic representations
+Observation
 \end_layout
 
 \begin_layout Itemize
@@ -527,28 +527,6 @@ Where
 \end_layout
 
 \begin_layout BeginFrame
-DGG DSL
-\end_layout
-
-\begin_layout Standard
-DGP library specific code is generated from these data types
-\end_layout
-
-\begin_layout Standard
-\begin_inset External
-	template LHS
-	filename data-tcvc.lhs
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
 CLI tool
 \end_layout
 
@@ -572,6 +550,28 @@ The following line is added to make the library selectable via the
 \begin_inset External
 	template LHS
 	filename adaptersEntry.lhs
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+DGG DSL
+\end_layout
+
+\begin_layout Standard
+DGP library specific code is generated from these data types
+\end_layout
+
+\begin_layout Standard
+\begin_inset External
+	template LHS
+	filename data-tcvc.lhs
 
 \end_inset
 
