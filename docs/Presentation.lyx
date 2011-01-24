@@ -488,6 +488,24 @@ Reps.hs
 
 \end_layout
 
+\begin_layout BeginFrame
+Example output
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cli-output.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Subsection
 Extending DGG
 \end_layout

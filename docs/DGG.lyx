@@ -105,13 +105,20 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Datatype generic programming (DGP) libraries commonly offer the ability
- to generate the code required to obtain generic representations of data
- types and to operate on these representations.
+Datatype-generic programming
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gibbons:2007p644,Backhouse:1999p645"
+
+\end_inset
+
+ (DGP) libraries commonly offer the ability to generate the code required
+ to obtain generic representations of data types and to operate on these
+ representations.
  Generating this code is generally done at compile time using Template Haskell
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Sheard:2002p631"
+key "Sheard:2002p643"
 
 \end_inset
 
