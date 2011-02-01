@@ -1,34 +1,25 @@
-DGG: Datatype Generic Generator v0.1-dev
-
-./Main [OPTIONS]
-
-Common flags:
-  -a --adapter=ITEM   Adapter name. E.g.: EMGM
-  -i --input=ITEM     Input file
-  -d --datatype=ITEM  Specify datatype for which to derive. Generates for all
-                      datatypes if left blank.
-  -o --output=ITEM    Output file. E.g.: Instances.hs
-  -? --help           Display help message
-  -V --version        Print version information
+What follows below is a very short introduction to how you can use DGG. For a
+slightly longer introduction, see the presentation PDF in the docs folder. A
+full report will appear online later.
 
 
-The library currently only supports generating code for regular datatypes for EMGM. This code still lacks a couple of representations and plenty of bugs are still left. The usual disclaimers for prerelease software apply.
+Installing:
+Clone this repository and navigate to the root of the project. To install it,
+just type "cabal install".
 
 
-Usage:
+Using the command-line tool:
+Cabal installed the dgg executable in ~/.cabal/bin, which should be in your
+PATH. Type "dgg --help" in your favorite shell to get an overview of commands
+you can pass to the dgg tool. The adapter and input flags are required.
 
-There are two ways to use DGG: using the commandline or using Template Haskell. Both ways and their pros and cons are discussed in this section.
 
-Commandline:
-Using the commandline you can specify a file and have DGG generate generic code for all (currently) supported datatypes in that file. If no output file is specified, the generated code will be outputted to stdout, otherwise to the file specified.
-Using the adapter argument you can specify the generic programming library you wish to generate code for. Currently only EMGM is supported.
-The advantage of using the CLI tool is that it works regardless of your compiler. In addition, the generated code can easily be inspected and possibly debugged. The downside to this approach is that you manually need to generate and regenerate the code on updates.
-
-Template Haskell:
-Using TH to generate your generic representations is significantly more convenient than the CLI approach. Just specify the adapter function and the datatype you wish to use in the TH call: 
+Using Template Haskell:
+To derive code for a particular data type, add the following line to your code:
 
 $(derive deriveEMGM ''Foo)
 
-where Foo is the datastructure for which the EMGM representations will be generated.
-The advantage of this approach is that your generic representations will be regenerated on every compile. In addition, it is easier to specify which datatypes should have generic representations and which should not.
-The downside to this approach is that it is limited to the GHC compiler. In addition, the generated code can only be viewed using flags like -ddump-slices.
+Where deriveEMGM can (at this point) be replaced by deriveSYB to derive code
+for SYB instead. ''Foo is used to specify for which data type you wish to
+generate code. Don't forget to enable Template Haskell and import the
+appropriate DGG adapter: DGG.Adapter.EMGM or DGG.Adapter.SYB.
