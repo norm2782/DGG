@@ -56,7 +56,6 @@ data DCVar = DCVar { dcvRec  :: Maybe Name -- ^ (Opt.) Record syntax name
                    }
            deriving (Show)
 
--- TODO: Do we need tycon arity? or just distill that from list length?
 data TCInfo = TCInfo { tcName :: Name 
                      , tcType :: TypeType
                      , tcVars :: [TCVar]
