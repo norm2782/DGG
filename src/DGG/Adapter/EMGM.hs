@@ -86,15 +86,16 @@ mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
 --
 -- From
 bdeclFrom :: Int -> DCInfo -> Match
-bdeclFrom cnt vci@(DCInfo n a _ _ _ _) = mkMatch fromFunName [pApp n
-                                                   (map mkPIdent (genNames a))]
-                                                   (fromEP 0 cnt vci)
+bdeclFrom cnt dci = mkMatch fromFunName [pApp n (map mkPIdent (genNames a))] 
+    (fromEP 0 cnt dci)
+    where n = dcName dci
+          a = dcArity dci
 
 fromEP :: Int -> Int -> DCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
 
 owFrom :: Int -> Int -> DCInfo -> Exp
-owFrom cnt nc vci = App (mkStrCon "R") (fromEP (cnt + 1) nc vci)
+owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
 
 mkFromRs :: Int -> Exp
 mkFromRs 0  = mkStrCon unitType
@@ -105,21 +106,23 @@ mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
 
 -- To
 bdeclTo :: Int -> DCInfo -> Match
-bdeclTo cnt vci = mkMatch toFunName [toEP 0 cnt vci] (mkToRhs vci)
+bdeclTo cnt dci = mkMatch toFunName [toEP 0 cnt dci] (mkToRhs dci)
 
 toEP :: Int -> Int -> DCInfo -> Pat
 toEP = ep mkToRs mkPatSum owTo
 
 owTo :: Int -> Int -> DCInfo -> Pat
-owTo cnt nc vci = PApp (mkUId "R") [(toEP (cnt + 1) nc vci)]
+owTo cnt nc dci = PApp (mkUId "R") [(toEP (cnt + 1) nc dci)]
 
 mkToRs :: Int -> Pat
 mkToRs 0 = pApp (name unitType) []
 mkToRs i = buildPProd i
 
 mkToRhs :: DCInfo -> Exp
-mkToRhs (DCInfo n 0 _ _ _ _) = mkNCon n
-mkToRhs (DCInfo n a _ _ _ _) = appFun (mkNCon n) (map mkIdent $ genNames a)
+mkToRhs dci | a == 0    = mkNCon n
+            | otherwise = appFun (mkNCon n) (map mkIdent $ genNames a)
+            where n = dcName dci
+                  a = dcArity dci
 
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
@@ -147,11 +150,12 @@ foldPInApp' op mk (x:xs) = PInfixApp (mk x) op (foldPInApp' op mk xs)
 
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> DCInfo -> a)
    -> Int -> Int -> DCInfo -> a
-ep mkr mks ow _   1  vci = mkr $ dcArity vci
-ep mkr mks ow cnt nc vci@(DCInfo _ a i _ _ _)
-    | i == cnt + 1 && i == nc - 1 = mks "R" a
-    | i == cnt                    = mks "L" a
-    | otherwise                   = ow cnt nc vci
+ep mkr mks ow _   1  dci = mkr $ dcArity dci
+ep mkr mks ow cnt nc dci | i == cnt + 1 && i == nc - 1 = mks "R" a
+                         | i == cnt                    = mks "L" a
+                         | otherwise                   = ow cnt nc dci
+                         where a = dcArity dci
+                               i = dcIndex dci
 
 mkGenG  = ClassA (mkUId "Generic")  [mkTyVar "g"]
 mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
@@ -239,8 +243,10 @@ buildRepProd :: Int -> Exp
 buildRepProd n = foldInApp fnRProd mkIdent $ replicate n "rep"
 
 mkSProd :: DCInfo -> Exp
-mkSProd (DCInfo n 0 _ _ _ _) = mkSProd' n 0 appRep
-mkSProd (DCInfo n a _ _ _ _) = mkSProd' n a (buildRepProd a) 
+mkSProd dci | a == 0    = mkSProd' n 0 appRep
+            | otherwise = mkSProd' n a (buildRepProd a) 
+            where a = dcArity dci
+                  n = dcName dci
 
 mkSProd' :: Name -> Int -> Exp -> Exp
 mkSProd' n a r = foldApp id $ reverse [appCon, mkConDescr n (toInteger a), r]

@@ -20,11 +20,11 @@ parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 -- TODO: Support for infix operators and support for assiciativity.
 mkVCI :: (Int, QualConDecl) -> DCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    DCInfo n (length bts) i Nonfix LeftAssoc $ map mkBTRec bts
+    DCInfo n i Nonfix LeftAssoc $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    DCInfo n 2 i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
+    DCInfo n i Nonfix LeftAssoc $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    DCInfo n (length bts) i Nonfix LeftAssoc $ map mkRec $ fromRec bts
+    DCInfo n i Nonfix LeftAssoc $ map mkRec $ fromRec bts
 
 fromRec :: [([Name], BangType)] -> [(Name, BangType)]
 fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!

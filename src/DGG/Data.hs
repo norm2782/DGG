@@ -46,13 +46,13 @@ data Associativity = LeftAssoc
                    | RightAssoc
                    deriving (Show)
 
-data TCVar = TCVar { tcvName :: Name
-                   , tcvKind :: Maybe Kind 
+data TCVar = TCVar { tcvName :: Name -- ^ Type variable name
+                   , tcvKind :: Maybe Kind -- ^ (Opt.) Explicit kind annotation
                    }
            deriving (Show)
 
-data DCVar = DCVar { dcvRec   :: Maybe Name
-                   , dcvBType :: Type 
+data DCVar = DCVar { dcvRec  :: Maybe Name -- ^ (Opt.) Record syntax name
+                   , dcvType :: Type -- ^ Variable type
                    }
            deriving (Show)
 
@@ -64,12 +64,13 @@ data TCInfo = TCInfo { tcName :: Name
                      }
             deriving (Show)
 
--- TODO: Remove Arity here and calculate that based on dcVars
 data DCInfo = DCInfo { dcName    :: Name
-                     , dcArity   :: Int
                      , dcIndex   :: Int
                      , dcFixity  :: ConFixity
                      , dcAssoc   :: Associativity
                      , dcVars    :: [DCVar]
                      }
             deriving (Show)
+
+dcArity :: DCInfo -> Int
+dcArity = length . dcVars

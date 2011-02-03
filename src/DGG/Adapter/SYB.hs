@@ -117,21 +117,27 @@ mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
     )]
 
 mkGunfoldAlt :: (Int, DCInfo) -> Alt
-mkGunfoldAlt (i, (DCInfo n a _ _ _ _)) = Alt srcLoc (PLit (Int (toInteger i))
-    ) (UnGuardedAlt (mkGunfoldKs n a)) bdecls
+mkGunfoldAlt (i, dci) = Alt srcLoc (PLit (Int (toInteger i)))
+    (UnGuardedAlt (mkGunfoldKs n a)) bdecls
+    where n = dcName dci
+          a = dcArity dci
 
 mkGunfoldKs :: Name -> Int -> Exp
 mkGunfoldKs n 0 = App (mkIdent "z") (mkNCon n)
 mkGunfoldKs n a = Paren (App (mkIdent "k") (mkGunfoldKs n $ a - 1))
 
 mkToConstr :: DCInfo -> Match
-mkToConstr (DCInfo n a _ _ _ _) = mkMatch "toConstr" [PApp (UnQual 
-    n) (replicate a PWildCard)] (mkIdent $ mkConstrName n)
+mkToConstr dci = mkMatch "toConstr" [PApp (UnQual n) (replicate a PWildCard)]
+    (mkIdent $ mkConstrName n)
+    where n = dcName dci
+          a = dcArity dci
 
 mkGfoldl :: DCInfo -> Match
-mkGfoldl (DCInfo n a _ _ _ _) = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z",
-    PApp (UnQual n) (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $
-    reverse $ App (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
+mkGfoldl dci = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z", PApp (UnQual n)
+    (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $ reverse $ App
+    (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
+    where n = dcName dci
+          a = dcArity dci
 
 mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
     (UnGuardedRhs (App (App (mkIdent "mkDataType") (Lit (String (fromName n)))) (List
@@ -140,12 +146,13 @@ mkDT (TCInfo n _ _ vcs) = PatBind srcLoc (mkPIdent $ mkDTName n) Nothing
 mkConstrName :: Name -> String
 mkConstrName n = "dggConstr_" ++ fromName n
 
-mkConstr tcn (DCInfo n _ _ _ _ _) = PatBind srcLoc (mkPIdent $ mkConstrName n)
-    Nothing (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
+mkConstr :: Name -> DCInfo -> Decl
+mkConstr tcn dci = PatBind srcLoc (mkPIdent $ mkConstrName n) Nothing
+    (UnGuardedRhs (App (App (App (App (mkIdent "mkConstr")
     (mkIdent $ mkDTName tcn)) (mkStrLit n)) (List [])
 --    (List [Lit (String "lTree"),Lit (String "bVal"),Lit (String "rTree")]) TODO: Record names
     ) (Con (UnQual(Ident "Prefix"))))) bdecls -- TODO: Fixity
-
+    where n = dcName dci
 
 {-
 DataDecl srcLoc DataType [] (Ident "MyTree") [UnkindedVar (Ident "a")] [
