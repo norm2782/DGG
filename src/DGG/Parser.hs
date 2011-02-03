@@ -19,11 +19,11 @@ parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 
 mkVCI :: (Int, QualConDecl) -> DCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
-    DCInfo n i Nonfix $ map mkBTRec bts
+    DCInfo n i Prefix $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    DCInfo n i Infix $ map mkBTRec [btl, btr]
+    DCInfo n i Prefix $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
-    DCInfo n i Nonfix $ map mkRec $ fromRec bts
+    DCInfo n i Prefix $ map mkRec $ fromRec bts
 
 fromRec :: [([Name], BangType)] -> [(Name, BangType)]
 fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!

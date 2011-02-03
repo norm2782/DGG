@@ -31,7 +31,7 @@ data TypeType = TyDataType
 
 -- TODO: Data types only contain possible infix constructors. InfixDecls need
 -- to be parsed separately to provide the right fixity information.
-data ConFixity = Nonfix
+data ConFixity = Prefix
                | Infix
                | Infixl 
                | Infixr 
