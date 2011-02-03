@@ -2,13 +2,6 @@ module DGG.Data where
 
 import Language.Haskell.Exts.Syntax
 
--- TODO: Define TCInfo instances for primitive types?
--- TODO: Capture quantified types and GADTs
---
--- TODO: In EMGM module: put together the representations as used by EMGM using
--- haskell-src-exts. Then use these with Derive to either generate code or to
--- feed TH.
---
 --
 -- Datatypes: DataDecl DatatType
 -- Type aliases: TypeDecl nothing (just TypeDecl)
@@ -44,16 +37,19 @@ data ConFixity = Nonfix
                | Infixr 
                deriving (Eq, Show)
 
+-- | Contains type constructor variable information
 data TCVar = TCVar { tcvName :: Name -- ^ Type variable name
                    , tcvKind :: Maybe Kind -- ^ (Opt.) Explicit kind annotation
                    }
            deriving (Show)
 
+-- | Contains data constructor variable information
 data DCVar = DCVar { dcvRec  :: Maybe Name -- ^ (Opt.) Record syntax name
                    , dcvType :: Type -- ^ Variable type
                    }
            deriving (Show)
 
+-- | Contains type constructor information
 data TCInfo = TCInfo { tcName :: Name 
                      , tcType :: TypeType
                      , tcVars :: [TCVar]
@@ -61,6 +57,7 @@ data TCInfo = TCInfo { tcName :: Name
                      }
             deriving (Show)
 
+-- | Contains data constructor information
 data DCInfo = DCInfo { dcName   :: Name
                      , dcIndex  :: Int
                      , dcFixity :: ConFixity
@@ -68,5 +65,7 @@ data DCInfo = DCInfo { dcName   :: Name
                      }
             deriving (Show)
 
+-- | Calculate the arity of a data constructor by counting the number of
+-- data constructor variables.
 dcArity :: DCInfo -> Int
 dcArity = length . dcVars
