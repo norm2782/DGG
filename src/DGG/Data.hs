@@ -37,14 +37,10 @@ data TypeType = TyDataType
               deriving (Show)  
 
 data ConFixity = Nonfix
-               | Infix 
-               | Infixl
-               | Infixr
+               | Infix
+               | Infixl 
+               | Infixr 
                deriving (Eq, Show)
-
-data Associativity = LeftAssoc
-                   | RightAssoc
-                   deriving (Show)
 
 data TCVar = TCVar { tcvName :: Name -- ^ Type variable name
                    , tcvKind :: Maybe Kind -- ^ (Opt.) Explicit kind annotation
@@ -66,7 +62,6 @@ data TCInfo = TCInfo { tcName :: Name
 data DCInfo = DCInfo { dcName    :: Name
                      , dcIndex   :: Int
                      , dcFixity  :: ConFixity
-                     , dcAssoc   :: Associativity
                      , dcVars    :: [DCVar]
                      }
             deriving (Show)

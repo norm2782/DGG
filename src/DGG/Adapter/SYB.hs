@@ -46,7 +46,7 @@ isSuppSYB' MutRec    = False
 
 -- TODO: No gunfold when quantification is used?
 
--- TODO: For these next tgree we need more information about the kinds. The
+-- TODO: For these next three we need more information about the kinds. The
 -- current approach for determining the kind of datatypes is plain wrong: it
 -- just counts the number of tycon arguments. Instead, it should take the kind
 -- of those arguments into account.
