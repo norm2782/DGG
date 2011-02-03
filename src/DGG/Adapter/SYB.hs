@@ -51,10 +51,10 @@ isSuppSYB' MutRec    = False
 -- just counts the number of tycon arguments. Instead, it should take the kind
 -- of those arguments into account.
 mkTypeableNs :: TCInfo -> [Decl]
-mkTypeableNs tci@(TCInfo _ _ tvs _) | n == 0           = [mkTypeable tci]
-                                    | n >= 1 && n <= 7 = [mkTypeableN tci]
-                                    | otherwise        = []
-                                    where n = length tvs
+mkTypeableNs tci | n == 0           = [mkTypeable tci]
+                 | n >= 1 && n <= 7 = [mkTypeableN tci]
+                 | otherwise        = []
+                 where n = length $ tcVars tci
 
 -- TODO: Refactor the next two: lots of shared stuff here!
 mkTypeable :: TCInfo -> Decl
