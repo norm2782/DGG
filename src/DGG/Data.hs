@@ -36,6 +36,8 @@ data TypeType = TyDataType
               | TyGADT
               deriving (Show)  
 
+-- TODO: Data types only contain possible infix constructors. InfixDecls need
+-- to be parsed separately to provide the right fixity information.
 data ConFixity = Nonfix
                | Infix
                | Infixl 
@@ -59,10 +61,10 @@ data TCInfo = TCInfo { tcName :: Name
                      }
             deriving (Show)
 
-data DCInfo = DCInfo { dcName    :: Name
-                     , dcIndex   :: Int
-                     , dcFixity  :: ConFixity
-                     , dcVars    :: [DCVar]
+data DCInfo = DCInfo { dcName   :: Name
+                     , dcIndex  :: Int
+                     , dcFixity :: ConFixity
+                     , dcVars   :: [DCVar]
                      }
             deriving (Show)
 

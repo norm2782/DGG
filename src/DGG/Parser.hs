@@ -17,12 +17,11 @@ parseBind :: TyVarBind -> [TCVar] -> [TCVar]
 parseBind (KindedVar n k) ts = TCVar n (Just k) : ts
 parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 
--- TODO: Support for infix operators 
 mkVCI :: (Int, QualConDecl) -> DCInfo
 mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
     DCInfo n i Nonfix $ map mkBTRec bts
 mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
-    DCInfo n i Nonfix $ map mkBTRec [btl, btr]
+    DCInfo n i Infix $ map mkBTRec [btl, btr]
 mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
     DCInfo n i Nonfix $ map mkRec $ fromRec bts
 
