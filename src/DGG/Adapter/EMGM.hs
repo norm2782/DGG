@@ -57,7 +57,11 @@ mkEPName n = "dggEP_" ++ (fromName n)
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType _ vcis) =
-  PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing rhs (mkBDecls vcis)
+  PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing
+  (UnGuardedRhs (App (App (Con $ mkUId "EP") (mkIdent fromFunName))
+  (mkIdent toFunName))) (BDecls [ FunBind $ map (bdeclFrom ln) vcis
+                                , FunBind $ map (bdeclTo ln) vcis ])
+  where ln = length vcis
 
 createNTEP   (TCInfo tn TyNewType _ vcis) = undefined
 createSynEP  (TCInfo tn TySynonym _ vcis) = undefined
@@ -67,16 +71,6 @@ fromFunName, toFunName, unitType :: String
 fromFunName = "from'"
 toFunName   = "to'"
 unitType    = "Unit"
-
-rhs :: Rhs
-rhs = UnGuardedRhs (App (App (Con $ mkUId "EP")
-                             (mkIdent fromFunName))
-                             (mkIdent toFunName))
-
-mkBDecls :: [DCInfo] -> Binds
-mkBDecls vcis = BDecls [ FunBind $ map (bdeclFrom ln) vcis
-                     , FunBind $ map (bdeclTo ln) vcis ]
-    where ln = length vcis
 
 --    --
 --    --
@@ -94,15 +88,16 @@ bdeclFrom cnt dci = mkMatch fromFunName [pApp n (map mkPIdent (genNames a))]
 fromEP :: Int -> Int -> DCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
 
-owFrom :: Int -> Int -> DCInfo -> Exp
-owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
-
 mkFromRs :: Int -> Exp
 mkFromRs 0  = mkStrCon unitType
-mkFromRs rs = buildProd rs
+mkFromRs n = foldInApp' (QConOp . unQualSym $ ":*:") mkIdent $ genNames n
 
 mkExpSum :: String -> Int -> Exp
 mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
+
+owFrom :: Int -> Int -> DCInfo -> Exp
+owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
+
 
 -- To
 bdeclTo :: Int -> DCInfo -> Match
@@ -126,11 +121,6 @@ mkToRhs dci | a == 0    = mkNCon n
 
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
-
--- Generic
-
-buildProd :: Int -> Exp
-buildProd n = foldInApp' ((QConOp . unQualSym) ":*:") mkIdent $ genNames n
 
 -- TODO: Port this back to foldInApp
 foldInApp' :: QOp -> (a -> Exp) -> [a] -> Exp
