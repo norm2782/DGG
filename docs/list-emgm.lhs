@@ -1,9 +1,5 @@
 %include polycode.fmt
 \begin{code}
-data List a = Nil | Cons a (List a)
-type ListRep a = Unit :+: a :*: List a
-
-listEP :: EP (List a) (ListRep a)
 listEP = EP from to
     where
         from Nil           = L Unit
