@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Main where
 
 import System (getArgs)
