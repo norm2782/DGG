@@ -13,17 +13,17 @@ Build-Type:     Simple
 Tested-With:    GHC
 
 Library
-    Build-Depends:  base >= 4.0 && <= 5.0
-    Hs-Source-Dirs: src
+    Build-Depends:   base >= 4.0 && <= 5.0
+    Hs-Source-Dirs:  src
     Exposed-modules: DGG.AdapterAbstract, DGG.Adapter.SYB, DGG.Adapter.EMGM,
                      DGG.Adapter.MultiRec, DGG.Data, DGG.Parser
 
 Executable dgg
-    Main-is: Main.hs
-    Build-Depends: cmdargs >= 0.6.5, derive >= 2.4.1, haskell-src-exts >= 1.9.6, containers >= 0.3, syb >= 0.1
+    Main-is:        Main.hs
+    Build-Depends:  cmdargs >= 0.6.5, derive >= 2.4.1, haskell-src-exts >= 1.9.6, containers >= 0.3, syb >= 0.1
     Hs-Source-Dirs: src
 
 Executable dgg-hse
-    Main-is: HSEParser.hs
-    Build-Depends: haskell-src-exts >= 1.9.6, haskell98
+    Main-is:        HSEParser.hs
+    Build-Depends:  haskell-src-exts >= 1.9.6, haskell98
     Hs-Source-Dirs: src
