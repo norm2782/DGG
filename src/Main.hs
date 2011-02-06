@@ -33,7 +33,7 @@ dgg = DGGArgs { adapter    = def &= help "Adapter name. E.g.: EMGM"
               , modulename = def &= help "Name of the module. Defaults to GenericReps."
               , output     = def &= typFile &= help "Output file. E.g.: Instances.hs"
               }
-              &= summary "DGG: Datatype Generic Generator v0.1-dev"
+              &= summary "DGG: Datatype Generic Generator v0.1.1-dev"
               &= program "dgg"
 
 main :: IO ()
@@ -47,21 +47,17 @@ main = do
             then return "GenericReps"
             else return $ modulename args
     pr   <- parseFile (input args)
-    adap <- return $ adapters ! (strToLower $ adapter args)
+    adap <- return $ adapters ! (map toLower $ adapter args)
     code <- return $ genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
-    if hasFileOutput args
+    if (not . null . output) args
         then writeFile (output args) code
         else putStrLn code
 
-strToLower :: String -> String
-strToLower = map toLower
-
-hasFileOutput :: DGGArgs -> Bool
-hasFileOutput = not . null . output
-
-genCode :: ParseResult Module -> String -> CodeGenerator -> LibSupport -> [ImportDecl] -> String
+genCode :: ParseResult Module -> String -> CodeGenerator -> LibSupport
+        -> [ImportDecl] -> String
 genCode (ParseFailed l m) _ _ _ _  = error $ "Failed to parse module."
-                                        ++ "Error on line " ++ show l ++ ": " ++ m
+                                          ++ "Error on line " ++ show l ++ ": "
+                                          ++ m
 genCode (ParseOk m)       n p s is = prettyPrint (mkModule n p is $ listify s m)
 
 mkModule :: String -> CodeGenerator -> [ImportDecl] -> [Decl] -> Module
