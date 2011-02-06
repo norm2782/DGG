@@ -85,18 +85,18 @@ bdeclFrom cnt dci = mkMatch fromFunName [pApp n (map mkPIdent (genNames a))]
     where n = dcName dci
           a = dcArity dci
 
+owFrom :: Int -> Int -> DCInfo -> Exp
+owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
+
 fromEP :: Int -> Int -> DCInfo -> Exp
 fromEP = ep mkFromRs mkExpSum owFrom
 
 mkFromRs :: Int -> Exp
-mkFromRs 0  = mkStrCon unitType
+mkFromRs 0 = mkStrCon unitType
 mkFromRs n = foldlInApp (QConOp . unQualSym $ ":*:") mkIdent $ genNames n
 
 mkExpSum :: String -> Int -> Exp
 mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
-
-owFrom :: Int -> Int -> DCInfo -> Exp
-owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
 
 
 -- To
@@ -111,7 +111,7 @@ toEP = ep mkToRs mkPatSum owTo
 
 mkToRs :: Int -> Pat
 mkToRs 0 = pApp (name unitType) []
-mkToRs i = buildPProd i
+mkToRs n = foldlPInApp (unQualSym ":*:") mkPIdent (genNames n)
 
 mkToRhs :: DCInfo -> Exp
 mkToRhs dci | a == 0    = mkNCon n
@@ -122,13 +122,8 @@ mkToRhs dci | a == 0    = mkNCon n
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
 
-buildPProd :: Int -> Pat
-buildPProd rs = buildInPApp (genNames rs)
 
-buildInPApp :: [String] -> Pat
-buildInPApp = foldlPInApp (unQualSym ":*:") mkPIdent
-
-
+-- Rest
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> DCInfo -> a)
    -> Int -> Int -> DCInfo -> a
 ep mkr mks ow _   1  dci = mkr $ dcArity dci
