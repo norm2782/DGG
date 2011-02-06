@@ -1,7 +1,7 @@
 module DGG.AdapterAbstract (
       srcLoc, mkStrCon, mkNCon, mkIdent, mkUId, mkPIdent, genNames, unQualSym
-    , mkImport, appInfix, bdecls, mkTyCon, mkTyVar, foldInApp, foldPInApp
-    , foldXInApp, foldApp, foldTyApp, foldXApp, mkMatch, fromName, mkStrLit
+    , mkImport, appInfix, bdecls, mkTyCon, mkTyVar, foldlInApp, foldrInApp
+    , foldlPInApp, foldrPInApp, foldApp, foldTyApp, mkMatch, fromName, mkStrLit
     , deriveLib
     , module Data.Derive.Internal.Derivation
     , module DGG.Data
@@ -57,15 +57,25 @@ mkTyCon = TyCon . UnQual
 mkTyVar :: String -> Type
 mkTyVar = TyVar . Ident
 
-foldInApp :: QOp -> (a -> Exp) -> [a] -> Exp
-foldInApp = foldXInApp InfixApp
+foldrInApp :: QOp -> (a -> Exp) -> [a] -> Exp
+foldrInApp = foldXRInApp InfixApp
 
-foldPInApp :: QName -> (a -> Pat) -> [a] -> Pat
-foldPInApp = foldXInApp PInfixApp
+foldlInApp :: QOp -> (a -> Exp) -> [a] -> Exp
+foldlInApp = foldXLInApp InfixApp
 
-foldXInApp :: (b -> c -> b -> b) -> c -> (a -> b) -> [a] -> b
-foldXInApp _ _  mk [x] = mk x
-foldXInApp c op mk (x:xs) = c (foldXInApp c op mk xs) op (mk x)
+foldlPInApp :: QName -> (a -> Pat) -> [a] -> Pat
+foldlPInApp = foldXLInApp PInfixApp
+
+foldrPInApp :: QName -> (a -> Pat) -> [a] -> Pat
+foldrPInApp = foldXRInApp PInfixApp
+
+foldXRInApp :: (b -> c -> b -> b) -> c -> (a -> b) -> [a] -> b
+foldXRInApp _ _  mk [x] = mk x
+foldXRInApp c op mk (x:xs) = c (foldXRInApp c op mk xs) op (mk x)
+
+foldXLInApp :: (b -> c -> b -> b) -> c -> (a -> b) -> [a] -> b
+foldXLInApp _ _  mk [x] = mk x
+foldXLInApp c op mk (x:xs) = c (mk x) op (foldXLInApp c op mk xs)
 
 foldApp :: (a -> Exp) -> [a] -> Exp
 foldApp = foldXApp App

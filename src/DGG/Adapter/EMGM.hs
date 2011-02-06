@@ -90,7 +90,7 @@ fromEP = ep mkFromRs mkExpSum owFrom
 
 mkFromRs :: Int -> Exp
 mkFromRs 0  = mkStrCon unitType
-mkFromRs n = foldInApp' (QConOp . unQualSym $ ":*:") mkIdent $ genNames n
+mkFromRs n = foldlInApp (QConOp . unQualSym $ ":*:") mkIdent $ genNames n
 
 mkExpSum :: String -> Int -> Exp
 mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
@@ -103,11 +103,11 @@ owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
 bdeclTo :: Int -> DCInfo -> Match
 bdeclTo cnt dci = mkMatch toFunName [toEP 0 cnt dci] (mkToRhs dci)
 
-toEP :: Int -> Int -> DCInfo -> Pat
-toEP = ep mkToRs mkPatSum owTo
-
 owTo :: Int -> Int -> DCInfo -> Pat
 owTo cnt nc dci = PApp (mkUId "R") [(toEP (cnt + 1) nc dci)]
+
+toEP :: Int -> Int -> DCInfo -> Pat
+toEP = ep mkToRs mkPatSum owTo
 
 mkToRs :: Int -> Pat
 mkToRs 0 = pApp (name unitType) []
@@ -122,21 +122,12 @@ mkToRhs dci | a == 0    = mkNCon n
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]
 
--- TODO: Port this back to foldInApp
-foldInApp' :: QOp -> (a -> Exp) -> [a] -> Exp
-foldInApp' _  mk [x]    = mk x
-foldInApp' op mk (x:xs) = InfixApp (mk x) op (foldInApp' op mk xs)
-
 buildPProd :: Int -> Pat
 buildPProd rs = buildInPApp (genNames rs)
 
 buildInPApp :: [String] -> Pat
-buildInPApp = foldPInApp' (unQualSym ":*:") mkPIdent
+buildInPApp = foldlPInApp (unQualSym ":*:") mkPIdent
 
--- TODO: Port this back to foldPInApp
-foldPInApp' :: QName -> (a -> Pat) -> [a] -> Pat
-foldPInApp' _  mk [x]    = mk x
-foldPInApp' op mk (x:xs) = PInfixApp (mk x) op (foldPInApp' op mk xs)
 
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> DCInfo -> a)
    -> Int -> Int -> DCInfo -> a
@@ -181,31 +172,31 @@ appFrep = mkIdent "frep"
 mkRepFn :: TCInfo -> Decl
 mkRepFn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkRepName tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
-    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (mkIdent $ mkEPName tn)) fnApp (foldlInApp fnRSum mkSProd $ reverse vcis)))
     bdecls
 
 mkFRepFn :: TCInfo -> Decl
 mkFRepFn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRepName tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
-    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (mkIdent $ mkEPName tn)) fnApp (foldlInApp fnRSum mkSProd $ reverse vcis)))
     bdecls
 
 mkFRep2Fn :: TCInfo -> Decl
 mkFRep2Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRep2Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
-    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (mkIdent $ mkEPName tn)) fnApp (foldlInApp fnRSum mkSProd $ reverse vcis)))
     bdecls
 
 mkBiFRep2Fn :: TCInfo -> Decl
 mkBiFRep2Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkBiFRep2Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
-    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (mkIdent $ mkEPName tn)) fnApp (foldlInApp fnRSum mkSProd $ reverse vcis)))
     bdecls
 
 mkFRep3Fn :: TCInfo -> Decl
 mkFRep3Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRep3Name tn)
     Nothing (UnGuardedRhs (InfixApp (App (mkIdent "rtype")
-    (mkIdent $ mkEPName tn)) fnApp (foldInApp fnRSum mkSProd $ reverse vcis)))
+    (mkIdent $ mkEPName tn)) fnApp (foldlInApp fnRSum mkSProd $ reverse vcis)))
     bdecls
 
 
@@ -230,7 +221,7 @@ mkFRep3Fn (TCInfo tn TyDataType tcv vcis) = PatBind srcLoc (mkPIdent $ mkFRep3Na
 -}
 
 buildRepProd :: Int -> Exp
-buildRepProd n = foldInApp fnRProd mkIdent $ replicate n "rep"
+buildRepProd n = foldlInApp fnRProd mkIdent $ replicate n "rep"
 
 mkSProd :: DCInfo -> Exp
 mkSProd dci | a == 0    = mkSProd' n 0 appRep

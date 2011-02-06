@@ -133,9 +133,9 @@ mkToConstr dci = mkMatch "toConstr" [PApp (UnQual n) (replicate a PWildCard)]
           a = dcArity dci
 
 mkGfoldl :: DCInfo -> Match
-mkGfoldl dci = mkMatch "gfoldl" [mkPIdent "k", mkPIdent "z", PApp (UnQual n)
-    (map mkPIdent $ genNames a)] (foldInApp (appInfix "k") id $ reverse $ App
-    (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
+mkGfoldl dci = mkMatch "gfoldl"
+    [mkPIdent "k", mkPIdent "z", PApp (UnQual n) (map mkPIdent $ genNames a)]
+    (foldrInApp (appInfix "k") id $ reverse $ App (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
     where n = dcName dci
           a = dcArity dci
 
