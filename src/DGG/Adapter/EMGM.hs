@@ -108,7 +108,7 @@ toEP :: Int -> Int -> DCInfo -> Pat
 toEP = ep mkToRs mkPatSum owTo
 
 owTo :: Int -> Int -> DCInfo -> Pat
-owTo cnt nc dci = PApp (mkUId "R") [(toEP (cnt + 1) nc dci)]
+owTo cnt nc dci = PApp (mkUId "R") [toEP (cnt + 1) nc dci]
 
 mkPatSum :: String -> Int -> Pat
 mkPatSum s n = pApp (name s) [mkToRs n]

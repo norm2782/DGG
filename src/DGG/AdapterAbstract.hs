@@ -99,7 +99,8 @@ mkStrLit :: Name -> Exp
 mkStrLit n = (Lit . String) $ fromName n
 
 deriveLib :: String -> CodeGenerator -> Derivation
-deriveLib n cg = derivationCustom ("DGG.Adapter." ++ n ++ ".Derivation") $ mkFullDecl cg
+deriveLib n cg = derivationCustom ("DGG.Adapter." ++ n ++ ".Derivation")
+               $ mkFullDecl cg
 
 mkFullDecl :: CodeGenerator -> FullDataDecl -> Either String [Decl]
 mkFullDecl cg (_, decl) = Right $ (cg . mkTCI) decl
