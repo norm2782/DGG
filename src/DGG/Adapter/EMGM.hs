@@ -56,12 +56,12 @@ mkEPName :: Name -> String
 mkEPName n = "dggEP_" ++ (fromName n)
 
 createDTEP :: TCInfo -> Decl
-createDTEP (TCInfo tn TyDataType _ vcis) =
+createDTEP (TCInfo tn TyDataType _ dcis) =
   PatBind srcLoc (mkPIdent $ mkEPName tn) Nothing
   (UnGuardedRhs (App (App (Con $ mkUId "EP") (mkIdent fromFunName))
-  (mkIdent toFunName))) (BDecls [ FunBind $ map (bdeclFrom ln) vcis
-                                , FunBind $ map (bdeclTo ln) vcis ])
-  where ln = length vcis
+  (mkIdent toFunName))) (BDecls [ FunBind $ map (bdeclFrom ln) dcis
+                                , FunBind $ map (bdeclTo   ln) dcis ])
+  where ln = length dcis
 
 createNTEP   (TCInfo tn TyNewType _ vcis) = undefined
 createSynEP  (TCInfo tn TySynonym _ vcis) = undefined
@@ -80,34 +80,38 @@ unitType    = "Unit"
 --
 -- From
 bdeclFrom :: Int -> DCInfo -> Match
-bdeclFrom cnt dci = mkMatch fromFunName [pApp n (map mkPIdent (genNames a))] 
+bdeclFrom cnt dci = mkMatch fromFunName [pApp n (map mkPIdent $ genNames a)] 
     (fromEP 0 cnt dci)
     where n = dcName dci
           a = dcArity dci
 
+fromEP :: Int -> Int -> DCInfo -> Exp
+fromEP = ep mkFromRs mkExpSum owFrom
+
 owFrom :: Int -> Int -> DCInfo -> Exp
 owFrom cnt nc dci = App (mkStrCon "R") (fromEP (cnt + 1) nc dci)
 
-fromEP :: Int -> Int -> DCInfo -> Exp
-fromEP = ep mkFromRs mkExpSum owFrom
+mkExpSum :: String -> Int -> Exp
+mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
 
 mkFromRs :: Int -> Exp
 mkFromRs 0 = mkStrCon unitType
 mkFromRs n = foldlInApp (QConOp . unQualSym $ ":*:") mkIdent $ genNames n
 
-mkExpSum :: String -> Int -> Exp
-mkExpSum s n = (App . mkStrCon) s $ mkFromRs n
 
 
 -- To
 bdeclTo :: Int -> DCInfo -> Match
 bdeclTo cnt dci = mkMatch toFunName [toEP 0 cnt dci] (mkToRhs dci)
 
+toEP :: Int -> Int -> DCInfo -> Pat
+toEP = ep mkToRs mkPatSum owTo
+
 owTo :: Int -> Int -> DCInfo -> Pat
 owTo cnt nc dci = PApp (mkUId "R") [(toEP (cnt + 1) nc dci)]
 
-toEP :: Int -> Int -> DCInfo -> Pat
-toEP = ep mkToRs mkPatSum owTo
+mkPatSum :: String -> Int -> Pat
+mkPatSum s n = pApp (name s) [mkToRs n]
 
 mkToRs :: Int -> Pat
 mkToRs 0 = pApp (name unitType) []
@@ -119,15 +123,12 @@ mkToRhs dci | a == 0    = mkNCon n
             where n = dcName dci
                   a = dcArity dci
 
-mkPatSum :: String -> Int -> Pat
-mkPatSum s n = pApp (name s) [mkToRs n]
-
 
 -- Rest
 ep :: (Int -> a) -> (String -> Int -> a) -> (Int -> Int -> DCInfo -> a)
    -> Int -> Int -> DCInfo -> a
-ep mkr mks ow _   1  dci = mkr $ dcArity dci
-ep mkr mks ow cnt nc dci | i == cnt + 1 && i == nc - 1 = mks "R" a
+ep mkr _   _  _   1  dci = mkr $ dcArity dci
+ep _   mks ow cnt nc dci | i == cnt + 1 && i == nc - 1 = mks "R" a
                          | i == cnt                    = mks "L" a
                          | otherwise                   = ow cnt nc dci
                          where a = dcArity dci
