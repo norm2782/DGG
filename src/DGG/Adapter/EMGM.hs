@@ -6,6 +6,7 @@ module DGG.Adapter.EMGM (
     ) where
 
 import DGG.AdapterAbstract
+import Language.Haskell.Exts.Syntax
 
 importsEMGM :: [ImportDecl]
 importsEMGM = [mkImport "Generics.EMGM"]

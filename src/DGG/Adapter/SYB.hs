@@ -1,8 +1,7 @@
 module DGG.Adapter.SYB (
-      deriveSYB
-    , importsSYB
+      makeSYB
     , isSuppSYB
-    , makeSYB
+    , importsSYB
     ) where
 
 import DGG.AdapterAbstract

@@ -7,5 +7,6 @@ dist:
 	cabal sdist
 
 clean:
+	cabal clean
 	rm -rf dist/ src/Main
 	find . -iname "*.hi" -o -iname "*.o" | xargs rm

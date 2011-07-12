@@ -6,13 +6,13 @@ module DGG.AdapterAbstract (
     , module Data.Derive.Internal.Derivation
     , module DGG.Data
     , module DGG.Parser
-    , module Language.Haskell
+    , module Language.Haskell.Exts
     ) where
 
 import Data.Derive.Internal.Derivation
 import DGG.Data
 import DGG.Parser
-import Language.Haskell hiding (genNames)
+import Language.Haskell.Exts hiding (genNames)
 
 srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0
@@ -83,7 +83,7 @@ foldApp = foldXApp App
 foldTyApp :: (a -> Type) -> [a] -> Type
 foldTyApp = foldXApp TyApp
 
--- TODO: Get rid of mk and replace by regular fold?
+-- TODO: Get rid of mk and replace by regular foldr1?
 foldXApp :: (b -> b -> b) -> (a -> b) -> [a] -> b
 foldXApp _ mk [x]    = mk x
 foldXApp c mk (x:xs) = c (foldXApp c mk xs) (mk x)
@@ -102,6 +102,6 @@ deriveLib :: String -> CodeGenerator -> Derivation
 deriveLib n cg = derivationCustom ("DGG.Adapter." ++ n ++ ".Derivation")
                $ mkFullDecl cg
 
-mkFullDecl :: CodeGenerator -> FullDataDecl -> Either String [Decl]
+{- mkFullDecl :: CodeGenerator -> FullDataDecl -> Either String [Decl]-}
 mkFullDecl cg (_, decl) = Right $ (cg . mkTCI) decl
 

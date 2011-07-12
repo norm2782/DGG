@@ -3,7 +3,7 @@
 module Main where
 
 import Control.Monad
-import Data.Char (toLower)
+import Data.Char
 import Data.Generics
 import Data.Map (fromList, (!), Map)
 import Data.Typeable
@@ -12,10 +12,6 @@ import DGG.Adapter.EMGM
 import DGG.Adapter.MultiRec
 import DGG.Adapter.SYB
 import System.Console.CmdArgs
-
-data Adapter = Adapter { makeFn    :: CodeGenerator
-                       , isSuppFn  :: (Decl -> Bool)
-                       , importsFn :: [ImportDecl] }
 
 data DGGArgs = DGGArgs { adapter  :: String
                        , input    :: String
@@ -40,15 +36,13 @@ main :: IO ()
 main = do
     args <- cmdArgs dgg
     -- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?
-    if (null $ adapter args) || (null $ input args)
-        then error "Specify at least an adapter and an input file."
-        else return ()
-    mn <- if (null $ modulename args)
-            then return "GenericReps"
-            else return $ modulename args
+    when ((null . adapter) args || (null . input) args)
+         undefined -- error "Specify at least an adapter and an input file."
+    let mn | null $ modulename args  = "GenericReps"
+           | otherwise               = modulename args
     pr   <- parseFile (input args)
-    adap <- return $ adapters ! (map toLower $ adapter args)
-    code <- return $ genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
+    let adap  = adapters ! map toLower (adapter args)
+    let code  = genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
     if (not . null . output) args
         then writeFile (output args) code
         else putStrLn code
@@ -63,9 +57,28 @@ genCode (ParseOk m)       n p s is = prettyPrint (mkModule n p is $ listify s m)
 mkModule :: String -> CodeGenerator -> [ImportDecl] -> [Decl] -> Module
 mkModule _ _ _  [] = error "No compatible datatypes found."
 mkModule n p is xs = Module srcLoc (ModuleName n) [] Nothing Nothing is
-                       $ concat $ map (p . mkTCI) xs
+                            $ concatMap (p . mkTCI) xs
 
-adapters :: Map String Adapter
-adapters = fromList [ ("emgm",     Adapter makeEMGM     isSuppEMGM     importsEMGM)
-                    , ("syb",      Adapter makeSYB      isSuppSYB      importsSYB)
-                    , ("multirec", Adapter makeMultiRec isSuppMultiRec importsMultiRec) ]
+data Adapters = EMGM | SYB | MultiRec
+
+class Adapter a where
+  makeFn     :: a -> CodeGenerator
+  isSuppFn   :: a -> Decl -> Bool
+  importsFn  :: a -> [ImportDecl]
+
+instance Adapter Adapters where
+  makeFn     EMGM      = makeEMGM
+  makeFn     SYB       = makeSYB
+  makeFn     MultiRec  = makeMultiRec
+  isSuppFn   EMGM      = isSuppEMGM
+  isSuppFn   SYB       = isSuppSYB
+  isSuppFn   MultiRec  = isSuppMultiRec
+  importsFn  EMGM      = importsEMGM
+  importsFn  SYB       = importsSYB
+  importsFn  MultiRec  = importsMultiRec
+
+-- TODO: Re-implement somehow
+adapters :: Map String Adapters
+adapters = fromList  [  ("emgm",      EMGM)
+                     ,  ("syb",       SYB)
+                     ,  ("multirec",  MultiRec) ]
