@@ -3,16 +3,13 @@ module DGG.AdapterAbstract (
     , mkImport, appInfix, bdecls, mkTyCon, mkTyVar, foldlInApp, foldrInApp
     , foldlPInApp, foldrPInApp, foldApp, foldTyApp, mkMatch, fromName, mkStrLit
     , deriveLib
-    , module Data.Derive.Internal.Derivation
-    , module DGG.Data
-    , module DGG.Parser
-    , module Language.Haskell.Exts
+    , module X
     ) where
 
-import Data.Derive.Internal.Derivation
-import DGG.Data
-import DGG.Parser
-import Language.Haskell.Exts hiding (genNames)
+import Data.Derive.Internal.Derivation as X
+import DGG.Data as X
+import DGG.Parser as X
+import Language.Haskell.Exts as X hiding (genNames)
 
 srcLoc :: SrcLoc
 srcLoc = SrcLoc "" 0 0

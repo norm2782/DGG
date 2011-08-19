@@ -2,20 +2,19 @@
 
 module Main where
 
+import Control.Monad
 import System (getArgs)
 import Language.Haskell.Exts
 
 main :: IO ()
 main =
     do args <- getArgs
-       if length args == 0
-           then error "Filename required"
-           else return ()
+       when (null args) $ error "Filename required"
        pr <- parseFile $ head args
-       do case pr of
-            (ParseOk a)       -> processModule a 
-            (ParseFailed _ m) -> putStrLn m
+       case pr of
+         (ParseOk a)       -> processModule a
+         (ParseFailed _ m) -> putStrLn m
 
 processModule :: Module -> IO ()
-processModule (Module _ _ _ _ _ _ ds) = sequence_ $ map (\x -> putStrLn (show x ++ "\n")) ds 
+processModule (Module _ _ _ _ _ _ ds) = mapM_ (\x -> putStrLn (show x ++ "\n")) ds
 

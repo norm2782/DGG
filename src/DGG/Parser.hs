@@ -18,11 +18,11 @@ parseBind (KindedVar n k) ts = TCVar n (Just k) : ts
 parseBind (UnkindedVar n) ts = TCVar n Nothing  : ts
 
 mkVCI :: (Int, QualConDecl) -> DCInfo
-mkVCI (i, (QualConDecl _ tvs _ (ConDecl n bts))) =
+mkVCI (i, QualConDecl _ tvs _ (ConDecl n bts)) =
     DCInfo n i Prefix $ map mkBTRec bts
-mkVCI (i, (QualConDecl _ tvs _ (InfixConDecl btl n btr))) =
+mkVCI (i, QualConDecl _ tvs _ (InfixConDecl btl n btr)) =
     DCInfo n i Prefix $ map mkBTRec [btl, btr]
-mkVCI (i, (QualConDecl _ tvs _ (RecDecl n bts))) =
+mkVCI (i, QualConDecl _ tvs _ (RecDecl n bts)) =
     DCInfo n i Prefix $ map mkRec $ fromRec bts
 
 fromRec :: [([Name], BangType)] -> [(Name, BangType)]
@@ -30,7 +30,7 @@ fromRec = foldr (\x xs -> fromNBT x ++ xs) [] -- TODO: ++ is inefficient!
 
 fromNBT :: ([Name], BangType) -> [(Name, BangType)]
 fromNBT ([], _)      = []
-fromNBT ((x:xs), bt) = (x, bt) : fromNBT (xs, bt)
+fromNBT (x:xs, bt) = (x, bt) : fromNBT (xs, bt)
 
 mkRec :: (Name, BangType) -> DCVar
 mkRec (n, BangedTy t)   = DCVar (Just n) t

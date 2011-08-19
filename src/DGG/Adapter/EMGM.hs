@@ -15,7 +15,7 @@ deriveEMGM :: Derivation
 deriveEMGM = deriveLib "EMGM" makeEMGM
 
 makeEMGM :: CodeGenerator
-makeEMGM tc@(TCInfo _ TyDataType _ _) = (createDTEP tc) : (mkDTReps tc)
+makeEMGM tc@(TCInfo _ TyDataType _ _) = createDTEP tc : mkDTReps tc
 makeEMGM tc@(TCInfo _ TyNewType  _ _) = createNTEP   tc
 makeEMGM tc@(TCInfo _ TySynonym  _ _) = createSynEP  tc
 makeEMGM tc@(TCInfo _ TyGADT     _ _) = createGADTEP tc
@@ -54,7 +54,7 @@ mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
                           , mkFRep3Fn,   mkFRep3Inst ] -}
 
 mkEPName :: Name -> String
-mkEPName n = "dggEP_" ++ (fromName n)
+mkEPName n = "dggEP_" ++ fromName n
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType _ dcis) =

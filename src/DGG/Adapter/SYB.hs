@@ -13,7 +13,7 @@ deriveSYB :: Derivation
 deriveSYB = deriveLib "SYB" makeSYB
 
 makeSYB :: CodeGenerator
-makeSYB tc@(TCInfo n TyDataType tvs vcs) = (mkTypeableNs tc) ++
+makeSYB tc@(TCInfo n TyDataType tvs vcs) = mkTypeableNs tc ++
                                            [mkData tc, mkDT tc] ++
                                            map (mkConstr n) vcs
 
@@ -73,14 +73,14 @@ mkTypeableN (TCInfo n _ tvs _) = InstDecl srcLoc [] (mkUId $ "Typeable" ++ show 
 
 mkClassInstN :: Int -> Name -> [Type]
 mkClassInstN i n = [foldTyApp id $ reverse
-                   $ (mkTyCon n) : (map mkTyVar $ genNames i)]
+                   $ mkTyCon n : map mkTyVar (genNames i)]
 
 mkClassReq :: String -> Asst
 mkClassReq n = ClassA (mkUId "Data") [mkTyVar n]
 
 mkClassInst :: Name -> [TCVar] -> [Type]
 mkClassInst n tvs = [foldTyApp id $ reverse
-                  $ (mkTyCon n) : (map mkTyVar $ genNames $ length tvs)]
+                  $ mkTyCon n : map mkTyVar (genNames $ length tvs)]
 
 mkDTName :: Name -> String
 mkDTName n = "dggDT_" ++ fromName n
@@ -92,7 +92,7 @@ mkData (TCInfo n _ tvs vcs) = InstDecl srcLoc
     mkInFun [Match srcLoc (Ident "dataTypeOf") [PWildCard] Nothing
                      (UnGuardedRhs (mkIdent $ mkDTName n)) bdecls],
     mkInFun (map mkGfoldl vcs),
-    mkInFun $ mkGunfold vcs] ++ ((mkDataCast . length) tvs)
+    mkInFun $ mkGunfold vcs] ++ (mkDataCast . length) tvs
     )
 
 -- TODO: Verify that kind information is used correctly this way
@@ -110,7 +110,7 @@ mkInFun = InsDecl . FunBind
 mkGunfold :: [DCInfo] -> [Match]
 mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
     (Case (App (mkIdent "constrIndex") (mkIdent "c"))
-    ((map mkGunfoldAlt $ zip [1..] vcs) ++ [Alt srcLoc PWildCard (UnGuardedAlt
+    (map mkGunfoldAlt (zip [1..] vcs) ++ [Alt srcLoc PWildCard (UnGuardedAlt
      (App (mkIdent "error") (Lit (String "gunfold: no match for ctor index"))))
       bdecls])
     )]
@@ -134,7 +134,7 @@ mkToConstr dci = mkMatch "toConstr" [PApp (UnQual n) (replicate a PWildCard)]
 mkGfoldl :: DCInfo -> Match
 mkGfoldl dci = mkMatch "gfoldl"
     [mkPIdent "k", mkPIdent "z", PApp (UnQual n) (map mkPIdent $ genNames a)]
-    (foldrInApp (appInfix "k") id $ reverse $ App (mkIdent "z") (mkNCon n) : (map mkIdent $ genNames a))
+    (foldrInApp (appInfix "k") id $ reverse $ App (mkIdent "z") (mkNCon n) : map mkIdent (genNames a))
     where n = dcName dci
           a = dcArity dci
 
