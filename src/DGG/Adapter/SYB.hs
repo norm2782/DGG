@@ -110,7 +110,7 @@ mkInFun = InsDecl . FunBind
 mkGunfold :: [DCInfo] -> [Match]
 mkGunfold vcs = [mkMatch "gunfold" [mkPIdent "k", mkPIdent "z", mkPIdent "c"]
     (Case (App (mkIdent "constrIndex") (mkIdent "c"))
-    (map mkGunfoldAlt (zip [1..] vcs) ++ [Alt srcLoc PWildCard (UnGuardedAlt
+    (zipWith (curry mkGunfoldAlt) [1 ..] vcs ++ [Alt srcLoc PWildCard (UnGuardedAlt
      (App (mkIdent "error") (Lit (String "gunfold: no match for ctor index"))))
       bdecls])
     )]

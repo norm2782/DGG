@@ -7,7 +7,7 @@ import Language.Haskell.Exts
 
 mkTCI :: Decl -> TCInfo
 mkTCI (DataDecl _ _ _ n tv ds _) = TCInfo n TyDataType
-    (parseTyVarBind tv) $ map mkVCI $ zip [0..] ds
+    (parseTyVarBind tv) $ zipWith (curry mkVCI) [0 ..] ds
 mkTCI _ = error "Only regular datatypes are supported at this moment."
 
 parseTyVarBind :: [TyVarBind] -> [TCVar]
