@@ -3,7 +3,7 @@
 module Main where
 
 import Control.Monad
-import System (getArgs)
+import System.Environment
 import Language.Haskell.Exts
 
 main :: IO ()

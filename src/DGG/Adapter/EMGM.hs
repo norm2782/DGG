@@ -54,7 +54,7 @@ mkDTReps tci = [] {- map ($tci) [ mkRepFn,     mkRepInst
                           , mkFRep3Fn,   mkFRep3Inst ] -}
 
 mkEPName :: Name -> String
-mkEPName n = "dggEP_" ++ fromName n
+mkEPName n = "dggEP" ++ fromName n
 
 createDTEP :: TCInfo -> Decl
 createDTEP (TCInfo tn TyDataType _ dcis) =
@@ -140,19 +140,19 @@ mkGenG2 = ClassA (mkUId "Generic2") [mkTyVar "g"]
 mkGenG3 = ClassA (mkUId "Generic3") [mkTyVar "g"]
 
 mkRepName :: Name -> String
-mkRepName n = "dggRep_" ++ fromName n
+mkRepName n = "dggRep" ++ fromName n
 
 mkFRepName :: Name -> String
-mkFRepName n = "dggFRep_" ++ fromName n
+mkFRepName n = "dggFRep" ++ fromName n
 
 mkFRep2Name :: Name -> String
-mkFRep2Name n = "dggFRep2_" ++ fromName n
+mkFRep2Name n = "dggFRep2" ++ fromName n
 
 mkBiFRep2Name :: Name -> String
-mkBiFRep2Name n = "dggBiFRep2_" ++ fromName n
+mkBiFRep2Name n = "dggBiFRep2" ++ fromName n
 
 mkFRep3Name :: Name -> String
-mkFRep3Name n = "dggFRep3_" ++ fromName n
+mkFRep3Name n = "dggFRep3" ++ fromName n
 
 fnApp   = (QVarOp . unQualSym) "$"
 fnRProd = appInfix "rprod"

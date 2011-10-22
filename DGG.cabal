@@ -30,5 +30,5 @@ Executable dgg
 Executable dgg-hse
     Main-is:        HSEParser.hs
     Build-Depends:    haskell-src-exts >= 1.11
-                    , haskell98
+                    , base >= 4.0 && <= 5.0
     Hs-Source-Dirs: src
