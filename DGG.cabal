@@ -4,31 +4,21 @@ Version:        0.2
 Cabal-Version:  >= 1.6
 License:        BSD3
 License-File:   LICENSE
-Author:         Jurriën Stutterheim
+Author:         Jurriën Stutterheim, Sean Leather
 Homepage:       http://github.com/norm2782/DGG
 Category:       Generics
 Synopsis:       Generator for GP libraries
-Description:    Generator for GP libraries. Developed as part of the Advanced
-                Functional Programming course at Utrecht University.
+Description:    Generator for GP libraries.
 Build-Type:     Simple
 Tested-With:    GHC
 
 Library
     Build-Depends:   base >= 4.0 && <= 5.0
     Hs-Source-Dirs:  src
-    Exposed-modules: DGG.AdapterAbstract, DGG.Adapter.SYB, DGG.Adapter.EMGM,
-                     DGG.Adapter.MultiRec, DGG.Data, DGG.Parser
 
 Executable dgg
     Main-is:        Main.hs
-    Build-Depends:    cmdargs >= 0.6.5
-                    , derive >= 2.5
-                    , haskell-src-exts >= 1.11
-                    , containers >= 0.3, syb >= 0.1
+    Build-Depends:    cmdargs >= 0.8
+                    , containers >= 0.3
     Hs-Source-Dirs: src
 
-Executable dgg-hse
-    Main-is:        HSEParser.hs
-    Build-Depends:    haskell-src-exts >= 1.11
-                    , base >= 4.0 && <= 5.0
-    Hs-Source-Dirs: src
