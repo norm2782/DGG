@@ -29,17 +29,18 @@ dgg = DGGArgs {
   &= summary "DGG: Datatype Generic Generator v0.2-dev"
   &= program "dgg"
 
-main :: IO ()
-main = do
-    args <- cmdArgs dgg
-    -- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?
-    when ((null . adapter) args || (null . inputfile) args) $
-        error "Specify at least an adapter and an input file."
-    let mn | null $ modulename args  = "GenericReps"
-           | otherwise               = modulename args
-    pr   <- parseFile (input args)
-    let adap  = adapters ! map toLower (adapter args)
-    let code  = genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)
-    if (not . null . output) args
-        then writeFile (output args) code
-        else putStrLn code
+main = undefined
+{- main :: IO ()-}
+{- main = do-}
+  {- args <- cmdArgs dgg-}
+  {- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?-}
+  {- when ((null . adapter) args || (null . inputfile) args) $-}
+      {- error "Specify at least an adapter and an input file."-}
+  {- let mn | null $ modulename args  = "GenericReps"-}
+         {- | otherwise               = modulename args-}
+  {- pr   <- parseFile (input args)-}
+  {- let adap  = adapters ! map toLower (adapter args)-}
+  {- let code  = genCode pr mn (makeFn adap) (isSuppFn adap) (importsFn adap)-}
+  {- if (not . null . output) args-}
+    {- then writeFile (output args) code-}
+    {- else putStrLn code-}
