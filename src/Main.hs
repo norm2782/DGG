@@ -39,7 +39,7 @@ main = do
     args <- cmdArgs dgg
     -- TODO: This is rather ugly. Can't CmdArgs do this kind of thing?
     when ((null . adapter) args || (null . input) args) $
-         error "Specify at least an adapter and an input file."
+        error "Specify at least an adapter and an input file."
     let mn | null $ modulename args  = "GenericReps"
            | otherwise               = modulename args
     pr   <- parseFile (input args)
