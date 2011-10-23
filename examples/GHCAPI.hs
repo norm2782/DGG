@@ -72,19 +72,21 @@ toDGGData (GHCDataDecl ty) = do
     fail "Contexts are not supported"
   when (isJust $ tcdTyPats ty) $
     fail "Type patterns are not supported"
+  tvs  <- mapM (mkTyVar . unLoc)  (tcdTyVars ty)
+  cts  <- mapM (mkCtor . unLoc)   (tcdCons ty)
   return DGG.DataType
     {  DGG.tyConName  = undefined -- showRdrName (unLoc (tcdLName ty))
     ,  DGG.tyKind     = DGG.KindStar -- TODO
-    ,  DGG.tyVars     = map (mkTyVar . unLoc) (tcdTyVars ty)
-    ,  DGG.ctors      = map (mkCtor . unLoc) (tcdCons ty)
+    ,  DGG.tyVars     = tvs
+    ,  DGG.ctors      = cts
     }
 
-mkTyVar :: Outputable a => HsTyVarBndr a -> String
-mkTyVar (UserTyVar n ptck)  = showSDoc ( ppr n )
-mkTyVar _                   = error "Explicitly kinded type variables are not supported yet"
+mkTyVar :: (Outputable a, Monad m) => HsTyVarBndr a -> m String
+mkTyVar (UserTyVar n ptck)  = return $ showSDoc ( ppr n )
+mkTyVar _                   = fail "Explicitly kinded type variables are not supported yet"
 
-mkCtor :: ConDecl name -> DGG.Con
-mkCtor cdcl = DGG.Con
+mkCtor :: Monad m => ConDecl name -> m DGG.Con
+mkCtor cdcl = return DGG.Con
   {  DGG.conName    = undefined
   ,  DGG.conFixity  = undefined
   ,  DGG.conFields  = undefined
