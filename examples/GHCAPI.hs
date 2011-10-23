@@ -8,12 +8,14 @@ import GHC.Paths ( libdir )
 
 import DynFlags
 
-targetFile = "src/testmodule.hs"
+targetFile = "TestModule.hs"
 
+main :: IO ()
 main = do
    res <- example
    putStrLn $ showSDoc ( ppr res )
 
+example :: IO ModSummary
 example =
     defaultErrorHandler defaultLogAction $ do
       runGhc (Just libdir) $ do
@@ -35,3 +37,24 @@ example =
         g <- getModuleGraph
         mapM showModule g
         return $ pm_mod_summary p -- $ (parsedSource d)--,"\n-----\n",  typecheckedSource d)
+
+kind_ :: Bool -> String -> IO (Type, Kind)
+kind_ b t =
+  defaultErrorHandler defaultLogAction $ do
+    runGhc (Just libdir) $ do
+      dflags <- getSessionDynFlags
+      setSessionDynFlags dflags
+      load LoadAllTargets
+      setContext [(IIDecl (simpleImportDecl (mkModuleName "Prelude")))]
+      typeKind b t
+
+type_ :: String -> IO Type
+type_ t =
+  defaultErrorHandler defaultLogAction $ do
+    runGhc (Just libdir) $ do
+      dflags <- getSessionDynFlags
+      setSessionDynFlags dflags
+      load LoadAllTargets
+      setContext [(IIDecl (simpleImportDecl (mkModuleName "Prelude")))]
+      exprType t
+
