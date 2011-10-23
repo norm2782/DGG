@@ -5,7 +5,8 @@ data Name
   |  Symbol String String
   deriving (Show)
 
-data DataType = DataType
+data DataType
+  =  DataType
   {  tyConName  :: Name
   ,  tyKind     :: Kind
   ,  tyVars     :: [String]
@@ -25,7 +26,7 @@ data Assoc
   deriving (Show)
 
 data Fixity
-  = Fixity Assoc Int
+  =  Fixity Assoc Int
   deriving (Show)
 
 data Con = Con

@@ -20,6 +20,7 @@ Executable dgg
     Main-is:        Main.hs
     Build-Depends:    cmdargs >= 0.8
                     , containers >= 0.3
+                    , hint >= 0.3
                     , syb >= 0.3
     Hs-Source-Dirs: src
 
