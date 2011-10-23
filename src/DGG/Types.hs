@@ -12,24 +12,16 @@ import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances
 import Text.ParserCombinators.UU.Utils
 
--- GHC related imports
-import GHC hiding (Kind, Fixity)
-import HsTypes
-
-data DataType name = DataType {
+data DataType = DataType {
      tyCon  :: TypeCon
-  ,  ctors  :: [Ctor name]
+  ,  ctors  :: [Con]
 }
 
 type TName = String
 
--- Stolen from HSE
 data Kind
     = KindStar
-    | KindBang
-    | KindFn Kind Kind
-    | KindParen Kind
-    | KindVar TName
+    | KindFun Kind Kind
 
 data TypeCon = TypeCon {
      tyConName  :: TName
@@ -37,23 +29,23 @@ data TypeCon = TypeCon {
   ,  tyVars     :: [TName]
 }
 
--- Stolen from HSE
 data Assoc
      = AssocNone
      | AssocLeft
      | AssocRight
 
--- Stolen from HSE
 data Fixity = Fixity Assoc Int
 
-data Ctor name = Ctor {
-     ctorName    :: CName
-  ,  ctorFixity  :: Fixity
-  ,  ctorFields  :: Fields name
+data Con = Con {
+     conName    :: CName
+  ,  conFixity  :: Fixity
+  ,  conFields  :: Fields
 }
 
-data Fields name = Fields [HsType name]
-                 | RecordFields [(CName, HsType name)]
+type Type = String
+
+data Fields = Fields [Type]
+            | RecordFields [(CName, Type)]
 
 data CName = Ident String (Maybe String)
            | Symbol String String
