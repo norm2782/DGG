@@ -1,41 +1,43 @@
 module DGG.Types where
 
-data DataType = DataType {
-     tyCon  :: TypeCon
-  ,  ctors  :: [Con]
-}
+data Name
+  =  Ident String (Maybe String)
+  |  Symbol String String
 
-type TName = String
+data DataType = DataType
+  {  tyConName  :: Name
+  ,  tyKind     :: Kind
+  ,  tyVars     :: [String]
+  ,  ctors      :: [Con]
+  }
 
 data Kind
-    = KindStar
-    | KindFun Kind Kind
-
-data TypeCon = TypeCon {
-     tyConName  :: TName
-  ,  tyKind     :: Kind
-  ,  tyVars     :: [TName]
-}
+  =  KindStar
+  |  KindFun Kind Kind
 
 data Assoc
-     = AssocNone
-     | AssocLeft
-     | AssocRight
+  =  AssocNone
+  |  AssocLeft
+  |  AssocRight
 
 data Fixity = Fixity Assoc Int
 
-data Con = Con {
-     conName    :: CName
+data Con = Con
+  {  conName    :: Name
   ,  conFixity  :: Fixity
   ,  conFields  :: Fields
-}
+  }
 
-type Type = String
+data Type
+  =  TyVar String
+  |  TyCon Name
+  |  TyApp Type Type
+  |  TyFun Type Type
+  |  TyList Type
+  |  TyTuple [Type]
 
-data Fields = Fields [Type]
-            | RecordFields [(CName, Type)]
-
-data CName = Ident String (Maybe String)
-           | Symbol String String
+data Fields
+  =  Fields [Type]
+  |  RecordFields [(Name, Type)]
 
 
