@@ -46,33 +46,28 @@ example =
         {- g <- getModuleGraph-}
         {- mapM showModule g-}
         let ps = parsedSource t
-        ts <- getTys ps
+        ts <- getTyDecls ps
         mapM toDGG ts
         {- liftIO $ putStrLn "getTys:"-}
         {- liftIO $ print ts-}
         return $ ps--,"\n-----\n",  typecheckedSource d)
 
-getTys :: Monad m => ParsedSource -> m [TyClDecl RdrName]
-getTys ps = do
-  let modl = unLoc ps
-  let decls = hsmodDecls modl
-  let hsdecls = map unLoc decls
-  let tydecls = [d | TyClD d <- hsdecls]
-  {- let datas = [d | d@(TyData _ _ _ _ _ _ _ _) <- tydecls]-}
-  {- let tysyns = [d | d@(TySynonym _ _ _ _) <- tydecls]-}
-  {- liftIO $ putStrLn $ showSDoc ( ppr datas )-}
-  {- liftIO $ putStrLn $ showSDoc ( ppr tysyns )-}
-  return tydecls -- datas ++ tysyns -- $ DGG.DataType {}
--- TODO: Filter datatypes based on a user-provided whitelist (or just take all of them when no whitelist is provided)
+getTyDecls :: Monad m => ParsedSource -> m [TyClDecl RdrName]
+getTyDecls ps = return [d | TyClD d <- map unLoc (hsmodDecls $ unLoc ps)]
+-- TODO: Filter datatypes based on a user-provided whitelist (or just take all
+-- of them when no whitelist is provided)
 
+
+newtype GHCDataDecl = GHCDataDecl (TyClDecl RdrName)
+newtype GHCTySynDecl = GHCTySynDecl (TyClDecl RdrName)
 
 toDGG :: Monad m => TyClDecl RdrName -> m DGG.DataType
-toDGG ty  | isDataDecl ty  = toDGGData ty
-          | isSynDecl ty   = toDGGSyn ty
+toDGG ty  | isDataDecl ty  = toDGGData $ GHCDataDecl ty
+          | isSynDecl ty   = toDGGSyn $ GHCTySynDecl ty
           | otherwise      = fail "Things other than datatypes and synonyms are not supported"
 
-toDGGData :: Monad m => TyClDecl name -> m DGG.DataType
-toDGGData ty = do
+toDGGData :: Monad m => GHCDataDecl -> m DGG.DataType
+toDGGData (GHCDataDecl ty) = do
   when (not . null $ unLoc $ tcdCtxt ty) $
     fail "Contexts are not supported"
   when (isJust $ tcdTyPats ty) $
@@ -84,8 +79,8 @@ toDGGData ty = do
     ,  DGG.ctors = [] -- TODO
     }
 
-toDGGSyn :: Monad m => TyClDecl name -> m DGG.DataType
-toDGGSyn = undefined
+toDGGSyn :: Monad m => GHCTySynDecl -> m DGG.DataType
+toDGGSyn (GHCTySynDecl syn) = undefined
 
 {- kind_ :: Bool -> String -> IO (Type, Kind)-}
 {- kind_ b t =-}
