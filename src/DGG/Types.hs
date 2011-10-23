@@ -3,6 +3,7 @@ module DGG.Types where
 data Name
   =  Ident String (Maybe String)
   |  Symbol String String
+  deriving (Show)
 
 data DataType = DataType
   {  tyConName  :: Name
@@ -10,23 +11,29 @@ data DataType = DataType
   ,  tyVars     :: [String]
   ,  ctors      :: [Con]
   }
+  deriving (Show)
 
 data Kind
   =  KindStar
   |  KindFun Kind Kind
+  deriving (Show)
 
 data Assoc
   =  AssocNone
   |  AssocLeft
   |  AssocRight
+  deriving (Show)
 
-data Fixity = Fixity Assoc Int
+data Fixity
+  = Fixity Assoc Int
+  deriving (Show)
 
 data Con = Con
   {  conName    :: Name
   ,  conFixity  :: Fixity
   ,  conFields  :: Fields
   }
+  deriving (Show)
 
 data Type
   =  TyVar String
@@ -35,9 +42,11 @@ data Type
   |  TyFun Type Type
   |  TyList Type
   |  TyTuple [Type]
+  deriving (Show)
 
 data Fields
   =  Fields [Type]
   |  RecordFields [(Name, Type)]
+  deriving (Show)
 
 
