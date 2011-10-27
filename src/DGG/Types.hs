@@ -3,7 +3,7 @@ module DGG.Types where
 data Name
   =  Ident String (Maybe String)
   |  Symbol String String
-  deriving (Show)
+  deriving (Show, Eq)
 
 data DataType
   =  DataType
