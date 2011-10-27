@@ -1,6 +1,7 @@
 module GHCAPI where
 
 import Control.Monad
+import qualified Data.Map as Map
 import Data.Maybe
 
 import DynFlags
@@ -74,8 +75,11 @@ toDGGData (GHCDataDecl ty) = do
     fail "Type patterns are not supported"
   tvs  <- mapM (mkTyVar . unLoc)  (tcdTyVars ty)
   cts  <- mapM (mkCtor . unLoc)   (tcdCons ty)
+  -- TODO: pass around IdentMap:
+  nm <- either (fail . (++) "No identifier map for ") return $
+    toDGGName Map.empty (unLoc (tcdLName ty))
   return DGG.DataType
-    {  DGG.tyConName  = undefined -- showRdrName (unLoc (tcdLName ty))
+    {  DGG.tyConName  = nm
     ,  DGG.tyKind     = DGG.KindStar -- TODO
     ,  DGG.tyVars     = tvs
     ,  DGG.ctors      = cts
@@ -94,6 +98,32 @@ mkCtor cdcl = return DGG.Con
 
 toDGGSyn :: Monad m => GHCTySynDecl -> m DGG.DataType
 toDGGSyn (GHCTySynDecl syn) = undefined
+
+type IdentMap = Map.Map String String
+
+-- Determine if the rname is a symbolic operator. Look up the sname in the
+-- identifier map. If it is symbolic and not in the map, fail with Left sname.
+-- Otherwise, the result is the sname and (optionally for Ident) the mapped
+-- identifier name.
+toDGGName :: IdentMap -> RdrName -> Either String DGG.Name
+toDGGName idmap rname = mk $ Map.lookup sname idmap
+  where
+    mk  | isSymOcc oname  = maybe (Left sname) (Right . DGG.Symbol sname)
+        | otherwise       = Right . DGG.Ident sname
+    oname = rdrNameOcc rname
+    sname = occNameString oname
+
+test_toDGGName = and $ map (\(m, n, r) -> toDGGName m n == r) tests
+  where
+    tests =
+      [  (Map.empty, mkRdrUnqual (mkTcOcc "X"), Right $ DGG.Ident "X" Nothing)
+      ,  (Map.empty, mkRdrUnqual (mkVarOcc "X"), Right $ DGG.Ident "X" Nothing)
+      ,  (Map.empty, mkRdrUnqual (mkDataOcc "X"), Right $ DGG.Ident "X" Nothing)
+      ,  (Map.empty, mkRdrQual (mkModuleName "M") (mkTcOcc "X"), Right $ DGG.Ident "X" Nothing)
+      ,  (Map.singleton "X" "Y", mkRdrUnqual (mkTcOcc "X"), Right $ DGG.Ident "X" (Just "Y"))
+      ,  (Map.empty, mkRdrUnqual (mkTcOcc ":*"), Left ":*")
+      ,  (Map.singleton ":*" "C", mkRdrUnqual (mkTcOcc ":*"), Right $ DGG.Symbol ":*" "C")
+      ]
 
 {- kind_ :: Bool -> String -> IO (Type, Kind)-}
 {- kind_ b t =-}
